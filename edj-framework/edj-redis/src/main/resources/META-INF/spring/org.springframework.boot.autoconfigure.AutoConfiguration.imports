@@ -1,0 +1,5 @@
+org.springframework.boot.autoconfigure.data.redis.JedisConnectionConfiguration
+org.springframework.boot.autoconfigure.data.redis.LettuceConnectionConfiguration
+org.springframework.boot.autoconfigure.data.redis.PropertiesRedisConnectionDetails
+
+com.edj.redis.config.RedisConfiguration

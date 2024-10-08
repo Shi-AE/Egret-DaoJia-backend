@@ -1,0 +1,56 @@
+server:
+  port: 33500 #端口
+
+logging:
+  level:
+    com.edj: debug
+
+spring:
+  profiles:
+    active: dev
+  application:
+    name: edj-gateway
+  cloud:
+    nacos:
+      config:
+        file-extension: yaml
+        shared-configs: # 共享配置
+          - data-id: shared-redis.yaml
+            refresh: false
+    gateway:
+      discovery:
+        locator:
+          # 启用服务发现
+          enabled: true
+          lower-case-service-id: true
+      # 网关路由
+      routes:
+        - id: edj-foundations
+          uri: lb://edj-foundations
+          predicates:
+            - Path=/edj-foundations/**
+        - id: edj-user
+          uri: lb://edj-use
+          predicates:
+            - Path=/edj-user/**
+
+# knife4j 网关聚合
+knife4j:
+  gateway:
+    enabled: true
+    # 指定服务发现的模式聚合微服务文档，并且是默认 default 分组
+    strategy: discover
+    discover:
+      # OpenAPI 3.0 规范
+      version: openapi3
+      enabled: true
+
+gateway:
+  api:
+    access-path-white-list:
+      # swagger
+      - /edj-foundations/v3/api-docs
+      - /edj-user/v3/api-docs
+      # 登录 \ 注册
+      - /edj-user/user/register
+      - /edj-user/user/login

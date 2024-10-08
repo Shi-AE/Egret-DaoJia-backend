@@ -1,0 +1,2 @@
+org.springframework.boot.autoconfigure.AutoConfigurationImportFilter=\
+    com.edj.redis.filter.RedisAutoConfigurationImportFilter

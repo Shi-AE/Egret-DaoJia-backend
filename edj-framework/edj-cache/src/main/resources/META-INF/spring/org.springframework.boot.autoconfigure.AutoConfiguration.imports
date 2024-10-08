@@ -1,0 +1,5 @@
+com.edj.redis.config.RedisConfiguration
+com.edj.redis.config.RedissonConfiguration
+com.edj.redis.config.LockConfiguration
+com.edj.redis.config.SpringCacheConfig
+com.edj.redis.config.RedisQueueSyncConfiguration

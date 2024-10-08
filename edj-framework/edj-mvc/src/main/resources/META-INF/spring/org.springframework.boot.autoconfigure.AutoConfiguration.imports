@@ -1,0 +1,4 @@
+com.edj.mvc.config.FilterConfiguration
+com.edj.mvc.config.JsonConfig
+com.edj.mvc.config.MvcConfig
+com.edj.mvc.config.AutoConfiguration

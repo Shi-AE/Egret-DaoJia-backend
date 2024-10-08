@@ -1,0 +1,40 @@
+#################     服务器配置     #################
+
+server:
+  port: 33510 #端口
+
+#################     spring公共配置     #################
+
+spring:
+  profiles:
+    active: dev
+  application:
+    name: edj-foundations
+  cloud:
+    nacos:
+      config:
+        file-extension: yaml
+        shared-configs:
+          - data-id: shared-redis.yaml
+            refresh: false
+          - data-id: shared-mysql.yaml
+            refresh: false
+          - data-id: shared-swagger.yaml
+            refresh: false
+
+#################     项目独有配置     #################
+
+mysql:
+  db-name: edj-foundations
+mybatis-plus:
+  mapper-locations: mapper/foundations/*.xml
+  type-aliases-package: com.edj.foundations.mapper
+swagger:
+  title: 白鹭到家-运营基础服务接口文档
+  description: 用于服务、区域进行管理
+
+#################     日志配置     #################
+
+logging:
+  level:
+    com.edj: debug

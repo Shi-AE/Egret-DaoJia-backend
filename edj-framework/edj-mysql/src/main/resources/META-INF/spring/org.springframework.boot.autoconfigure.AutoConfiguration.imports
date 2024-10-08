@@ -1,0 +1,3 @@
+com.edj.mysql.config.MybatisPlusConfiguration
+com.edj.mysql.config.PageHelperConfiguration
+com.edj.mysql.config.SnowflakeIdGeneratorConfiguration
