@@ -150,13 +150,14 @@ public class AuthorizationFilter implements GlobalFilter, Ordered {
 
             GatewayWebUtils.setRequestHeader(exchange, AUTHORIZATION_ACCESS_TOKEN, updateAccessToken);
             return chain.filter(exchange).doFinally(x -> {
-                // 设置返回的请求头
-                log.debug("设置返回请求头, updateAccessToken: {}, updateRefreshToken: {}", updateAccessToken, updateRefreshToken);
+                // 设置响应头
+                log.debug("设置响应头, updateAccessToken: {}, updateRefreshToken: {}", updateAccessToken, updateRefreshToken);
                 HttpHeaders headers = exchange.getResponse().getHeaders();
                 headers.add(AUTHORIZATION_ACCESS_TOKEN, updateAccessToken);
                 headers.add(AUTHORIZATION_REFRESH_TOKEN, updateRefreshToken);
             });
         }
+        log.debug("通过accessToken验证");
 
         return chain.filter(exchange);
     }

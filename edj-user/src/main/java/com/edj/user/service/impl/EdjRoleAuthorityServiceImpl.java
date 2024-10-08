@@ -34,7 +34,7 @@ public class EdjRoleAuthorityServiceImpl extends MPJBaseServiceImpl<EdjRoleAutho
         }
 
         MPJLambdaWrapper<EdjRoleAuthority> queryWrapper = new MPJLambdaWrapper<EdjRoleAuthority>()
-                .select(EdjAuthority::getName)
+                .select(EdjAuthority::getPermission)
                 .innerJoin(EdjAuthority.class, EdjAuthority::getId, EdjRoleAuthority::getEdjAuthorityId)
                 .in(EdjRoleAuthority::getEdjRoleId, roleIdList)
                 .eq(EdjAuthority::getStatus, EdjAuthorityStatus.NORMAL);

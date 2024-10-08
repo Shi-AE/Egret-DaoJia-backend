@@ -34,6 +34,8 @@ public class ErrorInfo {
         public static final String NO_PERMISSIONS = "无访问权限";
 
         public static final String FORBIDDEN_OPERATION = "禁止操作";
+
+        public static final String INVALID_PARAMETERS =  "入参校验失败";
     }
 
     public static class Code {

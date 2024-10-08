@@ -8,6 +8,7 @@ import com.edj.user.service.EdjRoleAuthorityService;
 import com.edj.user.service.EdjUserRoleService;
 import com.edj.user.service.EdjUserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserDetailsServiceImpl implements UserDetailsService {
@@ -37,12 +39,12 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         EdjUser user = userService.selectByUsername(username);
         BeanUtils.copyProperties(user, authorizationUserDTO);
 
-
         // 根据id查询用户权限
         Long id = user.getId();
 
         // 设置管理员权限
         if (id == 1) {
+            log.debug("设置管理员权限");
             authorizationUserDTO.setAuthorities(
                     Set.of(new SimpleGrantedAuthority("*:*:*"))
             );
@@ -52,12 +54,15 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         // 查询角色
         List<Long> roleIdList = userRoleService.selectRoleIdsByUserId(id);
         if (CollUtils.isEmpty(roleIdList)) {
+            log.debug("用户不存在角色");
             authorizationUserDTO.setAuthorities(new HashSet<>());
             return authorizationUserDTO;
         }
+        log.debug("查询角色 roleIdList: {}", roleIdList);
 
         // 查询权限
         List<String> authorityNameList = roleAuthorityService.selectAuthorityByRoleIdList(roleIdList);
+        log.debug("查询权限 authorityNameList: {}", authorityNameList);
         authorizationUserDTO.setAuthorities(authorityNameList
                 .stream()
                 .map(SimpleGrantedAuthority::new)

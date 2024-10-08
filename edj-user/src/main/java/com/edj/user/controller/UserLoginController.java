@@ -33,7 +33,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import static com.edj.common.constants.AuthorizationConstants.RedisKey.TOKEN_KEY;
+import static com.edj.common.constants.AuthorizationConstants.RedisKey.ACCESS_TOKEN_KEY;
+import static com.edj.common.constants.AuthorizationConstants.RedisKey.REFRESH_TOKEN_KEY;
 import static com.edj.common.constants.AuthorizationConstants.Timeout.ACCESS_TIMEOUT;
 import static com.edj.common.constants.AuthorizationConstants.Timeout.REFRESH_TIMEOUT;
 import static org.springframework.http.HttpHeaders.USER_AGENT;
@@ -98,14 +99,14 @@ public class UserLoginController {
 
         // 存入redis
         redisTemplate.opsForValue().set(String.format(
-                TOKEN_KEY,
+                ACCESS_TOKEN_KEY,
                 os,
                 browser,
                 accessToken
         ), principal, ACCESS_TIMEOUT);
 
         redisTemplate.opsForValue().set(String.format(
-                TOKEN_KEY,
+                REFRESH_TOKEN_KEY,
                 os,
                 browser,
                 refreshToken

@@ -18,7 +18,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 import static com.edj.common.constants.AuthorizationConstants.HeaderKey.AUTHORIZATION_ACCESS_TOKEN;
-import static com.edj.common.constants.AuthorizationConstants.RedisKey.TOKEN_KEY;
+import static com.edj.common.constants.AuthorizationConstants.RedisKey.ACCESS_TOKEN_KEY;
 import static org.springframework.http.HttpHeaders.USER_AGENT;
 
 @Slf4j
@@ -45,7 +45,7 @@ public class AuthorizationTokenFilter extends OncePerRequestFilter {
 
         // 获取用户登录信息
         AuthorizationUserDTO authorizationUserDTO = redisTemplate.opsForValue().get(String.format(
-                TOKEN_KEY,
+                ACCESS_TOKEN_KEY,
                 parseUserAgent.getOs().toString(),
                 parseUserAgent.getBrowser().toString(),
                 accessToken
@@ -54,8 +54,13 @@ public class AuthorizationTokenFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
+        log.debug("获取用户登录信息 authorizationUserDTO: {}", authorizationUserDTO);
 
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(authorizationUserDTO, null, null);
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                authorizationUserDTO,
+                null,
+                authorizationUserDTO.getAuthorities()
+        );
         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 
         filterChain.doFilter(request, response);
