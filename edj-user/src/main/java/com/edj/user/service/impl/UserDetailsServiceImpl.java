@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -41,15 +40,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         // 根据id查询用户权限
         Long id = user.getId();
-
-        // 设置管理员权限
-        if (id == 1) {
-            log.debug("设置管理员权限");
-            authorizationUserDTO.setAuthorities(
-                    Set.of(new SimpleGrantedAuthority("*:*:*"))
-            );
-            return authorizationUserDTO;
-        }
 
         // 查询角色
         List<Long> roleIdList = userRoleService.selectRoleIdsByUserId(id);

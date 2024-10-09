@@ -1,6 +1,5 @@
 package com.edj.security.utils;
 
-import com.edj.common.expcetions.ServerErrorException;
 import com.edj.security.domain.dto.AuthorizationUserDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -21,48 +20,44 @@ public class SecurityUtils {
      * 用户ID
      **/
     public static Long getUserId() {
-        try {
-            return getLoginUser().getId();
-        } catch (Exception e) {
-            log.error("获取用户ID异常, {}", e.getMessage(), e);
+        AuthorizationUserDTO loginUser = getLoginUser();
+        if (loginUser == null) {
             return null;
         }
+        return loginUser.getId();
     }
 
     /**
      * 获取用户账户
      **/
     public static String getUsername() {
-        try {
-            return getLoginUser().getUsername();
-        } catch (Exception e) {
-            log.error("获取用户账户异常, {}", e.getMessage(), e);
+        AuthorizationUserDTO loginUser = getLoginUser();
+        if (loginUser == null) {
             return null;
         }
+        return loginUser.getUsername();
     }
 
     /**
      * 获取用户昵称
      **/
     public static String getNickname() {
-        try {
-            return getLoginUser().getNickname();
-        } catch (Exception e) {
-            log.error("获取用户昵称异常, {}", e.getMessage(), e);
+        AuthorizationUserDTO loginUser = getLoginUser();
+        if (loginUser == null) {
             return null;
         }
+        return loginUser.getNickname();
     }
 
     /**
      * 获取用户
      **/
     public static AuthorizationUserDTO getLoginUser() {
-        try {
-            return (AuthorizationUserDTO) getAuthentication().getPrincipal();
-        } catch (Exception e) {
-            log.error("获取用户信息异常, {}", e.getMessage(), e);
-            throw new ServerErrorException();
+        Authentication authentication = getAuthentication();
+        if (authentication == null) {
+            return null;
         }
+        return (AuthorizationUserDTO) authentication.getPrincipal();
     }
 
     /**
