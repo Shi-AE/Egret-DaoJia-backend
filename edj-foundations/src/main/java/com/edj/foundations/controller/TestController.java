@@ -15,7 +15,7 @@ public class TestController {
 
     @GetMapping("hello")
     @Operation(summary = "hello world")
-    @PreAuthorize("hasAuthority('foundations')")
+    @PreAuthorize("hasPermission('foundations:test:hello')")
     public Result<String> hello() {
         return Result.success("hello world");
     }

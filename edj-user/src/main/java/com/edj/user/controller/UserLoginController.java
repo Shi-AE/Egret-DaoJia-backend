@@ -18,6 +18,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -66,6 +67,7 @@ public class UserLoginController {
      */
     @PostMapping("login")
     @Operation(summary = "登录")
+    @PreAuthorize("isAnonymous()")
     public Result<UserTokenVO> login(@Validated @RequestBody UserLoginDTO userLoginDTO, HttpServletRequest request) {
         // 验证账号
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userLoginDTO.getUsername(), userLoginDTO.getPassword());
@@ -128,6 +130,7 @@ public class UserLoginController {
      */
     @PostMapping("register")
     @Operation(summary = "注册")
+    @PreAuthorize("isAnonymous()")
     public Result<Void> register() {
         userMapper.insert(EdjUser
                 .builder()
