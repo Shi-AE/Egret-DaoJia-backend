@@ -58,6 +58,11 @@
             <artifactId>pagehelper</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.edj</groupId>
+            <artifactId>edj-security</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
 </project>

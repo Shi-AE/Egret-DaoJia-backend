@@ -1,10 +1,10 @@
 package com.edj.mysql.interceptor;
 
 import com.baomidou.mybatisplus.extension.plugins.inner.InnerInterceptor;
-import com.edj.common.domain.CurrentUserInfo;
 import com.edj.common.handler.UserInfoHandler;
 import com.edj.common.utils.ObjectUtils;
 import com.edj.common.utils.ReflectUtils;
+import com.edj.security.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.mapping.MappedStatement;
@@ -27,7 +27,7 @@ public class MyBatisAutoFillInterceptor implements InnerInterceptor {
     private final UserInfoHandler userInfoHandler;
 
     @Override
-    public void beforeUpdate(Executor executor, MappedStatement ms, Object parameter) throws SQLException {
+    public void beforeUpdate(Executor executor, MappedStatement ms, Object parameter) {
         // 更新操作
         updateExe(parameter);
         // 插入操作
@@ -41,7 +41,7 @@ public class MyBatisAutoFillInterceptor implements InnerInterceptor {
             if (ObjectUtils.isNotNull(parameter) && ReflectUtils.containField(CREATE_BY, parameter.getClass())) {
 
                 // 有userId也存在并设置createBy
-                Long userId = currentUserId();
+                Long userId = SecurityUtils.getUserId();
                 if (ObjectUtils.isNotNull(userId)) {
                     //4.当前操作人设置到创建人字段
                     ReflectUtils.setFieldValue(parameter, CREATE_BY, userId);
@@ -59,7 +59,7 @@ public class MyBatisAutoFillInterceptor implements InnerInterceptor {
         // 判断是否有updater字段
         if (ObjectUtils.isNotNull(parameter)) {
 
-            Long userId = currentUserId();
+            Long userId = SecurityUtils.getUserId();
 
             // 如果有userId也存在并设置updater
             if (ObjectUtils.isNotNull(userId)) {
@@ -76,13 +76,5 @@ public class MyBatisAutoFillInterceptor implements InnerInterceptor {
                 }
             }
         }
-    }
-
-    private Long currentUserId() {
-        if (ObjectUtils.isNull(userInfoHandler)) {
-            return null;
-        }
-        CurrentUserInfo currentUserInfo = userInfoHandler.currentUserInfo();
-        return currentUserInfo != null ? currentUserInfo.getId() : null;
     }
 }
