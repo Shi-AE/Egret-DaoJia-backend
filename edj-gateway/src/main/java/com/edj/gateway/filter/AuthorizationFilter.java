@@ -1,7 +1,9 @@
 package com.edj.gateway.filter;
 
+import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.http.useragent.UserAgent;
 import cn.hutool.http.useragent.UserAgentUtil;
+import com.edj.cache.helper.LockHelper;
 import com.edj.common.constants.ErrorInfo;
 import com.edj.common.expcetions.ServerErrorException;
 import com.edj.common.utils.BooleanUtils;
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import static com.edj.cache.helper.LockHelper.MEDIUM_OPERATION_WAIT_TIME;
 import static com.edj.common.constants.AuthorizationConstants.HeaderKey.AUTHORIZATION_ACCESS_TOKEN;
 import static com.edj.common.constants.AuthorizationConstants.HeaderKey.AUTHORIZATION_REFRESH_TOKEN;
 import static com.edj.common.constants.AuthorizationConstants.RedisKey.ACCESS_TOKEN_KEY;
@@ -36,6 +39,8 @@ public class AuthorizationFilter implements GlobalFilter, Ordered {
     private final StringRedisTemplate stringRedisTemplate;
 
     private final ApiProperties apiProperties;
+
+    private final LockHelper lockHelper;
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
@@ -111,54 +116,68 @@ public class AuthorizationFilter implements GlobalFilter, Ordered {
                         HttpStatus.FORBIDDEN.value(),
                         ErrorInfo.Msg.REQUEST_FORBIDDEN);
             }
+            log.debug("refreshToken 检验成功尝试更新 token");
 
-            // 更新 token
-            log.debug("更新 token");
-            // todo 更新加锁, 用token更新临时标记放行请求, 放行的请求通过refresh token获取用户信息
-            // noinspection UnnecessaryLocalVariable
-            String updateAccessToken = refreshToken;
-            String updateRefreshToken = JWTUtils.refreshCreateToken(refreshToken);
+            // 加锁更新，更新完成后统一放行
+            lockHelper.syncLockAndElse(
+                    "gateway:filter:AuthorizationFilter:" + refreshToken,
+                    MEDIUM_OPERATION_WAIT_TIME,
+                    // 未加锁执行逻辑，token未更新
+                    () -> {
+                        ThreadUtil.sleep(5000);
+                        // noinspection UnnecessaryLocalVariable
+                        String updateAccessToken = refreshToken;
+                        String updateRefreshToken = JWTUtils.refreshCreateToken(refreshToken);
+                        // 更新 token
+                        log.debug("更新 token");
 
-            // 获取并删除 refresh token
-            String UserStr = stringRedisTemplate.opsForValue().getAndDelete(String.format(
-                    REFRESH_TOKEN_KEY,
-                    os,
-                    browser,
-                    refreshToken
-            ));
-            if (UserStr == null) {
-                log.error("根据 refresh token 更新，但无法获取 redis value 。refreshToken: {}", refreshToken);
-                throw new ServerErrorException();
-            }
-            log.debug("获取redis值 userStr: {}", UserStr);
+                        // 获取并删除 refresh token
+                        String userStr = stringRedisTemplate.opsForValue().getAndDelete(String.format(
+                                REFRESH_TOKEN_KEY,
+                                os,
+                                browser,
+                                refreshToken
+                        ));
+                        if (userStr == null) {
+                            log.error("根据 refresh token 更新，但无法获取 redis value 。refreshToken: {}", refreshToken);
+                            throw new ServerErrorException();
+                        }
+                        log.debug("获取redis值 userStr: {}", userStr);
 
-            // 设置 redis token
-            log.debug("设置 redis token, updateAccessToken: {}, updateRefreshToken: {}", updateAccessToken, updateRefreshToken);
-            stringRedisTemplate.opsForValue().set(String.format(
-                    ACCESS_TOKEN_KEY,
-                    os,
-                    browser,
-                    updateAccessToken
-            ), UserStr, ACCESS_TIMEOUT);
+                        // 设置 redis token
+                        log.debug("设置 redis token, updateAccessToken: {}, updateRefreshToken: {}", updateAccessToken, updateRefreshToken);
+                        stringRedisTemplate.opsForValue().set(String.format(
+                                ACCESS_TOKEN_KEY,
+                                os,
+                                browser,
+                                updateAccessToken
+                        ), userStr, ACCESS_TIMEOUT);
 
-            stringRedisTemplate.opsForValue().set(String.format(
-                    REFRESH_TOKEN_KEY,
-                    os,
-                    browser,
-                    updateRefreshToken
-            ), UserStr, REFRESH_TIMEOUT);
+                        stringRedisTemplate.opsForValue().set(String.format(
+                                REFRESH_TOKEN_KEY,
+                                os,
+                                browser,
+                                updateRefreshToken
+                        ), userStr, REFRESH_TIMEOUT);
 
-            GatewayWebUtils.setRequestHeader(exchange, AUTHORIZATION_ACCESS_TOKEN, updateAccessToken);
-            return chain.filter(exchange).doFinally(x -> {
-                // 设置响应头
-                log.debug("设置响应头, updateAccessToken: {}, updateRefreshToken: {}", updateAccessToken, updateRefreshToken);
-                HttpHeaders headers = exchange.getResponse().getHeaders();
-                headers.add(AUTHORIZATION_ACCESS_TOKEN, updateAccessToken);
-                headers.add(AUTHORIZATION_REFRESH_TOKEN, updateRefreshToken);
-            });
+                        log.debug("token更新完成，修改凭证 {}:{}", AUTHORIZATION_ACCESS_TOKEN, updateAccessToken);
+                        GatewayWebUtils.setRequestHeader(exchange, AUTHORIZATION_ACCESS_TOKEN, updateAccessToken);
+                        // 设置响应头
+                        log.debug("设置响应头, updateAccessToken: {}, updateRefreshToken: {}", updateAccessToken, updateRefreshToken);
+                        HttpHeaders headers = exchange.getResponse().getHeaders();
+                        headers.add(AUTHORIZATION_ACCESS_TOKEN, updateAccessToken);
+                        headers.add(AUTHORIZATION_REFRESH_TOKEN, updateRefreshToken);
+                    },
+                    // 已加锁执行逻辑，token已更新
+                    () -> {
+                        // token更新完成，放行其余请求，并修改凭证
+                        log.debug("token更新完成，放行其余请求，并修改凭证 {}:{}", AUTHORIZATION_ACCESS_TOKEN, refreshToken);
+                        GatewayWebUtils.setRequestHeader(exchange, AUTHORIZATION_ACCESS_TOKEN, refreshToken);
+                    }
+            );
+            return chain.filter(exchange);
         }
         log.debug("通过accessToken验证");
-
         return chain.filter(exchange);
     }
 

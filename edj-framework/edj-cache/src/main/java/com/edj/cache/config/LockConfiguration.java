@@ -1,6 +1,7 @@
 package com.edj.cache.config;
 
 import com.edj.cache.aspect.LockAspect;
+import com.edj.cache.helper.LockHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RedissonClient;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -29,4 +30,8 @@ public class LockConfiguration {
         return new LockAspect(redissonClient);
     }
 
+    @Bean
+    public LockHelper lockHelper(RedissonClient redissonClient) {
+        return new LockHelper(redissonClient);
+    }
 }

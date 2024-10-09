@@ -79,13 +79,15 @@ public class LockHelper {
                 // 加读锁
                 tryLock(readLock, waitTime, -1, TIME_UNIT);
                 log.debug("加读锁成功");
-                executionUnlock.execute();
+                executionLocked.execute();
                 log.debug("已加锁逻辑已完成");
+                unlock(readLock);
             } else {
                 // 执行未加写锁逻辑
                 // 加写锁
-                executionLocked.execute();
+                executionUnlock.execute();
                 log.debug("未加锁逻辑已完成");
+                unlock(writeLock);
             }
         } catch (Exception e) {
             log.error("执行加锁业务逻辑错误", e);
