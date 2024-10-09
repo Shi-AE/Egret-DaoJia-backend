@@ -14,7 +14,7 @@ const (
 )
 
 // 自定义请求函数，支持添加请求头和请求体
-func makeRequest(wg *sync.WaitGroup) {
+func makeRequest(wg *sync.WaitGroup, token string) {
 	defer wg.Done()
 
 	// 创建请求
@@ -27,7 +27,7 @@ func makeRequest(wg *sync.WaitGroup) {
 	// 添加自定义请求头
 	req.Header.Set("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36 Edg/129.0.0.0")
 	req.Header.Set("AuthorizationAccessToken", "eyJhbGciOiJIbWFjU0hBMjU2IiwidHlwIjoiSldUIn0.eyJpZCI6MSwiZXhwIjoxNzI4NTYxODI3LCJpYXQiOjE3Mjg0NzU0MjcsImp0aSI6IjAzMTU1OWNiZjM4MTRiZDhhNTkxYzgwOGNiZDM2ZTY5In0.Q3sNO25bw93EB5vjscF1Mgt-EeXmKQ4Sja_vk1v9BMQ")
-	req.Header.Set("AuthorizationRefreshToken", "eyJhbGciOiJIbWFjU0hBMjU2IiwidHlwIjoiSldUIn0.eyJpZCI6MSwiZXhwIjoxNzI4NTY0NTM1LCJpYXQiOjE3Mjg0NzgxMzUsImp0aSI6Ijk4NmVhNGE2MmE4ZTQ1OThhNDNjZWJkOTk1ZmNiZjM2In0.B9YqnU59kr8KRtiExtmwwCBxLSxo6mh-53woJIT_mPM")
+	req.Header.Set("AuthorizationRefreshToken", token)
 
 	// 发送请求
 	client := &http.Client{}
@@ -54,8 +54,9 @@ func main() {
 	start := time.Now()
 
 	for i := 0; i < numRequests; i++ {
-		wg.Add(1)
-		go makeRequest(&wg)
+		wg.Add(2)
+		go makeRequest(&wg, "eyJhbGciOiJIbWFjU0hBMjU2IiwidHlwIjoiSldUIn0.eyJpZCI6MSwiZXhwIjoxNzI4NTY3MDA0LCJpYXQiOjE3Mjg0ODA2MDQsImp0aSI6ImY0YWZmMjJjYzVkMzRhZTFhMGExMWMzNzAyMWM0ZjdmIn0.2-2O0osLYLGf05V0rfOaNj1AVqBA_zn7XvLLOXhpGKY")
+		go makeRequest(&wg, "eyJhbGciOiJIbWFjU0hBMjU2IiwidHlwIjoiSldUIn0.eyJpZCI6MTg0MDY0MzYwNjY0NDE5NTMyOCwiZXhwIjoxNzI4NTY3MDA0LCJpYXQiOjE3Mjg0ODA2MDQsImp0aSI6ImJmMzIyMzliM2M0YTRjYTZhNjZlZGUxMDc1ZjEyMDYwIn0.W-itUS2zWRBGFJt4o7xUBd5QbFu-eP8ds59-C0ExDaw")
 	}
 
 	// 等待所有请求完成

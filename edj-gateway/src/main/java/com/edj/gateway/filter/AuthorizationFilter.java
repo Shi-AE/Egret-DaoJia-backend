@@ -1,6 +1,5 @@
 package com.edj.gateway.filter;
 
-import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.http.useragent.UserAgent;
 import cn.hutool.http.useragent.UserAgentUtil;
 import com.edj.cache.helper.LockHelper;
@@ -111,7 +110,7 @@ public class AuthorizationFilter implements GlobalFilter, Ordered {
                     refreshToken
             ));
             if (BooleanUtils.isFalse(hasRefreshTokenKey)) {
-                log.debug("refreshToken 失效重新登录 refreshToken: {}", refreshToken);
+                log.debug("refreshToken 失效可能存在网络波动 refreshToken: {}", refreshToken);
                 return GatewayWebUtils.toResponse(exchange,
                         HttpStatus.FORBIDDEN.value(),
                         ErrorInfo.Msg.REQUEST_FORBIDDEN);
@@ -124,7 +123,6 @@ public class AuthorizationFilter implements GlobalFilter, Ordered {
                     MEDIUM_OPERATION_WAIT_TIME,
                     // 未加锁执行逻辑，token未更新
                     () -> {
-                        ThreadUtil.sleep(5000);
                         // noinspection UnnecessaryLocalVariable
                         String updateAccessToken = refreshToken;
                         String updateRefreshToken = JWTUtils.refreshCreateToken(refreshToken);
@@ -142,7 +140,7 @@ public class AuthorizationFilter implements GlobalFilter, Ordered {
                             log.error("根据 refresh token 更新，但无法获取 redis value 。refreshToken: {}", refreshToken);
                             throw new ServerErrorException();
                         }
-                        log.debug("获取redis值 userStr: {}", userStr);
+                        log.debug("获取 redis 值 userStr: {}", userStr);
 
                         // 设置 redis token
                         log.debug("设置 redis token, updateAccessToken: {}, updateRefreshToken: {}", updateAccessToken, updateRefreshToken);
