@@ -64,13 +64,12 @@ public class SecurityConfiguration {
                         // 禁用X-Frame-Options
                         .frameOptions(HeadersConfigurer.FrameOptionsConfig::disable)
                 )
-                // todo 认证失败处理类
                 .authorizeHttpRequests(authorize -> authorize
                         // 放行
                         // swagger 文档
                         .requestMatchers(HttpMethod.GET, "/v3/api-docs").permitAll()
                         // 登录 \ 注册
-                        .requestMatchers(HttpMethod.POST, "/user/login", "/user/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/login", "/register").permitAll()
                         // 拦截
                         .anyRequest().authenticated()
                 )

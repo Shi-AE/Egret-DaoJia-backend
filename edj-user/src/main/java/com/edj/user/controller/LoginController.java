@@ -27,7 +27,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
@@ -47,7 +46,6 @@ import static org.springframework.http.HttpHeaders.USER_AGENT;
  * @date 2024/9/29
  */
 @RestController
-@RequestMapping("user")
 @RequiredArgsConstructor
 @Tag(name = "用户管理")
 public class LoginController {

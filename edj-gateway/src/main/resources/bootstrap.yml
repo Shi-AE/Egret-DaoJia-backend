@@ -30,7 +30,7 @@ spring:
           predicates:
             - Path=/edj-foundations/**
         - id: edj-user
-          uri: lb://edj-use
+          uri: lb://edj-user
           predicates:
             - Path=/edj-user/**
 
@@ -52,5 +52,5 @@ gateway:
       - /edj-foundations/v3/api-docs
       - /edj-user/v3/api-docs
       # 登录 \ 注册
-      - /edj-user/user/register
-      - /edj-user/user/login
+      - /edj-user/register
+      - /edj-user/login
