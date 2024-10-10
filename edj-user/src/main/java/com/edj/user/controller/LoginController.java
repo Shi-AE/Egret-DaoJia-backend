@@ -50,7 +50,7 @@ import static org.springframework.http.HttpHeaders.USER_AGENT;
 @RequestMapping("user")
 @RequiredArgsConstructor
 @Tag(name = "用户管理")
-public class UserLoginController {
+public class LoginController {
 
     private final AuthenticationManager authenticationManager;
 
