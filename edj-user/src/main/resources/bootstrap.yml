@@ -33,8 +33,3 @@ swagger:
   title: 白鹭到家-用户服务接口文档
   description: 用于用户管理
 
-#################     日志配置     #################
-
-logging:
-  level:
-    com.edj: debug

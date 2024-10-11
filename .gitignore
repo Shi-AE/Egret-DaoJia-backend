@@ -24,7 +24,7 @@ hs_err_pid*
 replay_pid*
 
 # idea
-/Egret DaoJia.iml
+*.iml
 /.idea/
 
 # project

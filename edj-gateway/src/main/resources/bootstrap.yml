@@ -1,10 +1,6 @@
 server:
   port: 33500 #端口
 
-logging:
-  level:
-    com.edj: debug
-
 spring:
   profiles:
     active: dev

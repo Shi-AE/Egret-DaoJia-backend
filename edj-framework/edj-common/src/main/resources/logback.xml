@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- 导入自定义颜色配置 -->
+    <conversionRule conversionWord="customColors" converterClass="com.edj.common.config.LogbackColorful"/>
+    <!-- 日志输出格式 -->
+    <property name="log.pattern"
+              value="%boldBlue(%d{yyyy-MM-dd HH:mm:ss.SSS}) %cyan([%-15.15thread]) %customColors(%-5.5level) %magenta(%-45.45logger) - %customColors([%-10.10method,%-5.5line]) - %msg%n"/>
+
+    <!-- 控制台输出 -->
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${log.pattern}</pattern>
+        </encoder>
+    </appender>
+
+    <!-- 系统模块日志级别控制  -->
+    <logger name="com.edj" level="DEBUG"/>
+    <!-- Spring日志级别控制  -->
+    <logger name="org.springframework" level="WARN"/>
+
+    <statusListener class="ch.qos.logback.core.status.NopStatusListener" />
+
+    <root level="info">
+        <appender-ref ref="console"/>
+    </root>
+</configuration>
