@@ -117,6 +117,7 @@ public class AuthorizationFilter implements GlobalFilter, Ordered {
             }
             log.debug("refreshToken 检验成功尝试更新 token");
 
+            // todo 优化更新逻辑
             // 加锁更新，更新完成后统一放行
             lockHelper.syncLockAndElse(
                     "gateway:filter:AuthorizationFilter:" + refreshToken,

@@ -26,6 +26,7 @@ public class DateUtils extends LocalDateTimeUtil {
     public static final String DEFAULT_DATE_FORMAT_COMPACT = "yyyyMMdd";
     public static final String DEFAULT_DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
     public static final String DEFAULT_DATE_TIME_COMPACT = "yyyyMMddHHmmss";
+    public static final String DEFAULT_DATE_TIME_MS_COMPACT = "yyyyMMddHHmmssSSS";
     public static final String DEFAULT_TIME_FORMAT = "HH:mm:ss";
     public static final String DATE_HOUR_FORMAT = "ddHH";
     public static final String DAY = "DAY";
@@ -129,8 +130,6 @@ public class DateUtils extends LocalDateTimeUtil {
 
     /**
      * 获取最近15天日期（不包含当天），格式MM.dd
-     *
-     * @return
      */
     public static List<String> last15Day() {
         // 1.定义日期列表
@@ -151,8 +150,6 @@ public class DateUtils extends LocalDateTimeUtil {
 
     /**
      * 获取当前时间s
-     *
-     * @return
      */
     public static int getCurrentTime() {
         return (int) (System.currentTimeMillis() / 1000);
@@ -175,7 +172,6 @@ public class DateUtils extends LocalDateTimeUtil {
      *
      * @param localDateTime 日期
      * @param format        格式模板，只支持纯数字模板
-     * @return
      */
     public static Long getFormatDate(LocalDateTime localDateTime, String format) {
         String date = format(localDateTime, format);
@@ -187,7 +183,6 @@ public class DateUtils extends LocalDateTimeUtil {
      *
      * @param localDateTime 日期
      * @param format        格式模板，只支持纯数字模板
-     * @return
      */
     public static Integer getIntFormatDate(LocalDateTime localDateTime, String format) {
         String date = format(localDateTime, format);
@@ -196,9 +191,6 @@ public class DateUtils extends LocalDateTimeUtil {
 
     /**
      * 获取最小的一个时间
-     *
-     * @param localDateTimes
-     * @return
      */
     public static LocalDateTime getMin(LocalDateTime... localDateTimes) {
         if (localDateTimes == null || localDateTimes.length == 0) {
@@ -222,4 +214,11 @@ public class DateUtils extends LocalDateTimeUtil {
         return localDateTimeList.stream().max(Comparator.naturalOrder()).orElse(null);
     }
 
+    public static String getFormatLong(long time) {
+        LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(time), ZoneId.systemDefault());
+
+        // 格式化日期时间
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DEFAULT_DATE_TIME_MS_COMPACT);
+        return dateTime.format(formatter);
+    }
 }

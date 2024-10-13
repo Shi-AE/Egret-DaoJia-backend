@@ -57,7 +57,11 @@ public class SecurityUtils {
         if (authentication == null) {
             return null;
         }
-        return (AuthorizationUserDTO) authentication.getPrincipal();
+        Object principal = authentication.getPrincipal();
+        if (!(principal instanceof AuthorizationUserDTO)) {
+            return null;
+        }
+        return (AuthorizationUserDTO) principal;
     }
 
     /**
