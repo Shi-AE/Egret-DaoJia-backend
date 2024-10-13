@@ -35,7 +35,7 @@ public class EdjServeTypeServiceImpl extends MPJBaseServiceImpl<EdjServeTypeMapp
                 .select(EdjServeType::getId)
                 .eq(EdjServeType::getName, name);
         boolean exists = serveTypeMapper.exists(checkWrapper);
-        if (!exists) {
+        if (exists) {
             throw new ServerErrorException("服务名重复");
         }
 

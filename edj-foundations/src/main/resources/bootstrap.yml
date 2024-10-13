@@ -25,7 +25,7 @@ spring:
 #################     项目独有配置     #################
 
 mysql:
-  db-name: edj-foundations
+  db-name: edj-foundation
 mybatis-plus:
   mapper-locations: mapper/foundations/*.xml
   type-aliases-package: com.edj.foundations.mapper
