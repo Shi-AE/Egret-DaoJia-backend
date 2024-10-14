@@ -20,6 +20,7 @@
         <module>../edj-gateway</module>
         <module>../edj-foundations</module>
         <module>../edj-user</module>
+        <module>../edj-publics</module>
     </modules>
 
     <properties>

@@ -29,6 +29,8 @@ public class AuthorizationTokenFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        log.debug("AuthorizationTokenFilter 过滤请求 url={}", request.getRequestURI());
+
         // token 已经由 gateway 过滤, 不存在非法请求
         String accessToken = request.getHeader(AUTHORIZATION_ACCESS_TOKEN);
         if (accessToken == null) {

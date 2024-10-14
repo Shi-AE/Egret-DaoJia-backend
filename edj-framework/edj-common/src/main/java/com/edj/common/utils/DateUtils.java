@@ -17,6 +17,7 @@ public class DateUtils extends LocalDateTimeUtil {
     public static final String DEFAULT_YEAR_FORMAT = "yyyy";
     public static final String DEFAULT_MONTH_FORMAT = "yyyy-MM";
     public static final String DEFAULT_MONTH_FORMAT_SLASH = "yyyy/MM";
+    public static final String DEFAULT_DAY_FORMAT_SLASH = "yyyy/MM/dd";
     public static final String DEFAULT_MONTH_FORMAT_EN = "yyyy年MM月";
     public static final String DEFAULT_MONTH_FORMAT_COMPACT = "yyyyMM";
     public static final String DEFAULT_WEEK_FORMAT = "yyyy-ww";

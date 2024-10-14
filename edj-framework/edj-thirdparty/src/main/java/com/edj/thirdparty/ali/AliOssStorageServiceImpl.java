@@ -1,10 +1,12 @@
 package com.edj.thirdparty.ali;
 
-import cn.hutool.core.util.ObjectUtil;
 import com.aliyun.oss.ClientException;
 import com.aliyun.oss.OSS;
 import com.aliyun.oss.OSSClientBuilder;
 import com.aliyun.oss.OSSException;
+import com.edj.common.utils.DateUtils;
+import com.edj.common.utils.IdUtils;
+import com.edj.common.utils.ObjectUtils;
 import com.edj.thirdparty.ali.properties.AliOssProperties;
 import com.edj.thirdparty.core.storage.StorageService;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +15,9 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
-import java.util.UUID;
+import java.time.LocalDate;
+
+import static com.edj.common.utils.DateUtils.DEFAULT_DAY_FORMAT_SLASH;
 
 /**
  * ali oss
@@ -38,20 +42,27 @@ public class AliOssStorageServiceImpl implements StorageService {
      */
     @Override
     public String upload(String extension, InputStream inputStream) {
-        String fileName = UUID.randomUUID() + extension;
+        String endpoint = aliOssProperties.getEndpoint();
+        String accessKeyId = aliOssProperties.getAccessKeyId();
+        String accessKeySecret = aliOssProperties.getAccessKeySecret();
+        String bucketName = aliOssProperties.getBucketName();
+        String basePath = aliOssProperties.getBasePath();
+
+        String datePath = DateUtils.format(LocalDate.now(), DEFAULT_DAY_FORMAT_SLASH);
+        String fileName = String.format("%s%s/%s%s", basePath, datePath, IdUtils.randomUUID(), extension);
 
         // 创建OSSClient实例。
-        OSS ossClient = new OSSClientBuilder().build(aliOssProperties.getEndpoint(), aliOssProperties.getAccessKeyId(), aliOssProperties.getAccessKeySecret());
-        StringBuilder stringBuilder = new StringBuilder("https://");
+        OSS ossClient = new OSSClientBuilder().build(endpoint, accessKeyId, accessKeySecret);
+        StringBuilder URI = new StringBuilder("https://");
 
         try {
             // 创建PutObject请求。
-            ossClient.putObject(aliOssProperties.getBucketName(), fileName, inputStream);
+            ossClient.putObject(bucketName, fileName, inputStream);
 
-            //文件访问路径规则 https://BucketName.Endpoint/ObjectName
-            stringBuilder.append(aliOssProperties.getBucketName())
+            // 文件访问路径规则 https://BucketName.Endpoint/ObjectName
+            URI.append(bucketName)
                     .append(".")
-                    .append(aliOssProperties.getEndpoint())
+                    .append(endpoint)
                     .append("/")
                     .append(fileName);
         } catch (OSSException oe) {
@@ -59,11 +70,11 @@ public class AliOssStorageServiceImpl implements StorageService {
         } catch (ClientException ce) {
             log.error("阿里OSS Client异常，Error Message:{}", ce.getMessage());
         } finally {
-            if (ObjectUtil.isNotEmpty(ossClient)) {
+            if (ObjectUtils.isNotEmpty(ossClient)) {
                 ossClient.shutdown();
             }
         }
 
-        return stringBuilder.toString();
+        return URI.toString();
     }
 }

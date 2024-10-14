@@ -1,5 +1,5 @@
 server:
-  port: 33500 #端口
+  port: 33500 # 端口
 
 spring:
   profiles:
@@ -25,10 +25,17 @@ spring:
           uri: lb://edj-foundations
           predicates:
             - Path=/edj-foundations/**
+
         - id: edj-user
           uri: lb://edj-user
           predicates:
             - Path=/edj-user/**
+
+        - id: edj-publics
+          uri: lb://edj-publics
+          predicates:
+            - Path=/edj-publics/**
+
 
 # knife4j 网关聚合
 knife4j:
@@ -47,6 +54,7 @@ gateway:
       # swagger
       - /edj-foundations/v3/api-docs
       - /edj-user/v3/api-docs
+      - /edj-publics/v3/api-docs
       # 登录 \ 注册
       - /edj-user/register
       - /edj-user/login

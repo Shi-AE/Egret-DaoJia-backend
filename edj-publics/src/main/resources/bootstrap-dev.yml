@@ -1,0 +1,10 @@
+spring:
+  cloud:
+    nacos:
+      username: nacos
+      password: nacos
+      server-addr: 42.193.192.61:8848
+      config:
+        namespace: 3b14212b-be35-4b72-bc26-bc62ba8e94f7
+      discovery:
+        namespace: 3b14212b-be35-4b72-bc26-bc62ba8e94f7
