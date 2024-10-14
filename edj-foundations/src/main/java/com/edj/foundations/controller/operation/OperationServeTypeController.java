@@ -70,4 +70,14 @@ public class OperationServeTypeController {
     public void deactivate(@PathVariable("id") @Negative @Schema(description = "服务类型id") Long id) {
         serveTypeService.deactivate(id);
     }
+
+    /**
+     * 服务类型删除
+     */
+    @DeleteMapping("/{id}")
+    @Operation(summary = "服务类型删除")
+    @PreAuthorize("hasAuthority('foundations:serverType:delete')")
+    public void delete(@PathVariable("id") @Negative @Schema(description = "服务类型id") Long id) {
+        serveTypeService.deleteById(id);
+    }
 }

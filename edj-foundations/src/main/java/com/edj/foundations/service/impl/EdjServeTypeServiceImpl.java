@@ -9,6 +9,7 @@ import com.edj.common.expcetions.BadRequestException;
 import com.edj.common.expcetions.ServerErrorException;
 import com.edj.common.utils.BeanUtils;
 import com.edj.common.utils.IdUtils;
+import com.edj.common.utils.ObjectUtils;
 import com.edj.foundations.domain.dto.ServeTypeAddDTO;
 import com.edj.foundations.domain.dto.ServerTypePageDTO;
 import com.edj.foundations.domain.entity.EdjServeType;
@@ -74,10 +75,11 @@ public class EdjServeTypeServiceImpl extends MPJBaseServiceImpl<EdjServeTypeMapp
     public void activate(Long id) {
         // 检查服务类型
         EdjServeType serveType = baseMapper.selectById(id);
-        if (serveType == null) {
+        if (ObjectUtils.isNull(serveType)) {
             throw new BadRequestException("服务类型不存在");
         }
 
+        // 检查状态
         Integer activeStatus = serveType.getActiveStatus();
         if (Objects.equals(activeStatus, EdjServerTypeActiveStatus.ENABLED.getValue())) {
             throw new BadRequestException("服务类型已启用");
@@ -96,10 +98,11 @@ public class EdjServeTypeServiceImpl extends MPJBaseServiceImpl<EdjServeTypeMapp
     public void deactivate(Long id) {
         // 检查服务类型
         EdjServeType serveType = baseMapper.selectById(id);
-        if (serveType == null) {
+        if (ObjectUtils.isNull(serveType)) {
             throw new BadRequestException("服务类型不存在");
         }
 
+        // 检查状态
         Integer activeStatus = serveType.getActiveStatus();
         if (!Objects.equals(activeStatus, EdjServerTypeActiveStatus.ENABLED.getValue())) {
             throw new BadRequestException("服务类型未启用");
@@ -116,5 +119,22 @@ public class EdjServeTypeServiceImpl extends MPJBaseServiceImpl<EdjServeTypeMapp
                 .set(EdjServeType::getActiveStatus, EdjServerTypeActiveStatus.DISABLED);
 
         baseMapper.update(updateWrapper);
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        // 检查服务类型
+        EdjServeType serveType = baseMapper.selectById(id);
+        if (ObjectUtils.isNull(serveType)) {
+            throw new BadRequestException("服务类型不存在");
+        }
+
+        // 检查状态
+        Integer activeStatus = serveType.getActiveStatus();
+        if (Objects.equals(activeStatus, EdjServerTypeActiveStatus.ENABLED.getValue())) {
+            throw new BadRequestException("启用状态无法删除");
+        }
+
+        baseMapper.deleteById(id);
     }
 }
