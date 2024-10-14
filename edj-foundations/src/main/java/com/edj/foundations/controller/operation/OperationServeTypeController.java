@@ -8,7 +8,9 @@ import com.edj.foundations.domain.dto.ServerTypePageDTO;
 import com.edj.foundations.domain.vo.ServerTypeVO;
 import com.edj.foundations.service.EdjServeTypeService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Negative;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -54,7 +56,18 @@ public class OperationServeTypeController {
      */
     @PutMapping("/activate/{id}")
     @Operation(summary = "启用服务类型")
-    public void activate(@PathVariable("id") Long id) {
+    @PreAuthorize("hasAuthority('foundations:serverType:activate')")
+    public void activate(@PathVariable("id") @Negative @Schema(description = "服务类型id") Long id) {
         serveTypeService.activate(id);
+    }
+
+    /**
+     * 禁用服务类型
+     */
+    @PutMapping("/deactivate/{id}")
+    @Operation(summary = "禁用服务类型")
+    @PreAuthorize("hasAuthority('foundations:serverType:deactivate')")
+    public void deactivate(@PathVariable("id") @Negative @Schema(description = "服务类型id") Long id) {
+        serveTypeService.deactivate(id);
     }
 }

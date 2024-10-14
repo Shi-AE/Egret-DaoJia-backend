@@ -29,4 +29,9 @@ public interface EdjServeTypeService extends MPJBaseService<EdjServeType> {
      * 启用服务类型
      */
     void activate(Long id);
+
+    /**
+     * 禁用服务类型
+     */
+    void deactivate(Long id);
 }

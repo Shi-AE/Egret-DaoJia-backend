@@ -13,8 +13,9 @@ import com.edj.foundations.domain.dto.ServeTypeAddDTO;
 import com.edj.foundations.domain.dto.ServerTypePageDTO;
 import com.edj.foundations.domain.entity.EdjServeType;
 import com.edj.foundations.domain.vo.ServerTypeVO;
-import com.edj.foundations.enums.EdjActiveStatus;
+import com.edj.foundations.enums.EdjServerTypeActiveStatus;
 import com.edj.foundations.mapper.EdjServeTypeMapper;
+import com.edj.foundations.service.EdjServeItemService;
 import com.edj.foundations.service.EdjServeTypeService;
 import com.edj.mysql.utils.PageUtils;
 import com.github.yulichang.base.MPJBaseServiceImpl;
@@ -35,6 +36,8 @@ import java.util.Objects;
 public class EdjServeTypeServiceImpl extends MPJBaseServiceImpl<EdjServeTypeMapper, EdjServeType> implements EdjServeTypeService {
 
     private final Snowflake snowflake;
+
+    private final EdjServeItemService serveItemService;
 
     @Override
     @Transactional
@@ -69,19 +72,48 @@ public class EdjServeTypeServiceImpl extends MPJBaseServiceImpl<EdjServeTypeMapp
     @Override
     @Transactional
     public void activate(Long id) {
+        // 检查服务类型
         EdjServeType serveType = baseMapper.selectById(id);
         if (serveType == null) {
             throw new BadRequestException("服务类型不存在");
         }
 
         Integer activeStatus = serveType.getActiveStatus();
-        if (Objects.equals(activeStatus, EdjActiveStatus.ENABLED.getValue())) {
+        if (Objects.equals(activeStatus, EdjServerTypeActiveStatus.ENABLED.getValue())) {
             throw new BadRequestException("服务类型已启用");
+        }
+
+        // 更新
+        LambdaUpdateWrapper<EdjServeType> updateWrapper = new LambdaUpdateWrapper<EdjServeType>()
+                .eq(EdjServeType::getId, id)
+                .set(EdjServeType::getActiveStatus, EdjServerTypeActiveStatus.ENABLED);
+
+        baseMapper.update(updateWrapper);
+    }
+
+    @Override
+    @Transactional
+    public void deactivate(Long id) {
+        // 检查服务类型
+        EdjServeType serveType = baseMapper.selectById(id);
+        if (serveType == null) {
+            throw new BadRequestException("服务类型不存在");
+        }
+
+        Integer activeStatus = serveType.getActiveStatus();
+        if (!Objects.equals(activeStatus, EdjServerTypeActiveStatus.ENABLED.getValue())) {
+            throw new BadRequestException("服务类型未启用");
+        }
+
+        // 检查服务项是否存在启用的
+        long count = serveItemService.activeServeItemCountByServeTypeId(id);
+        if (count > 0) {
+            throw new BadRequestException("该服务类型下有启用状态的服务项");
         }
 
         LambdaUpdateWrapper<EdjServeType> updateWrapper = new LambdaUpdateWrapper<EdjServeType>()
                 .eq(EdjServeType::getId, id)
-                .set(EdjServeType::getActiveStatus, EdjActiveStatus.ENABLED);
+                .set(EdjServeType::getActiveStatus, EdjServerTypeActiveStatus.DISABLED);
 
         baseMapper.update(updateWrapper);
     }
