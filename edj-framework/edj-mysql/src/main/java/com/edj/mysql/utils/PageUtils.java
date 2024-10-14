@@ -7,7 +7,7 @@ import com.edj.common.domain.dto.PageQueryDTO;
 import com.edj.common.handler.ConvertHandler;
 import com.edj.common.utils.BeanUtils;
 import com.edj.common.utils.CollUtils;
-import com.edj.common.utils.ObjectUtils;
+import com.edj.common.utils.IdUtils;
 import com.edj.common.utils.StringUtils;
 
 import java.util.ArrayList;
@@ -80,48 +80,33 @@ public class PageUtils {
      *
      * @param pageQueryDTO 前端传来的查询条件
      * @param <T>          查询数据库po
-     * @param targetClazz  校验数据库中是否有需要排序的字段
      * @return mybatis-plus 分页查询page
      */
-    public static <T> Page<T> parsePageQuery(PageQueryDTO pageQueryDTO, Class<T> targetClazz) {
+    public static <T> Page<T> parsePageQuery(PageQueryDTO pageQueryDTO) {
         Page<T> page = new Page<>(pageQueryDTO.getPageNo(), pageQueryDTO.getPageSize());
+
+        List<PageQueryDTO.OrderBy> orderByList = pageQueryDTO.getOrderByList();
+
         //是否排序
-        if (targetClazz != null) {
-            List<OrderItem> orderItems = getOrderItems(pageQueryDTO, targetClazz);
-            if (CollUtils.isNotEmpty(orderItems)) {
-                page.addOrder(orderItems);
-            }
-        } else {
-            //如果没有更新时间按照添加逆序排序
-            OrderItem orderItem = new OrderItem();
-            orderItem.setAsc(false);
-            orderItem.setColumn("id");
-            page.addOrder(orderItem);
-
+        if (orderByList != null) {
+            List<OrderItem> orderItemList = orderByList
+                    .stream()
+                    .map(x -> {
+                        String orderBy = x.getOrderBy();
+                        Boolean isAsc = x.getIsAsc();
+                        OrderItem orderItem = new OrderItem();
+                        orderItem.setColumn(StringUtils.toSymbolCase(orderBy, '_'));
+                        orderItem.setAsc(isAsc);
+                        return orderItem;
+                    })
+                    .toList();
+            page.addOrder(orderItemList);
         }
+
+        // 默认按照添加逆序排序
+        page.addOrder(OrderItem.desc(IdUtils.ID));
+
         return page;
-    }
-
-    public static <T> List<OrderItem> getOrderItems(PageQueryDTO pageQueryDTO, Class<T> targetClazz) {
-        List<OrderItem> orderItems = new ArrayList<>();
-        if (ObjectUtils.isEmpty(pageQueryDTO)) {
-            return orderItems;
-        }
-        // 排序字段1
-        if (StringUtils.isNotEmpty(pageQueryDTO.getOrderBy1())) {
-            OrderItem orderItem = new OrderItem();
-            orderItem.setColumn(StringUtils.toSymbolCase(pageQueryDTO.getOrderBy1(), '_'));
-            orderItem.setAsc(pageQueryDTO.getIsAsc1());
-            orderItems.add(orderItem);
-        }
-        // 排序字段2
-        if (StringUtils.isNotEmpty(pageQueryDTO.getOrderBy2())) {
-            OrderItem orderItem = new OrderItem();
-            orderItem.setColumn(StringUtils.toSymbolCase(pageQueryDTO.getOrderBy2(), '_'));
-            orderItem.setAsc(pageQueryDTO.getIsAsc2());
-            orderItems.add(orderItem);
-        }
-        return orderItems;
     }
 
     public static Long pages(Long total, Long pageSize) {

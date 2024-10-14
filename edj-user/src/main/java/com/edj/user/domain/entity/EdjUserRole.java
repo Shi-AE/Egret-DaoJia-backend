@@ -1,5 +1,7 @@
 package com.edj.user.domain.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.edj.common.domain.entity.EjdBaseEntity;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -20,6 +22,7 @@ public class EdjUserRole extends EjdBaseEntity {
     /**
      * id
      */
+    @TableId(type = IdType.AUTO)
     private Long id;
 
     /**

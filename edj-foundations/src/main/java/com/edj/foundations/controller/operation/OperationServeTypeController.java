@@ -1,18 +1,18 @@
 package com.edj.foundations.controller.operation;
 
 
+import com.edj.common.domain.PageResult;
 import com.edj.common.domain.Result;
 import com.edj.foundations.domain.dto.ServeTypeAddDTO;
+import com.edj.foundations.domain.dto.ServerTypePageDTO;
+import com.edj.foundations.domain.vo.ServerTypeVO;
 import com.edj.foundations.service.EdjServeTypeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * 运营端 - 服务类型相关接口
@@ -37,5 +37,15 @@ public class OperationServeTypeController {
     public Result<Void> add(@RequestBody @Validated ServeTypeAddDTO serveTypeAddDTO) {
         serveTypeService.add(serveTypeAddDTO);
         return Result.success();
+    }
+
+    /**
+     * 服务类型分页查询
+     */
+    @PostMapping("page")
+    @Operation(summary = "服务类型分页查询")
+    @PreAuthorize("hasAuthority('foundations:serverType:page')")
+    public PageResult<ServerTypeVO> page(@RequestBody @Validated ServerTypePageDTO serverTypePageDTO) {
+        return serveTypeService.page(serverTypePageDTO);
     }
 }

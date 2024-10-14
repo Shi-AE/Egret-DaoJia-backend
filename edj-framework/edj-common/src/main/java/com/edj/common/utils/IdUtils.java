@@ -8,13 +8,15 @@ import cn.hutool.core.util.IdUtil;
  */
 public class IdUtils extends IdUtil {
 
-    public static long DEFAULT_TWEPOCH = 1728745117883L;
+    public static final String ID = "id";
 
-    public static long DEFAULT_TIME_OFFSET = 2000L;
+    public static final long DEFAULT_TWEPOCH = 1728745117883L;
 
-    public static boolean IS_USE_SYSTEM_CLOCK = false;
+    public static final long DEFAULT_TIME_OFFSET = 2000L;
 
-    public static long RANDOM_SEQUENCE_LIMIT = 0L;
+    public static final boolean IS_USE_SYSTEM_CLOCK = false;
+
+    public static final long RANDOM_SEQUENCE_LIMIT = 0L;
 
     public static long getDataCenterId(long id) {
         return id >> 17 & 0x1FL;

@@ -1,26 +1,30 @@
 package com.edj.common.domain.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+import java.util.List;
+
+import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.NOT_REQUIRED;
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Schema(description = "分页查询数据")
 public class PageQueryDTO {
-    @Schema(description = "页码数")
+    @Schema(description = "页码数", requiredMode = NOT_REQUIRED)
     private Integer pageNo = 1;
-    @Schema(description = "每页条数")
+    @Schema(description = "每页条数", requiredMode = NOT_REQUIRED)
     private Integer pageSize = 10;
-    @Schema(description = "排序字段1")
-    private String orderBy1;
-    @Schema(description = "排序字段1是否升序")
-    private Boolean isAsc1 = false;
 
-    @Schema(description = "排序字段2，排序顺序排在排序字段1后边，如果排序字段1未设置，该字段也可以排序")
-    private String orderBy2;
-    @Schema(description = "排序字段2是否升序")
-    private Boolean isAsc2 = false;
+    @Schema(description = "排序项列表", requiredMode = NOT_REQUIRED)
+    private List<@Valid OrderBy> orderByList;
 
     /**
      * 计算起始条数
@@ -31,10 +35,18 @@ public class PageQueryDTO {
         return (pageNo - 1) * pageSize;
     }
 
+    @Data
+    @Builder
+    @NoArgsConstructor
     @AllArgsConstructor
-    @Getter
+    @Schema(description = "排序项")
     public static class OrderBy {
+
+        @Schema(description = "排序字段")
+        @NotBlank(message = "排序字段不能为空")
         private String orderBy;
-        private Boolean isAsc;
+
+        @Schema(description = "是否升序", requiredMode = NOT_REQUIRED)
+        private Boolean isAsc = true;
     }
 }

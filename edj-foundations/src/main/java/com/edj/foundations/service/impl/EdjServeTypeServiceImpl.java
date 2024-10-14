@@ -2,13 +2,18 @@ package com.edj.foundations.service.impl;
 
 import cn.hutool.core.lang.Snowflake;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.edj.common.domain.PageResult;
 import com.edj.common.expcetions.ServerErrorException;
 import com.edj.common.utils.BeanUtils;
 import com.edj.common.utils.IdUtils;
 import com.edj.foundations.domain.dto.ServeTypeAddDTO;
+import com.edj.foundations.domain.dto.ServerTypePageDTO;
 import com.edj.foundations.domain.entity.EdjServeType;
+import com.edj.foundations.domain.vo.ServerTypeVO;
 import com.edj.foundations.mapper.EdjServeTypeMapper;
 import com.edj.foundations.service.EdjServeTypeService;
+import com.edj.mysql.utils.PageUtils;
 import com.github.yulichang.base.MPJBaseServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -47,5 +52,12 @@ public class EdjServeTypeServiceImpl extends MPJBaseServiceImpl<EdjServeTypeMapp
         serveType.setCode(IdUtils.toCode(codeId));
 
         serveTypeMapper.insert(serveType);
+    }
+
+    @Override
+    public PageResult<ServerTypeVO> page(ServerTypePageDTO serverTypePageDTO) {
+        Page<EdjServeType> page = PageUtils.parsePageQuery(serverTypePageDTO);
+        Page<EdjServeType> serveTypePage = serveTypeMapper.selectPage(page, new LambdaQueryWrapper<>());
+        return PageUtils.toPage(serveTypePage, ServerTypeVO.class);
     }
 }
