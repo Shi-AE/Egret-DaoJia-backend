@@ -37,6 +37,7 @@ public class PageHelperUtils {
     }
 
     private static String getOrder(PageQueryDTO pageQueryDTO) {
+        // todo 用到再修复，这就叫懒修复
 //        if (StringUtils.isEmpty(pageQueryDTO.getOrderBy1()) && StringUtils.isEmpty(pageQueryDTO.getOrderBy2())) {
 //            return null;
 //        }

@@ -24,4 +24,9 @@ public interface EdjServeTypeService extends MPJBaseService<EdjServeType> {
      * 服务类型分页查询
      */
     PageResult<ServerTypeVO> page(ServerTypePageDTO serverTypePageDTO);
+
+    /**
+     * 启用服务类型
+     */
+    void activate(Long id);
 }

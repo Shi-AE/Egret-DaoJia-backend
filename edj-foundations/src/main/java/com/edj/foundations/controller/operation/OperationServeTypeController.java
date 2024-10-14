@@ -48,4 +48,13 @@ public class OperationServeTypeController {
     public PageResult<ServerTypeVO> page(@RequestBody @Validated ServerTypePageDTO serverTypePageDTO) {
         return serveTypeService.page(serverTypePageDTO);
     }
+
+    /**
+     * 启用服务类型
+     */
+    @PutMapping("/activate/{id}")
+    @Operation(summary = "启用服务类型")
+    public void activate(@PathVariable("id") Long id) {
+        serveTypeService.activate(id);
+    }
 }
