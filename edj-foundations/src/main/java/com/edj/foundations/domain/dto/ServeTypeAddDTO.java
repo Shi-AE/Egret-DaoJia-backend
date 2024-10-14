@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(name = "新增服务类型")
+@Schema(description = "新增服务类型")
 public class ServeTypeAddDTO {
 
     /**

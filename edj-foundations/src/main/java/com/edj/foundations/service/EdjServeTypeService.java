@@ -2,6 +2,7 @@ package com.edj.foundations.service;
 
 import com.edj.common.domain.PageResult;
 import com.edj.foundations.domain.dto.ServeTypeAddDTO;
+import com.edj.foundations.domain.dto.ServeTypeUpdateDTO;
 import com.edj.foundations.domain.dto.ServerTypePageDTO;
 import com.edj.foundations.domain.entity.EdjServeType;
 import com.edj.foundations.domain.vo.ServerTypeVO;
@@ -39,4 +40,9 @@ public interface EdjServeTypeService extends MPJBaseService<EdjServeType> {
      * 服务类型删除
      */
     void deleteById(Long id);
+
+    /**
+     * 服务类型修改
+     */
+    void update(ServeTypeUpdateDTO serveTypeUpdateDTO);
 }

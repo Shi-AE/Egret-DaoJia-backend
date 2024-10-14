@@ -10,7 +10,9 @@ import com.edj.common.expcetions.ServerErrorException;
 import com.edj.common.utils.BeanUtils;
 import com.edj.common.utils.IdUtils;
 import com.edj.common.utils.ObjectUtils;
+import com.edj.common.utils.StringUtils;
 import com.edj.foundations.domain.dto.ServeTypeAddDTO;
+import com.edj.foundations.domain.dto.ServeTypeUpdateDTO;
 import com.edj.foundations.domain.dto.ServerTypePageDTO;
 import com.edj.foundations.domain.entity.EdjServeType;
 import com.edj.foundations.domain.vo.ServerTypeVO;
@@ -122,6 +124,7 @@ public class EdjServeTypeServiceImpl extends MPJBaseServiceImpl<EdjServeTypeMapp
     }
 
     @Override
+    @Transactional
     public void deleteById(Long id) {
         // 检查服务类型
         EdjServeType serveType = baseMapper.selectById(id);
@@ -136,5 +139,30 @@ public class EdjServeTypeServiceImpl extends MPJBaseServiceImpl<EdjServeTypeMapp
         }
 
         baseMapper.deleteById(id);
+    }
+
+    @Override
+    @Transactional
+    public void update(ServeTypeUpdateDTO serveTypeUpdateDTO) {
+        String name = serveTypeUpdateDTO.getName();
+        Long id = serveTypeUpdateDTO.getId();
+
+        if (StringUtils.isNotBlank(name)) {
+            // 检查服务类型名重复
+            LambdaQueryWrapper<EdjServeType> repeatWrapper = new LambdaQueryWrapper<EdjServeType>()
+                    .select(EdjServeType::getId)
+                    .ne(EdjServeType::getId, id)
+                    .eq(EdjServeType::getName, name);
+            boolean exists = baseMapper.exists(repeatWrapper);
+            if (exists) {
+                throw new BadRequestException("服务类型名重复");
+            }
+        }
+
+        EdjServeType serveType = BeanUtils.toBean(serveTypeUpdateDTO, EdjServeType.class);
+        int update = baseMapper.updateById(serveType);
+        if (update != 1) {
+            throw new BadRequestException("服务类型不存在");
+        }
     }
 }

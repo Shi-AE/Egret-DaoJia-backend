@@ -4,6 +4,7 @@ package com.edj.foundations.controller.operation;
 import com.edj.common.domain.PageResult;
 import com.edj.common.domain.Result;
 import com.edj.foundations.domain.dto.ServeTypeAddDTO;
+import com.edj.foundations.domain.dto.ServeTypeUpdateDTO;
 import com.edj.foundations.domain.dto.ServerTypePageDTO;
 import com.edj.foundations.domain.vo.ServerTypeVO;
 import com.edj.foundations.service.EdjServeTypeService;
@@ -79,5 +80,14 @@ public class OperationServeTypeController {
     @PreAuthorize("hasAuthority('foundations:serverType:delete')")
     public void delete(@PathVariable("id") @Negative @Schema(description = "服务类型id") Long id) {
         serveTypeService.deleteById(id);
+    }
+
+    /**
+     * 服务类型修改
+     */
+    @PutMapping
+    @Operation(summary = "服务类型修改")
+    public void update(@RequestBody ServeTypeUpdateDTO serveTypeUpsertReqDTO) {
+        serveTypeService.update(serveTypeUpsertReqDTO);
     }
 }
