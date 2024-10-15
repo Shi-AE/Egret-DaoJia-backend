@@ -7,10 +7,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.edj.common.domain.PageResult;
 import com.edj.common.expcetions.BadRequestException;
 import com.edj.common.expcetions.ServerErrorException;
-import com.edj.common.utils.BeanUtils;
-import com.edj.common.utils.IdUtils;
-import com.edj.common.utils.ObjectUtils;
-import com.edj.common.utils.StringUtils;
+import com.edj.common.utils.*;
 import com.edj.foundations.domain.dto.ServeTypeAddDTO;
 import com.edj.foundations.domain.dto.ServeTypePageDTO;
 import com.edj.foundations.domain.dto.ServeTypeUpdateDTO;
@@ -28,7 +25,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Objects;
 
 /**
  * 针对表【edj_serve_type(服务类型表)】的数据库操作Service实现
@@ -85,7 +81,7 @@ public class EdjServeTypeServiceImpl extends MPJBaseServiceImpl<EdjServeTypeMapp
 
         // 检查状态
         Integer activeStatus = serveType.getActiveStatus();
-        if (Objects.equals(activeStatus, EdjServeTypeActiveStatus.ENABLED.getValue())) {
+        if (EnumUtils.equals(EdjServeTypeActiveStatus.ENABLED, activeStatus)) {
             throw new BadRequestException("服务类型已启用");
         }
 
@@ -108,7 +104,7 @@ public class EdjServeTypeServiceImpl extends MPJBaseServiceImpl<EdjServeTypeMapp
 
         // 检查状态
         Integer activeStatus = serveType.getActiveStatus();
-        if (!Objects.equals(activeStatus, EdjServeTypeActiveStatus.ENABLED.getValue())) {
+        if (EnumUtils.notEquals(EdjServeTypeActiveStatus.ENABLED, activeStatus)) {
             throw new BadRequestException("服务类型未启用");
         }
 
@@ -136,7 +132,7 @@ public class EdjServeTypeServiceImpl extends MPJBaseServiceImpl<EdjServeTypeMapp
 
         // 检查状态
         Integer activeStatus = serveType.getActiveStatus();
-        if (!Objects.equals(activeStatus, EdjServeTypeActiveStatus.DRAFTS.getValue())) {
+        if (EnumUtils.notEquals(EdjServeTypeActiveStatus.DRAFTS, activeStatus)) {
             throw new BadRequestException("只有草稿状态可删除");
         }
 

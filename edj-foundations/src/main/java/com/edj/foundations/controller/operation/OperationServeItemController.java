@@ -4,7 +4,9 @@ import com.edj.foundations.domain.dto.ServeItemAddDTO;
 import com.edj.foundations.domain.dto.ServeItemUpdateDTO;
 import com.edj.foundations.service.EdjServeItemService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -26,22 +28,31 @@ public class OperationServeItemController {
     private final EdjServeItemService serveItemService;
 
     /**
-     * 服务项新增
+     * 新增服务项
      */
     @PostMapping
-    @Operation(summary = "服务项新增")
+    @Operation(summary = "新增服务项")
     @PreAuthorize("hasAuthority('foundations:serveItem:add')")
     public void add(@RequestBody ServeItemAddDTO serveItemAddDTO) {
         serveItemService.add(serveItemAddDTO);
     }
 
     /**
-     * 服务项新增
+     * 修改服务项
      */
     @PutMapping
-    @Operation(summary = "服务项修改")
+    @Operation(summary = "修改服务项")
     @PreAuthorize("hasAuthority('foundations:serveItem:update')")
     public void update(@RequestBody ServeItemUpdateDTO serveItemUpdateDTO) {
         serveItemService.update(serveItemUpdateDTO);
+    }
+
+    /**
+     * 启用服务项
+     */
+    @PutMapping("/activate/{id}")
+    @Operation(summary = "启用服务项")
+    public void activate(@PathVariable("id") @Positive @Schema(description = "服务项id") Long id) {
+        serveItemService.activate(id);
     }
 }

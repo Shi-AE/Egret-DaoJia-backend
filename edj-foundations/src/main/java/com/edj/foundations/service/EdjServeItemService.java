@@ -19,12 +19,17 @@ public interface EdjServeItemService extends MPJBaseService<EdjServeItem> {
     long activeServeItemCountByServeTypeId(long serveTypeId);
 
     /**
-     * 服务项新增
+     * 新增服务项
      */
     void add(ServeItemAddDTO serveItemAddDTO);
 
     /**
-     * 服务项修改
+     * 修改服务项
      */
     void update(ServeItemUpdateDTO serveItemUpdateDTO);
+
+    /**
+     * 启用服务项
+     */
+    void activate(Long id);
 }

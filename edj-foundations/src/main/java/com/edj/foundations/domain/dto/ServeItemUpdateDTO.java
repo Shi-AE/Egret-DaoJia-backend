@@ -18,7 +18,7 @@ import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.NOT_REQUIR
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "服务项修改")
+@Schema(description = "修改服务项")
 public class ServeItemUpdateDTO {
 
     /**

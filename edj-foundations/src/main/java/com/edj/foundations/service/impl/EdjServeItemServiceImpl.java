@@ -2,12 +2,16 @@ package com.edj.foundations.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.edj.common.expcetions.BadRequestException;
 import com.edj.common.utils.BeanUtils;
+import com.edj.common.utils.EnumUtils;
+import com.edj.common.utils.ObjectUtils;
 import com.edj.foundations.domain.dto.ServeItemAddDTO;
 import com.edj.foundations.domain.dto.ServeItemUpdateDTO;
 import com.edj.foundations.domain.entity.EdjServeItem;
 import com.edj.foundations.domain.entity.EdjServeType;
+import com.edj.foundations.enums.EdjServeItemActiveStatus;
 import com.edj.foundations.enums.EdjServeTypeActiveStatus;
 import com.edj.foundations.mapper.EdjServeItemMapper;
 import com.edj.foundations.mapper.EdjServeTypeMapper;
@@ -69,6 +73,7 @@ public class EdjServeItemServiceImpl extends MPJBaseServiceImpl<EdjServeItemMapp
     }
 
     @Override
+    @Transactional
     public void update(ServeItemUpdateDTO serveItemUpdateDTO) {
         // 检查名称重复
         String name = serveItemUpdateDTO.getName();
@@ -85,5 +90,49 @@ public class EdjServeItemServiceImpl extends MPJBaseServiceImpl<EdjServeItemMapp
         // 更新
         EdjServeItem serveItem = BeanUtil.toBean(serveItemUpdateDTO, EdjServeItem.class);
         baseMapper.updateById(serveItem);
+    }
+
+    @Override
+    @Transactional
+    public void activate(Long id) {
+        // 查询服务项状态
+        EdjServeItem serveItem = baseMapper.selectById(id);
+
+        // 检查不存在
+        if (ObjectUtils.isNull(serveItem)) {
+            throw new BadRequestException("服务项不存在");
+        }
+
+        // 检查已启用
+        Integer serveItemStatus = serveItem.getActiveStatus();
+        if (EnumUtils.equals(EdjServeItemActiveStatus.ENABLED, serveItemStatus)) {
+            throw new BadRequestException("服务项已启用");
+        }
+
+        // 检查服务类型
+        Long edjServeTypeId = serveItem.getEdjServeTypeId();
+        EdjServeType serveType = serveTypeMapper.selectById(edjServeTypeId);
+
+        // 检查不存在
+        if (ObjectUtils.isNull(serveType)) {
+            throw new BadRequestException("服务类型不存在");
+        }
+
+        Integer serveTypeStatus = serveType.getActiveStatus();
+        // 服务类型为草稿
+        if (EnumUtils.equals(EdjServeTypeActiveStatus.DRAFTS, serveTypeStatus)) {
+            throw new BadRequestException("服务类型未启用");
+        }
+
+        // 服务类型禁用
+        if (EnumUtils.equals(EdjServeTypeActiveStatus.DISABLED, serveTypeStatus)) {
+            throw new BadRequestException("服务类型已禁用");
+        }
+
+        LambdaUpdateWrapper<EdjServeItem> updateWrapper = new LambdaUpdateWrapper<EdjServeItem>()
+                .eq(EdjServeItem::getId, id)
+                .set(EdjServeItem::getActiveStatus, EdjServeItemActiveStatus.ENABLED);
+
+        baseMapper.update(new EdjServeItem(), updateWrapper);
     }
 }
