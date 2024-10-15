@@ -55,6 +55,7 @@ public class OperationServeItemController {
      */
     @PutMapping("activate/{id}")
     @Operation(summary = "启用服务项")
+    @PreAuthorize("hasAuthority('foundations:serveItem:activate')")
     public void activate(@PathVariable("id") @Positive @Schema(description = "服务项id") Long id) {
         serveItemService.activate(id);
     }
@@ -64,6 +65,7 @@ public class OperationServeItemController {
      */
     @PutMapping("deactivate/{id}")
     @Operation(summary = "禁用服务项")
+    @PreAuthorize("hasAuthority('foundations:serveItem:deactivate')")
     public void deactivate(@PathVariable("id") @Positive @Schema(description = "服务项id") Long id) {
         serveItemService.deactivate(id);
     }
@@ -73,6 +75,7 @@ public class OperationServeItemController {
      */
     @DeleteMapping("{id}")
     @Operation(summary = "删除服务项")
+    @PreAuthorize("hasAuthority('foundations:serveItem:delete')")
     public void delete(@PathVariable("id") @Positive @Schema(description = "服务项id") Long id) {
         serveItemService.delete(id);
     }
@@ -82,6 +85,7 @@ public class OperationServeItemController {
      */
     @PostMapping("page")
     @Operation(summary = "分页查询服务项")
+    @PreAuthorize("hasAuthority('foundations:serveItem:page')")
     public PageResult<ServeItemVO> page(@RequestBody ServeItemPageDTO serveItemPageDTO) {
         return serveItemService.page(serveItemPageDTO);
     }
@@ -91,6 +95,7 @@ public class OperationServeItemController {
      */
     @GetMapping("{id}")
     @Operation(summary = "根据id查询服务项")
+    @PreAuthorize("hasAuthority('foundations:serveItem:findById')")
     public ServeItemVO findById(@PathVariable("id") @Positive @Schema(description = "服务项id") Long id) {
         return serveItemService.selectById(id);
     }

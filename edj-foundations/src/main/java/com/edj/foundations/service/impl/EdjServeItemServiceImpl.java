@@ -1,15 +1,13 @@
 package com.edj.foundations.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.lang.Snowflake;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.edj.common.domain.PageResult;
 import com.edj.common.expcetions.BadRequestException;
-import com.edj.common.utils.BeanUtils;
-import com.edj.common.utils.EnumUtils;
-import com.edj.common.utils.ObjectUtils;
-import com.edj.common.utils.StringUtils;
+import com.edj.common.utils.*;
 import com.edj.foundations.domain.dto.ServeItemAddDTO;
 import com.edj.foundations.domain.dto.ServeItemPageDTO;
 import com.edj.foundations.domain.dto.ServeItemUpdateDTO;
@@ -39,6 +37,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class EdjServeItemServiceImpl extends MPJBaseServiceImpl<EdjServeItemMapper, EdjServeItem> implements EdjServeItemService {
 
     private final EdjServeTypeMapper serveTypeMapper;
+
+    private final Snowflake snowflake;
 
     @Override
     public long activeServeItemCountByServeTypeId(long serveTypeId) {
@@ -76,6 +76,7 @@ public class EdjServeItemServiceImpl extends MPJBaseServiceImpl<EdjServeItemMapp
 
         // 插入
         EdjServeItem serveItem = BeanUtils.toBean(serveItemAddDTO, EdjServeItem.class);
+        serveItem.setCode(IdUtils.toCode(serveItem.getId()));
         baseMapper.insert(serveItem);
     }
 
