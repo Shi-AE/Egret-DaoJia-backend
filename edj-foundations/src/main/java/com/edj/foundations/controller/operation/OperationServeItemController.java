@@ -1,7 +1,10 @@
 package com.edj.foundations.controller.operation;
 
+import com.edj.common.domain.PageResult;
 import com.edj.foundations.domain.dto.ServeItemAddDTO;
+import com.edj.foundations.domain.dto.ServeItemPageDTO;
 import com.edj.foundations.domain.dto.ServeItemUpdateDTO;
+import com.edj.foundations.domain.vo.ServeItemPageVO;
 import com.edj.foundations.service.EdjServeItemService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -72,5 +75,14 @@ public class OperationServeItemController {
     @Operation(summary = "删除服务项")
     public void delete(@PathVariable("id") @Positive @Schema(description = "服务项id") Long id) {
         serveItemService.delete(id);
+    }
+
+    /**
+     * 分页查询服务项
+     */
+    @GetMapping("page")
+    @Operation(summary = "分页查询服务项")
+    public PageResult<ServeItemPageVO> page(ServeItemPageDTO serveItemPageDTO) {
+        return serveItemService.page(serveItemPageDTO);
     }
 }

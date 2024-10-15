@@ -3,20 +3,27 @@ package com.edj.foundations.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.edj.common.domain.PageResult;
 import com.edj.common.expcetions.BadRequestException;
 import com.edj.common.utils.BeanUtils;
 import com.edj.common.utils.EnumUtils;
 import com.edj.common.utils.ObjectUtils;
+import com.edj.common.utils.StringUtils;
 import com.edj.foundations.domain.dto.ServeItemAddDTO;
+import com.edj.foundations.domain.dto.ServeItemPageDTO;
 import com.edj.foundations.domain.dto.ServeItemUpdateDTO;
 import com.edj.foundations.domain.entity.EdjServeItem;
 import com.edj.foundations.domain.entity.EdjServeType;
+import com.edj.foundations.domain.vo.ServeItemPageVO;
 import com.edj.foundations.enums.EdjServeItemActiveStatus;
 import com.edj.foundations.enums.EdjServeTypeActiveStatus;
 import com.edj.foundations.mapper.EdjServeItemMapper;
 import com.edj.foundations.mapper.EdjServeTypeMapper;
 import com.edj.foundations.service.EdjServeItemService;
+import com.edj.mysql.utils.PageUtils;
 import com.github.yulichang.base.MPJBaseServiceImpl;
+import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -179,5 +186,25 @@ public class EdjServeItemServiceImpl extends MPJBaseServiceImpl<EdjServeItemMapp
         }
 
         baseMapper.deleteById(id);
+    }
+
+    @Override
+    public PageResult<ServeItemPageVO> page(ServeItemPageDTO serveItemPageDTO) {
+
+        String name = serveItemPageDTO.getName();
+        Integer activeStatus = serveItemPageDTO.getActiveStatus();
+        Long serveTypeId = serveItemPageDTO.getServeTypeId();
+
+        Page<ServeItemPageVO> page = PageUtils.parsePageQuery(serveItemPageDTO);
+        MPJLambdaWrapper<EdjServeItem> queryWrapper = new MPJLambdaWrapper<EdjServeItem>()
+                .selectAll(EdjServeItem.class)
+                .selectAs(EdjServeType::getName, ServeItemPageVO::getEdjServeTypeId)
+                .innerJoin(EdjServeType.class, EdjServeType::getId, EdjServeItem::getEdjServeTypeId)
+                .eq(StringUtils.isNotBlank(name), EdjServeType::getName, name)
+                .eq(ObjectUtils.isNotNull(activeStatus), EdjServeType::getActiveStatus, activeStatus)
+                .eq(ObjectUtils.isNotNull(serveTypeId), EdjServeType::getId, serveTypeId);
+
+        Page<ServeItemPageVO> serveItemPageVOPage = baseMapper.selectJoinPage(page, ServeItemPageVO.class, queryWrapper);
+        return PageUtils.toPage(serveItemPageVOPage, ServeItemPageVO.class);
     }
 }

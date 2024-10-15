@@ -1,8 +1,11 @@
 package com.edj.foundations.service;
 
+import com.edj.common.domain.PageResult;
 import com.edj.foundations.domain.dto.ServeItemAddDTO;
+import com.edj.foundations.domain.dto.ServeItemPageDTO;
 import com.edj.foundations.domain.dto.ServeItemUpdateDTO;
 import com.edj.foundations.domain.entity.EdjServeItem;
+import com.edj.foundations.domain.vo.ServeItemPageVO;
 import com.github.yulichang.base.MPJBaseService;
 
 /**
@@ -42,4 +45,9 @@ public interface EdjServeItemService extends MPJBaseService<EdjServeItem> {
      * 删除服务项
      */
     void delete(Long id);
+
+    /**
+     * 分页查询服务项
+     */
+    PageResult<ServeItemPageVO> page(ServeItemPageDTO serveItemPageDTO);
 }
