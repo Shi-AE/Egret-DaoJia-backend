@@ -2,7 +2,6 @@ package com.edj.foundations.controller.operation;
 
 
 import com.edj.common.domain.PageResult;
-import com.edj.common.domain.Result;
 import com.edj.foundations.domain.dto.ServeTypeAddDTO;
 import com.edj.foundations.domain.dto.ServeTypeUpdateDTO;
 import com.edj.foundations.domain.dto.ServerTypePageDTO;
@@ -11,7 +10,7 @@ import com.edj.foundations.service.EdjServeTypeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.constraints.Negative;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -23,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
  * @author A.E.
  * @date 2024/10/11
  */
+@Validated
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("operation/server/type")
@@ -37,9 +37,8 @@ public class OperationServeTypeController {
     @PostMapping
     @Operation(summary = "新增服务类型")
     @PreAuthorize("hasAuthority('foundations:serverType:add')")
-    public Result<Void> add(@RequestBody @Validated ServeTypeAddDTO serveTypeAddDTO) {
+    public void add(@RequestBody @Validated ServeTypeAddDTO serveTypeAddDTO) {
         serveTypeService.add(serveTypeAddDTO);
-        return Result.success();
     }
 
     /**
@@ -58,7 +57,7 @@ public class OperationServeTypeController {
     @PutMapping("/activate/{id}")
     @Operation(summary = "启用服务类型")
     @PreAuthorize("hasAuthority('foundations:serverType:activate')")
-    public void activate(@PathVariable("id") @Negative @Schema(description = "服务类型id") Long id) {
+    public void activate(@PathVariable("id") @Positive @Schema(description = "服务类型id") Long id) {
         serveTypeService.activate(id);
     }
 
@@ -68,7 +67,7 @@ public class OperationServeTypeController {
     @PutMapping("/deactivate/{id}")
     @Operation(summary = "禁用服务类型")
     @PreAuthorize("hasAuthority('foundations:serverType:deactivate')")
-    public void deactivate(@PathVariable("id") @Negative @Schema(description = "服务类型id") Long id) {
+    public void deactivate(@PathVariable("id") @Positive @Schema(description = "服务类型id") Long id) {
         serveTypeService.deactivate(id);
     }
 
@@ -78,7 +77,7 @@ public class OperationServeTypeController {
     @DeleteMapping("/{id}")
     @Operation(summary = "服务类型删除")
     @PreAuthorize("hasAuthority('foundations:serverType:delete')")
-    public void delete(@PathVariable("id") @Negative @Schema(description = "服务类型id") Long id) {
+    public void delete(@PathVariable("id") @Positive @Schema(description = "服务类型id") Long id) {
         serveTypeService.deleteById(id);
     }
 
@@ -87,6 +86,7 @@ public class OperationServeTypeController {
      */
     @PutMapping
     @Operation(summary = "服务类型修改")
+    @PreAuthorize("hasAuthority('foundations:serverType:update')")
     public void update(@RequestBody ServeTypeUpdateDTO serveTypeUpsertReqDTO) {
         serveTypeService.update(serveTypeUpsertReqDTO);
     }

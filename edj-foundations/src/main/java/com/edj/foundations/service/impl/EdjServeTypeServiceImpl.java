@@ -92,7 +92,7 @@ public class EdjServeTypeServiceImpl extends MPJBaseServiceImpl<EdjServeTypeMapp
                 .eq(EdjServeType::getId, id)
                 .set(EdjServeType::getActiveStatus, EdjServerTypeActiveStatus.ENABLED);
 
-        baseMapper.update(updateWrapper);
+        baseMapper.update(new EdjServeType(), updateWrapper);
     }
 
     @Override
@@ -120,7 +120,7 @@ public class EdjServeTypeServiceImpl extends MPJBaseServiceImpl<EdjServeTypeMapp
                 .eq(EdjServeType::getId, id)
                 .set(EdjServeType::getActiveStatus, EdjServerTypeActiveStatus.DISABLED);
 
-        baseMapper.update(updateWrapper);
+        baseMapper.update(new EdjServeType(), updateWrapper);
     }
 
     @Override
@@ -134,8 +134,8 @@ public class EdjServeTypeServiceImpl extends MPJBaseServiceImpl<EdjServeTypeMapp
 
         // 检查状态
         Integer activeStatus = serveType.getActiveStatus();
-        if (Objects.equals(activeStatus, EdjServerTypeActiveStatus.ENABLED.getValue())) {
-            throw new BadRequestException("启用状态无法删除");
+        if (!Objects.equals(activeStatus, EdjServerTypeActiveStatus.DRAFTS.getValue())) {
+            throw new BadRequestException("只有草稿状态可删除");
         }
 
         baseMapper.deleteById(id);

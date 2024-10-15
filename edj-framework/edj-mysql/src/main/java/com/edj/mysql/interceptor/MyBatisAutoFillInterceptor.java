@@ -1,6 +1,7 @@
 package com.edj.mysql.interceptor;
 
 import com.baomidou.mybatisplus.extension.plugins.inner.InnerInterceptor;
+import com.edj.common.expcetions.ServerErrorException;
 import com.edj.common.handler.UserInfoHandler;
 import com.edj.common.utils.ObjectUtils;
 import com.edj.common.utils.ReflectUtils;
@@ -9,8 +10,9 @@ import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.SqlCommandType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.sql.SQLException;
 import java.util.Map;
 
 import static com.edj.mysql.constants.DbFiledConstants.*;
@@ -24,6 +26,7 @@ import static com.edj.mysql.constants.DbValueConstants.EXIST;
 @RequiredArgsConstructor
 public class MyBatisAutoFillInterceptor implements InnerInterceptor {
 
+    private static final Logger log = LoggerFactory.getLogger(MyBatisAutoFillInterceptor.class);
     private final UserInfoHandler userInfoHandler;
 
     @Override
@@ -68,6 +71,11 @@ public class MyBatisAutoFillInterceptor implements InnerInterceptor {
                 // 如果通过 update wrapper 更新
                 if (t instanceof Map<?, ?>) {
                     t = ((Map<?, ?>) t).get("et");
+                }
+
+                if (t == null) {
+                    log.error("修改代码格式为: update(new Entity(), updateWrapper)");
+                    throw new ServerErrorException();
                 }
 
                 // 当前用户设置到更新人字段

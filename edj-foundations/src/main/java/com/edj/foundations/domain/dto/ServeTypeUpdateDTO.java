@@ -1,7 +1,7 @@
 package com.edj.foundations.domain.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.Negative;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,7 +21,7 @@ public class ServeTypeUpdateDTO {
      * 服务类型id
      */
     @Schema(description = "服务类型id")
-    @Negative(message = "服务类型id格式错误")
+    @Positive(message = "服务类型id格式错误")
     @NotNull(message = "服务类型id不能为空")
     private Long id;
 

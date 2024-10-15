@@ -22,8 +22,8 @@ public class TempTest {
         EdjAuthority edjAuthority = EdjAuthority
                 .builder()
                 .parentId(338323032326144L)
-                .name("服务类型分页查询")
-                .permission("foundations:serverType:page")
+                .name("服务类型删除")
+                .permission("foundations:serverType:delete")
                 .build();
         authorityMapper.insert(edjAuthority);
 
