@@ -13,10 +13,10 @@ import com.edj.common.utils.ObjectUtils;
 import com.edj.common.utils.StringUtils;
 import com.edj.foundations.domain.dto.ServeTypeAddDTO;
 import com.edj.foundations.domain.dto.ServeTypeUpdateDTO;
-import com.edj.foundations.domain.dto.ServerTypePageDTO;
+import com.edj.foundations.domain.dto.ServeTypePageDTO;
 import com.edj.foundations.domain.entity.EdjServeType;
-import com.edj.foundations.domain.vo.ServerTypeVO;
-import com.edj.foundations.enums.EdjServerTypeActiveStatus;
+import com.edj.foundations.domain.vo.ServeTypeVO;
+import com.edj.foundations.enums.EdjServeTypeActiveStatus;
 import com.edj.foundations.mapper.EdjServeTypeMapper;
 import com.edj.foundations.service.EdjServeItemService;
 import com.edj.foundations.service.EdjServeTypeService;
@@ -66,10 +66,10 @@ public class EdjServeTypeServiceImpl extends MPJBaseServiceImpl<EdjServeTypeMapp
     }
 
     @Override
-    public PageResult<ServerTypeVO> page(ServerTypePageDTO serverTypePageDTO) {
-        Page<EdjServeType> page = PageUtils.parsePageQuery(serverTypePageDTO);
+    public PageResult<ServeTypeVO> page(ServeTypePageDTO serveTypePageDTO) {
+        Page<EdjServeType> page = PageUtils.parsePageQuery(serveTypePageDTO);
         Page<EdjServeType> serveTypePage = baseMapper.selectPage(page, new LambdaQueryWrapper<>());
-        return PageUtils.toPage(serveTypePage, ServerTypeVO.class);
+        return PageUtils.toPage(serveTypePage, ServeTypeVO.class);
     }
 
     @Override
@@ -83,14 +83,14 @@ public class EdjServeTypeServiceImpl extends MPJBaseServiceImpl<EdjServeTypeMapp
 
         // 检查状态
         Integer activeStatus = serveType.getActiveStatus();
-        if (Objects.equals(activeStatus, EdjServerTypeActiveStatus.ENABLED.getValue())) {
+        if (Objects.equals(activeStatus, EdjServeTypeActiveStatus.ENABLED.getValue())) {
             throw new BadRequestException("服务类型已启用");
         }
 
         // 更新
         LambdaUpdateWrapper<EdjServeType> updateWrapper = new LambdaUpdateWrapper<EdjServeType>()
                 .eq(EdjServeType::getId, id)
-                .set(EdjServeType::getActiveStatus, EdjServerTypeActiveStatus.ENABLED);
+                .set(EdjServeType::getActiveStatus, EdjServeTypeActiveStatus.ENABLED);
 
         baseMapper.update(new EdjServeType(), updateWrapper);
     }
@@ -106,7 +106,7 @@ public class EdjServeTypeServiceImpl extends MPJBaseServiceImpl<EdjServeTypeMapp
 
         // 检查状态
         Integer activeStatus = serveType.getActiveStatus();
-        if (!Objects.equals(activeStatus, EdjServerTypeActiveStatus.ENABLED.getValue())) {
+        if (!Objects.equals(activeStatus, EdjServeTypeActiveStatus.ENABLED.getValue())) {
             throw new BadRequestException("服务类型未启用");
         }
 
@@ -118,7 +118,7 @@ public class EdjServeTypeServiceImpl extends MPJBaseServiceImpl<EdjServeTypeMapp
 
         LambdaUpdateWrapper<EdjServeType> updateWrapper = new LambdaUpdateWrapper<EdjServeType>()
                 .eq(EdjServeType::getId, id)
-                .set(EdjServeType::getActiveStatus, EdjServerTypeActiveStatus.DISABLED);
+                .set(EdjServeType::getActiveStatus, EdjServeTypeActiveStatus.DISABLED);
 
         baseMapper.update(new EdjServeType(), updateWrapper);
     }
@@ -134,7 +134,7 @@ public class EdjServeTypeServiceImpl extends MPJBaseServiceImpl<EdjServeTypeMapp
 
         // 检查状态
         Integer activeStatus = serveType.getActiveStatus();
-        if (!Objects.equals(activeStatus, EdjServerTypeActiveStatus.DRAFTS.getValue())) {
+        if (!Objects.equals(activeStatus, EdjServeTypeActiveStatus.DRAFTS.getValue())) {
             throw new BadRequestException("只有草稿状态可删除");
         }
 

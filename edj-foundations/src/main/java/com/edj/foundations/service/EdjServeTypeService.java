@@ -3,9 +3,9 @@ package com.edj.foundations.service;
 import com.edj.common.domain.PageResult;
 import com.edj.foundations.domain.dto.ServeTypeAddDTO;
 import com.edj.foundations.domain.dto.ServeTypeUpdateDTO;
-import com.edj.foundations.domain.dto.ServerTypePageDTO;
+import com.edj.foundations.domain.dto.ServeTypePageDTO;
 import com.edj.foundations.domain.entity.EdjServeType;
-import com.edj.foundations.domain.vo.ServerTypeVO;
+import com.edj.foundations.domain.vo.ServeTypeVO;
 import com.github.yulichang.base.MPJBaseService;
 
 /**
@@ -24,7 +24,7 @@ public interface EdjServeTypeService extends MPJBaseService<EdjServeType> {
     /**
      * 服务类型分页查询
      */
-    PageResult<ServerTypeVO> page(ServerTypePageDTO serverTypePageDTO);
+    PageResult<ServeTypeVO> page(ServeTypePageDTO serveTypePageDTO);
 
     /**
      * 启用服务类型

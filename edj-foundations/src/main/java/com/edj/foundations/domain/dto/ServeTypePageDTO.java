@@ -14,5 +14,5 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString(callSuper = true)
-public class ServerTypePageDTO extends PageQueryDTO {
+public class ServeTypePageDTO extends PageQueryDTO {
 }

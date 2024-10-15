@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Schema(description = "服务类型查询结果")
-public class ServerTypeVO {
+public class ServeTypeVO {
     /**
      * 服务类型id
      */

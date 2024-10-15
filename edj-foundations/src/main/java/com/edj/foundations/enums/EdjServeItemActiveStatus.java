@@ -5,14 +5,14 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
- * 服务类型状态枚举
+ * 服务项状态枚举
  *
  * @author A.E.
  * @date 2024/10/14
  */
 @Getter
 @AllArgsConstructor
-public enum EdjServerTypeActiveStatus {
+public enum EdjServeItemActiveStatus {
 
     DRAFTS(0, "草稿"),
 

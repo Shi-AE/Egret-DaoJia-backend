@@ -4,8 +4,8 @@ package com.edj.foundations.controller.operation;
 import com.edj.common.domain.PageResult;
 import com.edj.foundations.domain.dto.ServeTypeAddDTO;
 import com.edj.foundations.domain.dto.ServeTypeUpdateDTO;
-import com.edj.foundations.domain.dto.ServerTypePageDTO;
-import com.edj.foundations.domain.vo.ServerTypeVO;
+import com.edj.foundations.domain.dto.ServeTypePageDTO;
+import com.edj.foundations.domain.vo.ServeTypeVO;
 import com.edj.foundations.service.EdjServeTypeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -47,8 +47,8 @@ public class OperationServeTypeController {
     @PostMapping("page")
     @Operation(summary = "服务类型分页查询")
     @PreAuthorize("hasAuthority('foundations:serverType:page')")
-    public PageResult<ServerTypeVO> page(@RequestBody @Validated ServerTypePageDTO serverTypePageDTO) {
-        return serveTypeService.page(serverTypePageDTO);
+    public PageResult<ServeTypeVO> page(@RequestBody @Validated ServeTypePageDTO serveTypePageDTO) {
+        return serveTypeService.page(serveTypePageDTO);
     }
 
     /**

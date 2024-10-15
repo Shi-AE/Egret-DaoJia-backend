@@ -50,7 +50,7 @@ public class EdjServeItem extends EjdBaseEntity {
     private String img;
 
     /**
-     * 服务数量单位
+     * 服务数量单位(1小时 2天 3次 4台 5个 6㎡ 7米)
      */
     private Integer unit;
 
