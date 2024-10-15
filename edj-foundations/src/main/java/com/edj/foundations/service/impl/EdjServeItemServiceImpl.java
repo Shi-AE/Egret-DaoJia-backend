@@ -1,9 +1,11 @@
 package com.edj.foundations.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.edj.common.expcetions.BadRequestException;
 import com.edj.common.utils.BeanUtils;
 import com.edj.foundations.domain.dto.ServeItemAddDTO;
+import com.edj.foundations.domain.dto.ServeItemUpdateDTO;
 import com.edj.foundations.domain.entity.EdjServeItem;
 import com.edj.foundations.domain.entity.EdjServeType;
 import com.edj.foundations.enums.EdjServeTypeActiveStatus;
@@ -64,5 +66,24 @@ public class EdjServeItemServiceImpl extends MPJBaseServiceImpl<EdjServeItemMapp
         // 插入
         EdjServeItem serveItem = BeanUtils.toBean(serveItemAddDTO, EdjServeItem.class);
         baseMapper.insert(serveItem);
+    }
+
+    @Override
+    public void update(ServeItemUpdateDTO serveItemUpdateDTO) {
+        // 检查名称重复
+        String name = serveItemUpdateDTO.getName();
+        Long id = serveItemUpdateDTO.getId();
+        LambdaQueryWrapper<EdjServeItem> checkWrapper = new LambdaQueryWrapper<EdjServeItem>()
+                .select(EdjServeItem::getId)
+                .eq(EdjServeItem::getName, name)
+                .ne(EdjServeItem::getId, id);
+        boolean exists = baseMapper.exists(checkWrapper);
+        if (exists) {
+            throw new BadRequestException("存在相同的服务项名称");
+        }
+
+        // 更新
+        EdjServeItem serveItem = BeanUtil.toBean(serveItemUpdateDTO, EdjServeItem.class);
+        baseMapper.updateById(serveItem);
     }
 }

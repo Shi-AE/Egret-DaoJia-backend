@@ -1,6 +1,7 @@
 package com.edj.foundations.service;
 
 import com.edj.foundations.domain.dto.ServeItemAddDTO;
+import com.edj.foundations.domain.dto.ServeItemUpdateDTO;
 import com.edj.foundations.domain.entity.EdjServeItem;
 import com.github.yulichang.base.MPJBaseService;
 
@@ -21,4 +22,9 @@ public interface EdjServeItemService extends MPJBaseService<EdjServeItem> {
      * 服务项新增
      */
     void add(ServeItemAddDTO serveItemAddDTO);
+
+    /**
+     * 服务项修改
+     */
+    void update(ServeItemUpdateDTO serveItemUpdateDTO);
 }

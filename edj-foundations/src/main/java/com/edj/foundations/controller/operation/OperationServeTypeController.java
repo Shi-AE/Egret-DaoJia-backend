@@ -101,6 +101,7 @@ public class OperationServeTypeController {
     @PreAuthorize("hasAuthority('foundations:serverType:status')")
     public List<ServeTypeStatusGetVO> selectByStatus(
             @RequestParam(required = false)
+            @Schema(description = "状态（0草稿 1禁用 2启用）")
             @Enums(EdjServeTypeActiveStatus.class)
             Integer activeStatus
     ) {
