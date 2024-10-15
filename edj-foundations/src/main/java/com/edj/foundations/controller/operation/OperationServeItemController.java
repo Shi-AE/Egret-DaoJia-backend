@@ -4,7 +4,7 @@ import com.edj.common.domain.PageResult;
 import com.edj.foundations.domain.dto.ServeItemAddDTO;
 import com.edj.foundations.domain.dto.ServeItemPageDTO;
 import com.edj.foundations.domain.dto.ServeItemUpdateDTO;
-import com.edj.foundations.domain.vo.ServeItemPageVO;
+import com.edj.foundations.domain.vo.ServeItemVO;
 import com.edj.foundations.service.EdjServeItemService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -80,9 +80,18 @@ public class OperationServeItemController {
     /**
      * 分页查询服务项
      */
-    @GetMapping("page")
+    @PostMapping("page")
     @Operation(summary = "分页查询服务项")
-    public PageResult<ServeItemPageVO> page(ServeItemPageDTO serveItemPageDTO) {
+    public PageResult<ServeItemVO> page(@RequestBody ServeItemPageDTO serveItemPageDTO) {
         return serveItemService.page(serveItemPageDTO);
+    }
+
+    /**
+     * 根据id查询服务项
+     */
+    @GetMapping("{id}")
+    @Operation(summary = "根据id查询服务项")
+    public ServeItemVO findById(@PathVariable("id") @Positive @Schema(description = "服务项id") Long id) {
+        return serveItemService.selectById(id);
     }
 }

@@ -20,7 +20,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Schema(description = "分页查询服务项")
-public class ServeItemPageVO {
+public class ServeItemVO {
     /**
      * 服务项id
      */

@@ -15,7 +15,7 @@ import com.edj.foundations.domain.dto.ServeItemPageDTO;
 import com.edj.foundations.domain.dto.ServeItemUpdateDTO;
 import com.edj.foundations.domain.entity.EdjServeItem;
 import com.edj.foundations.domain.entity.EdjServeType;
-import com.edj.foundations.domain.vo.ServeItemPageVO;
+import com.edj.foundations.domain.vo.ServeItemVO;
 import com.edj.foundations.enums.EdjServeItemActiveStatus;
 import com.edj.foundations.enums.EdjServeTypeActiveStatus;
 import com.edj.foundations.mapper.EdjServeItemMapper;
@@ -189,22 +189,34 @@ public class EdjServeItemServiceImpl extends MPJBaseServiceImpl<EdjServeItemMapp
     }
 
     @Override
-    public PageResult<ServeItemPageVO> page(ServeItemPageDTO serveItemPageDTO) {
+    public PageResult<ServeItemVO> page(ServeItemPageDTO serveItemPageDTO) {
 
         String name = serveItemPageDTO.getName();
         Integer activeStatus = serveItemPageDTO.getActiveStatus();
         Long serveTypeId = serveItemPageDTO.getServeTypeId();
 
-        Page<ServeItemPageVO> page = PageUtils.parsePageQuery(serveItemPageDTO);
+        Page<ServeItemVO> page = PageUtils.parsePageQuery(serveItemPageDTO);
         MPJLambdaWrapper<EdjServeItem> queryWrapper = new MPJLambdaWrapper<EdjServeItem>()
                 .selectAll(EdjServeItem.class)
-                .selectAs(EdjServeType::getName, ServeItemPageVO::getEdjServeTypeId)
+                .selectAs(EdjServeType::getName, ServeItemVO::getEdjServeTypeId)
                 .innerJoin(EdjServeType.class, EdjServeType::getId, EdjServeItem::getEdjServeTypeId)
                 .eq(StringUtils.isNotBlank(name), EdjServeType::getName, name)
                 .eq(ObjectUtils.isNotNull(activeStatus), EdjServeType::getActiveStatus, activeStatus)
                 .eq(ObjectUtils.isNotNull(serveTypeId), EdjServeType::getId, serveTypeId);
 
-        Page<ServeItemPageVO> serveItemPageVOPage = baseMapper.selectJoinPage(page, ServeItemPageVO.class, queryWrapper);
-        return PageUtils.toPage(serveItemPageVOPage, ServeItemPageVO.class);
+        Page<ServeItemVO> serveItemPageVOPage = baseMapper.selectJoinPage(page, ServeItemVO.class, queryWrapper);
+        return new PageResult<>((int) serveItemPageVOPage.getPages(), serveItemPageVOPage.getTotal(),
+                serveItemPageVOPage.getRecords());
+    }
+
+    @Override
+    public ServeItemVO selectById(Long id) {
+        MPJLambdaWrapper<EdjServeItem> queryWrapper = new MPJLambdaWrapper<EdjServeItem>()
+                .selectAll(EdjServeItem.class)
+                .selectAs(EdjServeType::getName, ServeItemVO::getEdjServeTypeId)
+                .innerJoin(EdjServeType.class, EdjServeType::getId, EdjServeItem::getEdjServeTypeId)
+                .eq(EdjServeItem::getId, id);
+
+        return baseMapper.selectJoinOne(ServeItemVO.class, queryWrapper);
     }
 }

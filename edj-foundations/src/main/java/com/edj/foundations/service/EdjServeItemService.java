@@ -5,7 +5,7 @@ import com.edj.foundations.domain.dto.ServeItemAddDTO;
 import com.edj.foundations.domain.dto.ServeItemPageDTO;
 import com.edj.foundations.domain.dto.ServeItemUpdateDTO;
 import com.edj.foundations.domain.entity.EdjServeItem;
-import com.edj.foundations.domain.vo.ServeItemPageVO;
+import com.edj.foundations.domain.vo.ServeItemVO;
 import com.github.yulichang.base.MPJBaseService;
 
 /**
@@ -49,5 +49,10 @@ public interface EdjServeItemService extends MPJBaseService<EdjServeItem> {
     /**
      * 分页查询服务项
      */
-    PageResult<ServeItemPageVO> page(ServeItemPageDTO serveItemPageDTO);
+    PageResult<ServeItemVO> page(ServeItemPageDTO serveItemPageDTO);
+
+    /**
+     * 根据id查询服务项
+     */
+    ServeItemVO selectById(Long id);
 }
