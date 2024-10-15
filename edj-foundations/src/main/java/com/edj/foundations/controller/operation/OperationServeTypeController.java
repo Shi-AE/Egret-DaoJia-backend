@@ -59,7 +59,7 @@ public class OperationServeTypeController {
     /**
      * 启用服务类型
      */
-    @PutMapping("/activate/{id}")
+    @PutMapping("activate/{id}")
     @Operation(summary = "启用服务类型")
     @PreAuthorize("hasAuthority('foundations:serverType:activate')")
     public void activate(@PathVariable("id") @Positive @Schema(description = "服务类型id") Long id) {
@@ -69,7 +69,7 @@ public class OperationServeTypeController {
     /**
      * 禁用服务类型
      */
-    @PutMapping("/deactivate/{id}")
+    @PutMapping("deactivate/{id}")
     @Operation(summary = "禁用服务类型")
     @PreAuthorize("hasAuthority('foundations:serverType:deactivate')")
     public void deactivate(@PathVariable("id") @Positive @Schema(description = "服务类型id") Long id) {
@@ -79,7 +79,7 @@ public class OperationServeTypeController {
     /**
      * 服务类型删除
      */
-    @DeleteMapping("/{id}")
+    @DeleteMapping("{id}")
     @Operation(summary = "服务类型删除")
     @PreAuthorize("hasAuthority('foundations:serverType:delete')")
     public void delete(@PathVariable("id") @Positive @Schema(description = "服务类型id") Long id) {

@@ -37,4 +37,9 @@ public interface EdjServeItemService extends MPJBaseService<EdjServeItem> {
      * 禁用服务项
      */
     void deactivate(Long id);
+
+    /**
+     * 删除服务项
+     */
+    void delete(Long id);
 }

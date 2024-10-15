@@ -139,7 +139,6 @@ public class EdjServeItemServiceImpl extends MPJBaseServiceImpl<EdjServeItemMapp
     @Override
     @Transactional
     public void deactivate(Long id) {
-
         // 查询服务项状态
         EdjServeItem serveItem = baseMapper.selectById(id);
 
@@ -160,5 +159,25 @@ public class EdjServeItemServiceImpl extends MPJBaseServiceImpl<EdjServeItemMapp
                 .eq(EdjServeItem::getId, id)
                 .set(EdjServeItem::getActiveStatus, EdjServeItemActiveStatus.DISABLED);
         baseMapper.update(new EdjServeItem(), updateWrapper);
+    }
+
+    @Override
+    @Transactional
+    public void delete(Long id) {
+        // 查询服务项状态
+        EdjServeItem serveItem = baseMapper.selectById(id);
+
+        // 检查不存在
+        if (ObjectUtils.isNull(serveItem)) {
+            throw new BadRequestException("服务项不存在");
+        }
+
+        // 检查已未启用
+        Integer serveItemStatus = serveItem.getActiveStatus();
+        if (EnumUtils.notEquals(EdjServeItemActiveStatus.DRAFTS, serveItemStatus)) {
+            throw new BadRequestException("只有草稿状态可删除");
+        }
+
+        baseMapper.deleteById(id);
     }
 }
