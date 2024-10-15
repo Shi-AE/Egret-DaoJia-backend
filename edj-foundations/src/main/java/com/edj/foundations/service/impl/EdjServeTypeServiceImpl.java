@@ -12,9 +12,10 @@ import com.edj.common.utils.IdUtils;
 import com.edj.common.utils.ObjectUtils;
 import com.edj.common.utils.StringUtils;
 import com.edj.foundations.domain.dto.ServeTypeAddDTO;
-import com.edj.foundations.domain.dto.ServeTypeUpdateDTO;
 import com.edj.foundations.domain.dto.ServeTypePageDTO;
+import com.edj.foundations.domain.dto.ServeTypeUpdateDTO;
 import com.edj.foundations.domain.entity.EdjServeType;
+import com.edj.foundations.domain.vo.ServeTypeStatusGetVO;
 import com.edj.foundations.domain.vo.ServeTypeVO;
 import com.edj.foundations.enums.EdjServeTypeActiveStatus;
 import com.edj.foundations.mapper.EdjServeTypeMapper;
@@ -26,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -164,5 +166,16 @@ public class EdjServeTypeServiceImpl extends MPJBaseServiceImpl<EdjServeTypeMapp
         if (update != 1) {
             throw new BadRequestException("服务类型不存在");
         }
+    }
+
+    @Override
+    public List<ServeTypeStatusGetVO> selectByStatus(Integer activeStatus) {
+        LambdaQueryWrapper<EdjServeType> queryWrapper = new LambdaQueryWrapper<EdjServeType>()
+                .select(EdjServeType::getId, EdjServeType::getName)
+                .eq(ObjectUtils.isNotNull(activeStatus), EdjServeType::getActiveStatus, activeStatus)
+                .orderByAsc(EdjServeType::getSortNum);
+
+        List<EdjServeType> edjServeTypes = baseMapper.selectList(queryWrapper);
+        return BeanUtils.copyToList(edjServeTypes, ServeTypeStatusGetVO.class);
     }
 }

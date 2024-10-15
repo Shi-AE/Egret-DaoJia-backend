@@ -5,8 +5,11 @@ import com.edj.foundations.domain.dto.ServeTypeAddDTO;
 import com.edj.foundations.domain.dto.ServeTypeUpdateDTO;
 import com.edj.foundations.domain.dto.ServeTypePageDTO;
 import com.edj.foundations.domain.entity.EdjServeType;
+import com.edj.foundations.domain.vo.ServeTypeStatusGetVO;
 import com.edj.foundations.domain.vo.ServeTypeVO;
 import com.github.yulichang.base.MPJBaseService;
+
+import java.util.List;
 
 /**
  * 针对表【edj_serve_type(服务类型表)】的数据库操作Service
@@ -45,4 +48,9 @@ public interface EdjServeTypeService extends MPJBaseService<EdjServeType> {
      * 服务类型修改
      */
     void update(ServeTypeUpdateDTO serveTypeUpdateDTO);
+
+    /**
+     * 根据活动状态查询服务类型
+     */
+    List<ServeTypeStatusGetVO> selectByStatus(Integer activeStatus);
 }

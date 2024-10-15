@@ -17,7 +17,7 @@ import java.lang.annotation.Target;
  * @author A.E.
  * @date 2024/10/15
  */
-@Target(ElementType.FIELD)
+@Target({ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = EnumsValidator.class)
 public @interface Enums {

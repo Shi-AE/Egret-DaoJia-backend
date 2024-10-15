@@ -3,10 +3,13 @@ package com.edj.foundations.controller.operation;
 
 import com.edj.common.domain.PageResult;
 import com.edj.foundations.domain.dto.ServeTypeAddDTO;
-import com.edj.foundations.domain.dto.ServeTypeUpdateDTO;
 import com.edj.foundations.domain.dto.ServeTypePageDTO;
+import com.edj.foundations.domain.dto.ServeTypeUpdateDTO;
+import com.edj.foundations.domain.vo.ServeTypeStatusGetVO;
 import com.edj.foundations.domain.vo.ServeTypeVO;
+import com.edj.foundations.enums.EdjServeTypeActiveStatus;
 import com.edj.foundations.service.EdjServeTypeService;
+import com.edj.mvc.annotation.enums.Enums;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -15,6 +18,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * 运营端 - 服务类型相关接口
@@ -89,5 +94,16 @@ public class OperationServeTypeController {
     @PreAuthorize("hasAuthority('foundations:serverType:update')")
     public void update(@RequestBody ServeTypeUpdateDTO serveTypeUpsertReqDTO) {
         serveTypeService.update(serveTypeUpsertReqDTO);
+    }
+
+    @GetMapping("status")
+    @Operation(summary = "根据活动状态查询服务类型")
+    @PreAuthorize("hasAuthority('foundations:serverType:status')")
+    public List<ServeTypeStatusGetVO> selectByStatus(
+            @RequestParam(required = false)
+            @Enums(EdjServeTypeActiveStatus.class)
+            Integer activeStatus
+    ) {
+        return serveTypeService.selectByStatus(activeStatus);
     }
 }
