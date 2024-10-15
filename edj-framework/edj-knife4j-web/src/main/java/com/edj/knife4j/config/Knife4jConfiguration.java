@@ -4,7 +4,6 @@ package com.edj.knife4j.config;
 import com.edj.common.utils.DateUtils;
 import com.edj.knife4j.filter.SwaggerFilter;
 import com.edj.knife4j.properties.SwaggerProperties;
-import com.github.xiaoymin.knife4j.spring.annotations.EnableKnife4j;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
@@ -21,7 +20,6 @@ import java.time.format.DateTimeFormatter;
 
 
 @Configuration
-@EnableKnife4j
 @EnableConfigurationProperties({SwaggerProperties.class})
 @Import(SwaggerFilter.class)
 @ConditionalOnProperty(prefix = "swagger", name = "enable", havingValue = "true")
