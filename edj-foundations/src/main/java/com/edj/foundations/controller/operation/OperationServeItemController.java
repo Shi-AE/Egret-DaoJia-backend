@@ -55,4 +55,13 @@ public class OperationServeItemController {
     public void activate(@PathVariable("id") @Positive @Schema(description = "服务项id") Long id) {
         serveItemService.activate(id);
     }
+
+    /**
+     * 禁用服务项
+     */
+    @PutMapping("/deactivate/{id}")
+    @Operation(summary = "禁用服务项")
+    public void deactivate(@PathVariable("id") @Positive @Schema(description = "服务项id") Long id) {
+        serveItemService.deactivate(id);
+    }
 }

@@ -114,6 +114,8 @@ public class EdjServeTypeServiceImpl extends MPJBaseServiceImpl<EdjServeTypeMapp
             throw new BadRequestException("该服务类型下有启用状态的服务项");
         }
 
+        // todo 有区域在使用该服务将无法禁用（存在关联的区域服务且状态为上架表示有区域在使用该服务项）
+
         LambdaUpdateWrapper<EdjServeType> updateWrapper = new LambdaUpdateWrapper<EdjServeType>()
                 .eq(EdjServeType::getId, id)
                 .set(EdjServeType::getActiveStatus, EdjServeTypeActiveStatus.DISABLED);

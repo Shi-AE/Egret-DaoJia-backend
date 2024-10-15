@@ -135,4 +135,30 @@ public class EdjServeItemServiceImpl extends MPJBaseServiceImpl<EdjServeItemMapp
 
         baseMapper.update(new EdjServeItem(), updateWrapper);
     }
+
+    @Override
+    @Transactional
+    public void deactivate(Long id) {
+
+        // 查询服务项状态
+        EdjServeItem serveItem = baseMapper.selectById(id);
+
+        // 检查不存在
+        if (ObjectUtils.isNull(serveItem)) {
+            throw new BadRequestException("服务项不存在");
+        }
+
+        // 检查已未启用
+        Integer serveItemStatus = serveItem.getActiveStatus();
+        if (EnumUtils.notEquals(EdjServeItemActiveStatus.ENABLED, serveItemStatus)) {
+            throw new BadRequestException("服务项未启用");
+        }
+
+        // todo 有区域在使用该服务将无法禁用（存在关联的区域服务且状态为上架表示有区域在使用该服务项）
+
+        LambdaUpdateWrapper<EdjServeItem> updateWrapper = new LambdaUpdateWrapper<EdjServeItem>()
+                .eq(EdjServeItem::getId, id)
+                .set(EdjServeItem::getActiveStatus, EdjServeItemActiveStatus.DISABLED);
+        baseMapper.update(new EdjServeItem(), updateWrapper);
+    }
 }
