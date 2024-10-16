@@ -2,12 +2,15 @@ package com.edj.foundations.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.edj.common.expcetions.BadRequestException;
+import com.edj.common.utils.AsyncUtils;
 import com.edj.common.utils.BeanUtils;
+import com.edj.common.utils.EnumUtils;
 import com.edj.common.utils.ObjectUtils;
 import com.edj.foundations.domain.dto.RegionAddDTO;
 import com.edj.foundations.domain.dto.RegionUpdateDTO;
 import com.edj.foundations.domain.entity.EdjCity;
 import com.edj.foundations.domain.entity.EdjRegion;
+import com.edj.foundations.enums.EdjRegionActiveStatus;
 import com.edj.foundations.mapper.EdjCityMapper;
 import com.edj.foundations.mapper.EdjRegionMapper;
 import com.edj.foundations.service.EdjConfigRegionService;
@@ -71,5 +74,30 @@ public class EdjRegionServiceImpl extends MPJBaseServiceImpl<EdjRegionMapper, Ed
     public void update(RegionUpdateDTO regionUpdateDTO) {
         EdjRegion region = BeanUtils.toBean(regionUpdateDTO, EdjRegion.class);
         baseMapper.updateById(region);
+    }
+
+    @Override
+    @Transactional
+    public void deleteById(Long id) {
+        // 检查区域
+        LambdaQueryWrapper<EdjRegion> wrapper = new LambdaQueryWrapper<EdjRegion>()
+                .select(EdjRegion::getActiveStatus)
+                .eq(EdjRegion::getId, id);
+        EdjRegion region = baseMapper.selectOne(wrapper);
+
+        // 检查不存在
+        if (ObjectUtils.isNull(region)) {
+            throw new BadRequestException("区域不存在");
+        }
+        // 检查状态
+        Integer activeStatus = region.getActiveStatus();
+        if (EnumUtils.notEquals(EdjRegionActiveStatus.DRAFTS, activeStatus)) {
+            throw new BadRequestException("草稿状态方可删除");
+        }
+
+        baseMapper.deleteById(id);
+
+        // 异步移除区域配置
+        AsyncUtils.runAsyncComplete(() -> configRegionService.delete(id));
     }
 }

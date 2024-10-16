@@ -22,4 +22,9 @@ public interface EdjRegionService extends MPJBaseService<EdjRegion> {
      * 修改区域
      */
     void update(RegionUpdateDTO regionUpdateDTO);
+
+    /**
+     * 删除区域
+     */
+    void deleteById(Long id);
 }

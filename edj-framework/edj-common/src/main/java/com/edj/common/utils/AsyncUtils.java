@@ -44,46 +44,6 @@ public class AsyncUtils {
 
     public static final ThreadPoolExecutor ASYNC_POOL;
 
-    static {
-        ASYNC_POOL = new ThreadPoolExecutor(
-                CORE_POOL_SIZE,
-                MAXIMUM_POOL_SIZE,
-                KEEP_ALIVE_TIME,
-                UNIT,
-                new LinkedBlockingQueue<>(CAPACITY),
-                new EdjThreadFactory(),
-                new CallerRunsPolicyWithLog()
-        );
-    }
-
-    /**
-     * 线程统一异常处理
-     */
-    private static void exceptionHandle(Thread t, Throwable e) {
-        String threadName = t.getName();
-        log.error("线程发生异常, 线程名: {}", threadName, e);
-    }
-
-    /**
-     * 异步执行一个没有返回值的任务
-     */
-    public static CompletableFuture<Void> runAsync(Runnable runnable) {
-        if (runnable == null) throw new ServerErrorException("异步任务为空");
-        return CompletableFuture.runAsync(runnable, ASYNC_POOL);
-    }
-
-    /**
-     * 异步执行一个没有返回值的任务
-     * 默认异常处理
-     */
-    public static CompletableFuture<Void> runAsyncComplete(Runnable runnable) {
-        return runAsync(runnable).whenComplete((result, throwable) -> {
-            if (throwable != null) {
-                exceptionHandle(Thread.currentThread(), throwable);
-            }
-        });
-    }
-
     /**
      * 任务队列拒绝策略
      *
@@ -144,5 +104,45 @@ public class AsyncUtils {
 
             return thread;
         }
+    }
+
+    static {
+        ASYNC_POOL = new ThreadPoolExecutor(
+                CORE_POOL_SIZE,
+                MAXIMUM_POOL_SIZE,
+                KEEP_ALIVE_TIME,
+                UNIT,
+                new LinkedBlockingQueue<>(CAPACITY),
+                new EdjThreadFactory(),
+                new CallerRunsPolicyWithLog()
+        );
+    }
+
+    /**
+     * 线程统一异常处理
+     */
+    private static void exceptionHandle(Thread t, Throwable e) {
+        String threadName = t.getName();
+        log.error("线程发生异常, 线程名: {}", threadName, e);
+    }
+
+    /**
+     * 异步执行一个没有返回值的任务
+     */
+    public static CompletableFuture<Void> runAsync(Runnable runnable) {
+        if (runnable == null) throw new ServerErrorException("异步任务为空");
+        return CompletableFuture.runAsync(runnable, ASYNC_POOL);
+    }
+
+    /**
+     * 异步执行一个没有返回值的任务
+     * 默认异常处理
+     */
+    public static CompletableFuture<Void> runAsyncComplete(Runnable runnable) {
+        return runAsync(runnable).whenComplete((result, throwable) -> {
+            if (throwable != null) {
+                exceptionHandle(Thread.currentThread(), throwable);
+            }
+        });
     }
 }

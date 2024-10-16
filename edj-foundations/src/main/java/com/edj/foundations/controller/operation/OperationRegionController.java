@@ -4,7 +4,9 @@ import com.edj.foundations.domain.dto.RegionAddDTO;
 import com.edj.foundations.domain.dto.RegionUpdateDTO;
 import com.edj.foundations.service.EdjRegionService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -43,5 +45,15 @@ public class OperationRegionController {
     @PreAuthorize("hasAuthority('foundations:region:update')")
     public void update(@RequestBody @Validated RegionUpdateDTO regionUpdateDTO) {
         regionService.update(regionUpdateDTO);
+    }
+
+    /**
+     * 删除区域
+     */
+    @DeleteMapping("{id}")
+    @Operation(summary = "删除区域")
+    @PreAuthorize("hasAuthority('foundations:region:delete')")
+    public void delete(@PathVariable("id") @Positive @Schema(description = "区域id") Long id) {
+        regionService.deleteById(id);
     }
 }

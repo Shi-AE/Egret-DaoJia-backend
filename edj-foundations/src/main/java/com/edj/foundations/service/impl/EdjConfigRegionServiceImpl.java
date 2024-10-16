@@ -42,4 +42,10 @@ public class EdjConfigRegionServiceImpl extends MPJBaseServiceImpl<EdjConfigRegi
                 .build();
         baseMapper.insert(configRegion);
     }
+
+    @Override
+    @Transactional
+    public void delete(Long id) {
+        baseMapper.deleteById(id);
+    }
 }

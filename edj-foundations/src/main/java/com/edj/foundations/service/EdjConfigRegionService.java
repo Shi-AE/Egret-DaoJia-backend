@@ -15,4 +15,9 @@ public interface EdjConfigRegionService extends MPJBaseService<EdjConfigRegion> 
      * 初始化区域配置
      */
     void init(Long id, Integer edjCityId);
+
+    /**
+     * 删除区域配置
+     */
+    void delete(Long id);
 }
