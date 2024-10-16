@@ -30,7 +30,7 @@ import java.util.List;
 @Validated
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("operation/server/type")
+@RequestMapping("operation/serve/type")
 @Tag(name = "运营端 - 服务类型相关接口")
 public class OperationServeTypeController {
 
