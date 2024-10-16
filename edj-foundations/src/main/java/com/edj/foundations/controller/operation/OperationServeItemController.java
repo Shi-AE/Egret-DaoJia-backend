@@ -36,7 +36,7 @@ public class OperationServeItemController {
     @PostMapping
     @Operation(summary = "新增服务项")
     @PreAuthorize("hasAuthority('foundations:serveItem:add')")
-    public void add(@RequestBody ServeItemAddDTO serveItemAddDTO) {
+    public void add(@RequestBody @Validated ServeItemAddDTO serveItemAddDTO) {
         serveItemService.add(serveItemAddDTO);
     }
 
@@ -46,7 +46,7 @@ public class OperationServeItemController {
     @PutMapping
     @Operation(summary = "修改服务项")
     @PreAuthorize("hasAuthority('foundations:serveItem:update')")
-    public void update(@RequestBody ServeItemUpdateDTO serveItemUpdateDTO) {
+    public void update(@RequestBody @Validated ServeItemUpdateDTO serveItemUpdateDTO) {
         serveItemService.update(serveItemUpdateDTO);
     }
 
@@ -86,7 +86,7 @@ public class OperationServeItemController {
     @PostMapping("page")
     @Operation(summary = "分页查询服务项")
     @PreAuthorize("hasAuthority('foundations:serveItem:page')")
-    public PageResult<ServeItemVO> page(@RequestBody ServeItemPageDTO serveItemPageDTO) {
+    public PageResult<ServeItemVO> page(@RequestBody @Validated ServeItemPageDTO serveItemPageDTO) {
         return serveItemService.page(serveItemPageDTO);
     }
 

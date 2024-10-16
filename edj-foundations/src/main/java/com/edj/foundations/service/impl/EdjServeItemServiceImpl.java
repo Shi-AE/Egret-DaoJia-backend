@@ -76,7 +76,7 @@ public class EdjServeItemServiceImpl extends MPJBaseServiceImpl<EdjServeItemMapp
 
         // 插入
         EdjServeItem serveItem = BeanUtils.toBean(serveItemAddDTO, EdjServeItem.class);
-        serveItem.setCode(IdUtils.toCode(serveItem.getId()));
+        serveItem.setCode(IdUtils.toCode(snowflake.nextId()));
         baseMapper.insert(serveItem);
     }
 
@@ -104,7 +104,10 @@ public class EdjServeItemServiceImpl extends MPJBaseServiceImpl<EdjServeItemMapp
     @Transactional
     public void activate(Long id) {
         // 查询服务项状态
-        EdjServeItem serveItem = baseMapper.selectById(id);
+        LambdaQueryWrapper<EdjServeItem> serveItemLambdaQueryWrapper = new LambdaQueryWrapper<EdjServeItem>()
+                .select(EdjServeItem::getActiveStatus, EdjServeItem::getEdjServeTypeId)
+                .eq(EdjServeItem::getId, id);
+        EdjServeItem serveItem = baseMapper.selectOne(serveItemLambdaQueryWrapper);
 
         // 检查不存在
         if (ObjectUtils.isNull(serveItem)) {
@@ -119,7 +122,10 @@ public class EdjServeItemServiceImpl extends MPJBaseServiceImpl<EdjServeItemMapp
 
         // 检查服务类型
         Long edjServeTypeId = serveItem.getEdjServeTypeId();
-        EdjServeType serveType = serveTypeMapper.selectById(edjServeTypeId);
+        LambdaQueryWrapper<EdjServeType> serveTypeLambdaQueryWrapper = new LambdaQueryWrapper<EdjServeType>()
+                .select(EdjServeType::getActiveStatus)
+                .eq(EdjServeType::getId, edjServeTypeId);
+        EdjServeType serveType = serveTypeMapper.selectOne(serveTypeLambdaQueryWrapper);
 
         // 检查不存在
         if (ObjectUtils.isNull(serveType)) {
@@ -148,7 +154,10 @@ public class EdjServeItemServiceImpl extends MPJBaseServiceImpl<EdjServeItemMapp
     @Transactional
     public void deactivate(Long id) {
         // 查询服务项状态
-        EdjServeItem serveItem = baseMapper.selectById(id);
+        LambdaQueryWrapper<EdjServeItem> serveItemLambdaQueryWrapper = new LambdaQueryWrapper<EdjServeItem>()
+                .select(EdjServeItem::getActiveStatus)
+                .eq(EdjServeItem::getId, id);
+        EdjServeItem serveItem = baseMapper.selectOne(serveItemLambdaQueryWrapper);
 
         // 检查不存在
         if (ObjectUtils.isNull(serveItem)) {
@@ -199,10 +208,10 @@ public class EdjServeItemServiceImpl extends MPJBaseServiceImpl<EdjServeItemMapp
         Page<ServeItemVO> page = PageUtils.parsePageQuery(serveItemPageDTO);
         MPJLambdaWrapper<EdjServeItem> queryWrapper = new MPJLambdaWrapper<EdjServeItem>()
                 .selectAll(EdjServeItem.class)
-                .selectAs(EdjServeType::getName, ServeItemVO::getEdjServeTypeId)
+                .selectAs(EdjServeType::getName, ServeItemVO::getServeTypeName)
                 .innerJoin(EdjServeType.class, EdjServeType::getId, EdjServeItem::getEdjServeTypeId)
-                .eq(StringUtils.isNotBlank(name), EdjServeType::getName, name)
-                .eq(ObjectUtils.isNotNull(activeStatus), EdjServeType::getActiveStatus, activeStatus)
+                .eq(StringUtils.isNotBlank(name), EdjServeItem::getName, name)
+                .eq(ObjectUtils.isNotNull(activeStatus), EdjServeItem::getActiveStatus, activeStatus)
                 .eq(ObjectUtils.isNotNull(serveTypeId), EdjServeType::getId, serveTypeId);
 
         Page<ServeItemVO> serveItemPageVOPage = baseMapper.selectJoinPage(page, ServeItemVO.class, queryWrapper);
@@ -214,7 +223,7 @@ public class EdjServeItemServiceImpl extends MPJBaseServiceImpl<EdjServeItemMapp
     public ServeItemVO selectById(Long id) {
         MPJLambdaWrapper<EdjServeItem> queryWrapper = new MPJLambdaWrapper<EdjServeItem>()
                 .selectAll(EdjServeItem.class)
-                .selectAs(EdjServeType::getName, ServeItemVO::getEdjServeTypeId)
+                .selectAs(EdjServeType::getName, ServeItemVO::getServeTypeName)
                 .innerJoin(EdjServeType.class, EdjServeType::getId, EdjServeItem::getEdjServeTypeId)
                 .eq(EdjServeItem::getId, id);
 
