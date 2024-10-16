@@ -26,6 +26,10 @@ public class EnumsValidator implements ConstraintValidator<Enums, Integer> {
 
     @Override
     public boolean isValid(Integer target, ConstraintValidatorContext constraintValidatorContext) {
+        // 放行空数据
+        if (target == null) {
+            return true;
+        }
         Enum<?>[] enumConstants = value.getEnumConstants();
         return Arrays.stream(enumConstants).anyMatch(x -> EnumUtils.equals(x, target));
     }

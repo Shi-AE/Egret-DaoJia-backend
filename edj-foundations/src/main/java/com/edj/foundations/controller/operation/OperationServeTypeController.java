@@ -96,6 +96,9 @@ public class OperationServeTypeController {
         serveTypeService.update(serveTypeUpsertReqDTO);
     }
 
+    /**
+     * 根据活动状态查询服务类型 用于下拉选项
+     */
     @GetMapping("status")
     @Operation(summary = "根据活动状态查询服务类型")
     @PreAuthorize("hasAuthority('foundations:serverType:status')")
