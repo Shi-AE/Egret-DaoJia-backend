@@ -59,7 +59,6 @@ public class ServeItemAddDTO {
      * 服务描述
      */
     @Schema(description = "服务描述")
-    @NotBlank(message = "服务描述不能为空")
     private String description;
 
     /**
