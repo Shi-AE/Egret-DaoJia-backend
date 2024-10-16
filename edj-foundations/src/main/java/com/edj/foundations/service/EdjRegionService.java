@@ -1,6 +1,7 @@
 package com.edj.foundations.service;
 
 import com.edj.foundations.domain.dto.RegionAddDTO;
+import com.edj.foundations.domain.dto.RegionUpdateDTO;
 import com.edj.foundations.domain.entity.EdjRegion;
 import com.github.yulichang.base.MPJBaseService;
 
@@ -16,4 +17,9 @@ public interface EdjRegionService extends MPJBaseService<EdjRegion> {
      * 新增区域
      */
     void add(RegionAddDTO regionAddDTO);
+
+    /**
+     * 修改区域
+     */
+    void update(RegionUpdateDTO regionUpdateDTO);
 }

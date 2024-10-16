@@ -5,6 +5,7 @@ import com.edj.common.expcetions.BadRequestException;
 import com.edj.common.utils.BeanUtils;
 import com.edj.common.utils.ObjectUtils;
 import com.edj.foundations.domain.dto.RegionAddDTO;
+import com.edj.foundations.domain.dto.RegionUpdateDTO;
 import com.edj.foundations.domain.entity.EdjCity;
 import com.edj.foundations.domain.entity.EdjRegion;
 import com.edj.foundations.mapper.EdjCityMapper;
@@ -63,5 +64,12 @@ public class EdjRegionServiceImpl extends MPJBaseServiceImpl<EdjRegionMapper, Ed
         // 初始化区域配置
         Long id = region.getId();
         configRegionService.init(id, edjCityId);
+    }
+
+    @Override
+    @Transactional
+    public void update(RegionUpdateDTO regionUpdateDTO) {
+        EdjRegion region = BeanUtils.toBean(regionUpdateDTO, EdjRegion.class);
+        baseMapper.updateById(region);
     }
 }
