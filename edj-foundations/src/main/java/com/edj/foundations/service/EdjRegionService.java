@@ -1,8 +1,11 @@
 package com.edj.foundations.service;
 
+import com.edj.common.domain.PageResult;
 import com.edj.foundations.domain.dto.RegionAddDTO;
+import com.edj.foundations.domain.dto.RegionPageDTO;
 import com.edj.foundations.domain.dto.RegionUpdateDTO;
 import com.edj.foundations.domain.entity.EdjRegion;
+import com.edj.foundations.domain.vo.RegionVO;
 import com.github.yulichang.base.MPJBaseService;
 
 /**
@@ -27,4 +30,9 @@ public interface EdjRegionService extends MPJBaseService<EdjRegion> {
      * 删除区域
      */
     void deleteById(Long id);
+
+    /**
+     * 区域分页查询
+     */
+    PageResult<RegionVO> page(RegionPageDTO regionPageDTO);
 }

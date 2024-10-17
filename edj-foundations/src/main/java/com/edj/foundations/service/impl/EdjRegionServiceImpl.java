@@ -1,20 +1,25 @@
 package com.edj.foundations.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.edj.common.domain.PageResult;
 import com.edj.common.expcetions.BadRequestException;
 import com.edj.common.utils.AsyncUtils;
 import com.edj.common.utils.BeanUtils;
 import com.edj.common.utils.EnumUtils;
 import com.edj.common.utils.ObjectUtils;
 import com.edj.foundations.domain.dto.RegionAddDTO;
+import com.edj.foundations.domain.dto.RegionPageDTO;
 import com.edj.foundations.domain.dto.RegionUpdateDTO;
 import com.edj.foundations.domain.entity.EdjCity;
 import com.edj.foundations.domain.entity.EdjRegion;
+import com.edj.foundations.domain.vo.RegionVO;
 import com.edj.foundations.enums.EdjRegionActiveStatus;
 import com.edj.foundations.mapper.EdjCityMapper;
 import com.edj.foundations.mapper.EdjRegionMapper;
 import com.edj.foundations.service.EdjConfigRegionService;
 import com.edj.foundations.service.EdjRegionService;
+import com.edj.mysql.utils.PageUtils;
 import com.github.yulichang.base.MPJBaseServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -99,5 +104,12 @@ public class EdjRegionServiceImpl extends MPJBaseServiceImpl<EdjRegionMapper, Ed
 
         // 异步移除区域配置
         AsyncUtils.runAsyncComplete(() -> configRegionService.delete(id));
+    }
+
+    @Override
+    public PageResult<RegionVO> page(RegionPageDTO regionPageDTO) {
+        Page<EdjRegion> page = PageUtils.parsePageQuery(regionPageDTO);
+        Page<EdjRegion> serveTypePage = baseMapper.selectPage(page, null);
+        return PageUtils.toPage(serveTypePage, RegionVO.class);
     }
 }

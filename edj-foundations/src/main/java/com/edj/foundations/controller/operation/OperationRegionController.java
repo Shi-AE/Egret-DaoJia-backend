@@ -1,7 +1,10 @@
 package com.edj.foundations.controller.operation;
 
+import com.edj.common.domain.PageResult;
 import com.edj.foundations.domain.dto.RegionAddDTO;
+import com.edj.foundations.domain.dto.RegionPageDTO;
 import com.edj.foundations.domain.dto.RegionUpdateDTO;
+import com.edj.foundations.domain.vo.RegionVO;
 import com.edj.foundations.service.EdjRegionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -55,5 +58,14 @@ public class OperationRegionController {
     @PreAuthorize("hasAuthority('foundations:region:delete')")
     public void delete(@PathVariable("id") @Positive @Schema(description = "区域id") Long id) {
         regionService.deleteById(id);
+    }
+
+    /**
+     * 区域分页查询
+     */
+    @GetMapping("page")
+    @Operation(summary = "区域分页查询")
+    public PageResult<RegionVO> page(RegionPageDTO regionPageDTO) {
+        return regionService.page(regionPageDTO);
     }
 }
