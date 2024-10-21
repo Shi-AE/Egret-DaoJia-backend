@@ -1,9 +1,11 @@
 package com.edj.foundations.controller.operation;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.edj.common.domain.PageResult;
 import com.edj.foundations.domain.dto.RegionAddDTO;
 import com.edj.foundations.domain.dto.RegionPageDTO;
 import com.edj.foundations.domain.dto.RegionUpdateDTO;
+import com.edj.foundations.domain.entity.EdjRegion;
 import com.edj.foundations.domain.vo.RegionVO;
 import com.edj.foundations.service.EdjRegionService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -65,7 +67,19 @@ public class OperationRegionController {
      */
     @GetMapping("page")
     @Operation(summary = "区域分页查询")
+    @PreAuthorize("hasAuthority('foundations:region:page')")
     public PageResult<RegionVO> page(RegionPageDTO regionPageDTO) {
         return regionService.page(regionPageDTO);
+    }
+
+    /**
+     * 根据id查询
+     */
+    @GetMapping("{id}")
+    @Operation(summary = "根据id查询")
+    @PreAuthorize("hasAuthority('foundations:region:findById')")
+    public RegionVO findById(@PathVariable("id") @Positive @Schema(description = "区域id") Long id) {
+        EdjRegion region = regionService.getById(id);
+        return BeanUtil.toBean(region, RegionVO.class);
     }
 }
