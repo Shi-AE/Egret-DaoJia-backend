@@ -30,7 +30,9 @@ public class TempTest {
                         Pair.of("根据id查询区域", "foundations:region:findById"),
                         Pair.of("启用区域", "foundations:region:activate"),
                         Pair.of("禁用区域", "foundations:region:deactivate")
-                ).parallelStream()
+                )
+                .parallelStream()
+                .unordered()
                 .forEach(x -> {
                     EdjAuthority edjAuthority = EdjAuthority
                             .builder()
