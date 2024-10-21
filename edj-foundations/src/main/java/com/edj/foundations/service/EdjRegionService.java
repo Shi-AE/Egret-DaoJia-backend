@@ -40,4 +40,9 @@ public interface EdjRegionService extends MPJBaseService<EdjRegion> {
      * 启用区域
      */
     void active(Long id);
+
+    /**
+     * 禁用区域
+     */
+    void deactivate(Long id);
 }

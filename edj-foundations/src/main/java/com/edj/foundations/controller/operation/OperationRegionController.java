@@ -88,7 +88,18 @@ public class OperationRegionController {
      */
     @PutMapping("activate/{id}")
     @Operation(summary = "启用区域")
+    @PreAuthorize("hasAuthority('foundations:region:activate')")
     public void activate(@PathVariable("id") @Positive @Schema(description = "区域id") Long id) {
         regionService.active(id);
+    }
+
+    /**
+     * 禁用区域
+     */
+    @PutMapping("deactivate/{id}")
+    @Operation(summary = "禁用区域")
+    @PreAuthorize("hasAuthority('foundations:region:deactivate')")
+    public void deactivate(@PathVariable("id") @Positive @Schema(description = "区域id") Long id) {
+        regionService.deactivate(id);
     }
 }
