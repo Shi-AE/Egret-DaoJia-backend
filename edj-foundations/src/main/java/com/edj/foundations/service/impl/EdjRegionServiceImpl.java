@@ -15,6 +15,7 @@ import com.edj.foundations.domain.dto.RegionUpdateDTO;
 import com.edj.foundations.domain.entity.EdjCity;
 import com.edj.foundations.domain.entity.EdjRegion;
 import com.edj.foundations.domain.vo.RegionVO;
+import com.edj.foundations.enums.EdjCityType;
 import com.edj.foundations.enums.EdjRegionActiveStatus;
 import com.edj.foundations.mapper.EdjCityMapper;
 import com.edj.foundations.mapper.EdjRegionMapper;
@@ -56,7 +57,8 @@ public class EdjRegionServiceImpl extends MPJBaseServiceImpl<EdjRegionMapper, Ed
         // 检查城市
         LambdaQueryWrapper<EdjCity> cityLambdaQueryWrapper = new LambdaQueryWrapper<EdjCity>()
                 .select(EdjCity::getSortNum)
-                .eq(EdjCity::getId, edjCityId);
+                .eq(EdjCity::getId, edjCityId)
+                .eq(EdjCity::getType, EdjCityType.CITY);
         EdjCity city = cityMapper.selectOne(cityLambdaQueryWrapper);
         // 检查存在
         if (ObjectUtils.isNull(city)) {
