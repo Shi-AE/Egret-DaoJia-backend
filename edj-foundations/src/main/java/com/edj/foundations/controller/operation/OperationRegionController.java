@@ -73,10 +73,10 @@ public class OperationRegionController {
     }
 
     /**
-     * 根据id查询
+     * 根据id查询区域
      */
     @GetMapping("{id}")
-    @Operation(summary = "根据id查询")
+    @Operation(summary = "根据id查询区域")
     @PreAuthorize("hasAuthority('foundations:region:findById')")
     public RegionVO findById(@PathVariable("id") @Positive @Schema(description = "区域id") Long id) {
         EdjRegion region = regionService.getById(id);
