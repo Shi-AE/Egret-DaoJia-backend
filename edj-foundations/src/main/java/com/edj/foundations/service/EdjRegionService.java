@@ -35,4 +35,9 @@ public interface EdjRegionService extends MPJBaseService<EdjRegion> {
      * 区域分页查询
      */
     PageResult<RegionVO> page(RegionPageDTO regionPageDTO);
+
+    /**
+     * 启用区域
+     */
+    void active(Long id);
 }

@@ -1,6 +1,7 @@
 package com.edj.foundations.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.edj.common.domain.PageResult;
 import com.edj.common.expcetions.BadRequestException;
@@ -111,5 +112,35 @@ public class EdjRegionServiceImpl extends MPJBaseServiceImpl<EdjRegionMapper, Ed
         Page<EdjRegion> page = PageUtils.parsePageQuery(regionPageDTO);
         Page<EdjRegion> serveTypePage = baseMapper.selectPage(page, null);
         return PageUtils.toPage(serveTypePage, RegionVO.class);
+    }
+
+    @Override
+    public void active(Long id) {
+        // 检查区域
+        LambdaQueryWrapper<EdjRegion> checkWrapper = new LambdaQueryWrapper<EdjRegion>()
+                .select(EdjRegion::getActiveStatus)
+                .eq(EdjRegion::getId, id);
+        EdjRegion edjRegion = baseMapper.selectOne(checkWrapper);
+
+        // 检查存在
+        if (ObjectUtils.isNull(edjRegion)) {
+            throw new BadRequestException("区域不存在");
+        }
+
+        // 检查启用
+        Integer activeStatus = edjRegion.getActiveStatus();
+        if (EnumUtils.equals(EdjRegionActiveStatus.ENABLED, activeStatus)) {
+            throw new BadRequestException("区域已启用");
+        }
+
+        // todo 如果需要启用区域，需要校验该区域下是否有上架的服务
+
+        // 更新状态
+        LambdaUpdateWrapper<EdjRegion> updateWrapper = new LambdaUpdateWrapper<EdjRegion>()
+                .eq(EdjRegion::getId, id)
+                .set(EdjRegion::getActiveStatus, EdjRegionActiveStatus.ENABLED);
+        baseMapper.update(new EdjRegion(), updateWrapper);
+
+        // todo 如果是启用操作，刷新缓存：启用区域列表、首页图标、热门服务、服务类型
     }
 }

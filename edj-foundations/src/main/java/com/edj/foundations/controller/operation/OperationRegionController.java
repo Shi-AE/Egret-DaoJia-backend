@@ -82,4 +82,13 @@ public class OperationRegionController {
         EdjRegion region = regionService.getById(id);
         return BeanUtil.toBean(region, RegionVO.class);
     }
+
+    /**
+     * 启用区域
+     */
+    @PutMapping("activate/{id}")
+    @Operation(summary = "启用区域")
+    public void activate(@PathVariable("id") @Positive @Schema(description = "区域id") Long id) {
+        regionService.active(id);
+    }
 }
