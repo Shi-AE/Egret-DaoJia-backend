@@ -56,20 +56,24 @@ public class EdjRegionServiceImpl extends MPJBaseServiceImpl<EdjRegionMapper, Ed
 
         // 检查城市
         LambdaQueryWrapper<EdjCity> cityLambdaQueryWrapper = new LambdaQueryWrapper<EdjCity>()
-                .select(EdjCity::getSortNum)
+                .select(EdjCity::getSortNum, EdjCity::getName)
                 .eq(EdjCity::getId, edjCityId)
                 .eq(EdjCity::getType, EdjCityType.CITY);
         EdjCity city = cityMapper.selectOne(cityLambdaQueryWrapper);
         // 检查存在
         if (ObjectUtils.isNull(city)) {
-            throw new BadRequestException("城市不存在");
+            throw new BadRequestException("城市不存在或者选项为省份");
         }
         // 获取城市排序位
         Integer sortNum = city.getSortNum();
 
+        // 获取城市名称
+        String name = city.getName();
+
         // 新增区域
         EdjRegion region = BeanUtils.toBean(regionAddDTO, EdjRegion.class);
         region.setSortNum(sortNum);
+        region.setName(name);
         baseMapper.insert(region);
 
         // 初始化区域配置
