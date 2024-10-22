@@ -68,7 +68,7 @@ public class OperationRegionController {
     @PostMapping("page")
     @Operation(summary = "区域分页查询")
     @PreAuthorize("hasAuthority('foundations:region:page')")
-    public PageResult<RegionVO> page(RegionPageDTO regionPageDTO) {
+    public PageResult<RegionVO> page(@RequestBody @Validated RegionPageDTO regionPageDTO) {
         return regionService.page(regionPageDTO);
     }
 
