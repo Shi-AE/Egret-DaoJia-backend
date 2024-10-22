@@ -7,12 +7,15 @@ import com.edj.foundations.enums.EdjCityType;
 import com.edj.foundations.mapper.EdjCityMapper;
 import com.edj.foundations.service.EdjCityService;
 import com.github.yulichang.base.MPJBaseServiceImpl;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static com.edj.cache.constants.CacheConstants.CacheName.CITY_CACHE;
 
 /**
  * 针对表【edj_city(城市字典)】的数据库操作Service实现
@@ -22,7 +25,9 @@ import java.util.stream.Collectors;
  */
 @Service
 public class EdjCityServiceImpl extends MPJBaseServiceImpl<EdjCityMapper, EdjCity> implements EdjCityService {
+
     @Override
+    @Cacheable(cacheNames = CITY_CACHE)
     public List<ProvinceStructVO> getStruct() {
         // 根据排序查询省列表
         LambdaQueryWrapper<EdjCity> pw = new LambdaQueryWrapper<EdjCity>()

@@ -3,8 +3,10 @@ package com.edj.foundations;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.cache.annotation.EnableCaching;
 
 @Slf4j
+@EnableCaching
 @SpringBootApplication
 public class FoundationsApplication {
 
