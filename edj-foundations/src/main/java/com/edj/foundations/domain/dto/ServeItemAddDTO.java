@@ -30,6 +30,7 @@ public class ServeItemAddDTO {
      * 服务名称
      */
     @Schema(description = "服务名称")
+    @Size(min = 2, max = 5, message = "服务名称格式错误，请输入2-5个字符，请重新输入服务名称")
     @NotBlank(message = "服务名称不能为空")
     private String name;
 
