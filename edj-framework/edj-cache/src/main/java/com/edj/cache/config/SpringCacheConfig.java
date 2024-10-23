@@ -1,6 +1,7 @@
 package com.edj.cache.config;
 
 import com.edj.redis.config.FastJson2JsonRedisSerializer;
+import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -63,9 +64,10 @@ public class SpringCacheConfig {
      * @return redis缓存管理器
      */
     @Bean
-    public RedisCacheManager cacheManager30Minutes(RedisConnectionFactory connectionFactory) {
+    public CacheManager cacheManager30Minutes(RedisConnectionFactory connectionFactory) {
         int randomNum = new Random().nextInt(100);
         RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
+                .computePrefixWith(cacheName -> cacheName + ":")
                 .entryTtl(Duration.ofSeconds(30 * 60L + randomNum))
                 .serializeValuesWith(
                         RedisSerializationContext.SerializationPair.fromSerializer(
@@ -86,10 +88,11 @@ public class SpringCacheConfig {
      * @return redis缓存管理器
      */
     @Bean
-    public RedisCacheManager cacheManagerOneDay(RedisConnectionFactory connectionFactory) {
+    public CacheManager cacheManagerOneDay(RedisConnectionFactory connectionFactory) {
         //生成随机数
         int randomNum = new Random().nextInt(6000);
         RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
+                .computePrefixWith(cacheName -> cacheName + ":")
                 //过期时间为基础时间加随机数
                 .entryTtl(Duration.ofSeconds(24 * 60 * 60L + randomNum))
                 .serializeValuesWith(
@@ -112,8 +115,9 @@ public class SpringCacheConfig {
      */
     @Bean
     @Primary
-    public RedisCacheManager cacheManagerForever(RedisConnectionFactory connectionFactory) {
+    public CacheManager cacheManagerForever(RedisConnectionFactory connectionFactory) {
         RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
+                .computePrefixWith(cacheName -> cacheName + ":")
                 .serializeValuesWith(
                         RedisSerializationContext.SerializationPair.fromSerializer(
                                 new FastJson2JsonRedisSerializer<>(Object.class)

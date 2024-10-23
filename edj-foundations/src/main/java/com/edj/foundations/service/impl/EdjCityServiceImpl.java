@@ -27,7 +27,7 @@ import static com.edj.cache.constants.CacheConstants.CacheName.CITY_CACHE;
 public class EdjCityServiceImpl extends MPJBaseServiceImpl<EdjCityMapper, EdjCity> implements EdjCityService {
 
     @Override
-    @Cacheable(cacheNames = CITY_CACHE)
+    @Cacheable(cacheNames = CITY_CACHE, key = "'CityStruct'")
     public List<ProvinceStructVO> getStruct() {
         // 根据排序查询省列表
         LambdaQueryWrapper<EdjCity> pw = new LambdaQueryWrapper<EdjCity>()
