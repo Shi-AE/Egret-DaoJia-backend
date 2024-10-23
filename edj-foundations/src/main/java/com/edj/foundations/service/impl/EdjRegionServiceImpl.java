@@ -121,6 +121,7 @@ public class EdjRegionServiceImpl extends MPJBaseServiceImpl<EdjRegionMapper, Ed
     }
 
     @Override
+    @Transactional
     public void active(Long id) {
         // 检查区域
         LambdaQueryWrapper<EdjRegion> checkWrapper = new LambdaQueryWrapper<EdjRegion>()
@@ -151,6 +152,7 @@ public class EdjRegionServiceImpl extends MPJBaseServiceImpl<EdjRegionMapper, Ed
     }
 
     @Override
+    @Transactional
     public void deactivate(Long id) {
         // 检查区域
         LambdaQueryWrapper<EdjRegion> checkWrapper = new LambdaQueryWrapper<EdjRegion>()
