@@ -36,7 +36,7 @@ public class ServeItemPageDTO extends PageQueryDTO {
      */
     @Schema(description = "服务类型id", requiredMode = NOT_REQUIRED)
     @Positive(message = "服务类型错误")
-    private Long serveTypeId;
+    private Long edjServeTypeId;
 
     /**
      * 活动状态（0草稿 1禁用 2启用）

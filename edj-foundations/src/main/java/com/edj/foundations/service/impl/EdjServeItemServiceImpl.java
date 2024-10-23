@@ -203,7 +203,7 @@ public class EdjServeItemServiceImpl extends MPJBaseServiceImpl<EdjServeItemMapp
 
         String name = serveItemPageDTO.getName();
         Integer activeStatus = serveItemPageDTO.getActiveStatus();
-        Long serveTypeId = serveItemPageDTO.getServeTypeId();
+        Long edjServeTypeId = serveItemPageDTO.getEdjServeTypeId();
 
         Page<ServeItemVO> page = PageUtils.parsePageQuery(serveItemPageDTO);
         MPJLambdaWrapper<EdjServeItem> queryWrapper = new MPJLambdaWrapper<EdjServeItem>()
@@ -212,7 +212,7 @@ public class EdjServeItemServiceImpl extends MPJBaseServiceImpl<EdjServeItemMapp
                 .innerJoin(EdjServeType.class, EdjServeType::getId, EdjServeItem::getEdjServeTypeId)
                 .eq(StringUtils.isNotBlank(name), EdjServeItem::getName, name)
                 .eq(ObjectUtils.isNotNull(activeStatus), EdjServeItem::getActiveStatus, activeStatus)
-                .eq(ObjectUtils.isNotNull(serveTypeId), EdjServeType::getId, serveTypeId);
+                .eq(ObjectUtils.isNotNull(edjServeTypeId), EdjServeType::getId, edjServeTypeId);
 
         Page<ServeItemVO> serveItemPageVOPage = baseMapper.selectJoinPage(page, ServeItemVO.class, queryWrapper);
         return new PageResult<>((int) serveItemPageVOPage.getPages(), serveItemPageVOPage.getTotal(),
