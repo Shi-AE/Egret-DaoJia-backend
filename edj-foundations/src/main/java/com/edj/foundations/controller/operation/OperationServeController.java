@@ -7,18 +7,19 @@ import com.edj.foundations.domain.dto.ServePageDTO;
 import com.edj.foundations.domain.vo.ServeVO;
 import com.edj.foundations.service.EdjServeService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -54,5 +55,18 @@ public class OperationServeController {
     @PreAuthorize("permitAll()")
     public PageResult<ServeVO> page(@RequestBody @Validated ServePageDTO servePageDTO) {
         return serveService.page(servePageDTO);
+    }
+
+    /**
+     * 区域服务价格修改
+     */
+    @PutMapping("{id}")
+    @Operation(summary = "区域服务价格修改")
+    @PreAuthorize("permitAll()")
+    public void update(
+            @Schema(description = "区域服务id") @NotNull(message = "id不能为空") @Positive @PathVariable Long id,
+            @Schema(description = "价格") @NotNull(message = "价格不能为空") @Digits(integer = 8, fraction = 2) @RequestParam BigDecimal price
+    ) {
+        serveService.update(id, price);
     }
 }

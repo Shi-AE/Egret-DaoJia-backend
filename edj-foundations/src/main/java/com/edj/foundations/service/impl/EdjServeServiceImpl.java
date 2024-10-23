@@ -1,6 +1,7 @@
 package com.edj.foundations.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.edj.common.domain.PageResult;
 import com.edj.common.expcetions.BadRequestException;
@@ -25,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -135,5 +137,15 @@ public class EdjServeServiceImpl extends MPJBaseServiceImpl<EdjServeMapper, EdjS
         Page<ServeVO> serveVOPage = baseMapper.selectJoinPage(page, ServeVO.class, wrapper);
         return new PageResult<>((int) serveVOPage.getPages(), serveVOPage.getTotal(),
                 serveVOPage.getRecords());
+    }
+
+    @Override
+    @Transactional
+    public void update(Long id, BigDecimal price) {
+        System.out.println(price);
+        LambdaUpdateWrapper<EdjServe> wrapper = new LambdaUpdateWrapper<EdjServe>()
+                .eq(EdjServe::getId, id)
+                .set(EdjServe::getPrice, price);
+        baseMapper.update(new EdjServe(), wrapper);
     }
 }

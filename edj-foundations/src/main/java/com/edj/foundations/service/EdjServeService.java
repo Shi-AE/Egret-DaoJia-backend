@@ -7,6 +7,7 @@ import com.edj.foundations.domain.entity.EdjServe;
 import com.edj.foundations.domain.vo.ServeVO;
 import com.github.yulichang.base.MPJBaseService;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -26,4 +27,9 @@ public interface EdjServeService extends MPJBaseService<EdjServe> {
      * 区域服务分页查询
      */
     PageResult<ServeVO> page(ServePageDTO servePageDTO);
+
+    /**
+     * 区域服务价格修改
+     */
+    void update(Long id, BigDecimal price);
 }
