@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,7 +27,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("operation/serve")
-@Tag(name = "运营端 - 服务项相关接口")
+@Tag(name = "运营端 - 服务管理相关接口")
 public class OperationServeController {
 
     private final EdjServeService serveService;
@@ -36,6 +37,7 @@ public class OperationServeController {
      */
     @PostMapping
     @Operation(summary = "批量新增区域服务")
+    @PreAuthorize("permitAll()")
     public void add(@RequestBody @NotEmpty List<@Valid ServeAddDTO> serveAddDTOList) {
         serveService.add(serveAddDTOList);
     }

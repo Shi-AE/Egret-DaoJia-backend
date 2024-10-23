@@ -38,7 +38,7 @@ public class ServeAddDTO {
     @Schema(description = "服务项id")
     @NotNull(message = "服务项id不能为空")
     @Positive(message = "服务项id格式错误")
-    private Long ejdServeItemId;
+    private Long edjServeItemId;
 
     /**
      * 价格

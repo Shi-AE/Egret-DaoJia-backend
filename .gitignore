@@ -30,3 +30,4 @@ replay_pid*
 # project
 /src/
 **/target/
+/edj-api-script/临时测试数据.json

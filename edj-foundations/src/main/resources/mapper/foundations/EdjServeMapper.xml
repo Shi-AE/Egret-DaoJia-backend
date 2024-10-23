@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.edj.foundations.mapper.EdjServeMapper">
+    <select id="batchCheckRegionItem" resultType="java.lang.Long">
+        SELECT COUNT(id)
+        FROM edj_serve
+        WHERE is_delete=0 AND ((edj_region_id, edj_serve_item_id) IN
+        <foreach collection="serveAddDTOList" item="item" separator="," open="(" close=")">
+            (#{item.edjRegionId}, #{item.edjServeItemId})
+        </foreach>)
+    </select>
+</mapper>

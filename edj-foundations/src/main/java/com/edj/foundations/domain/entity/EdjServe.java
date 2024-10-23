@@ -28,7 +28,7 @@ public class EdjServe extends EjdBaseEntity {
     /**
      * 服务项id
      */
-    private Long ejdServeItemId;
+    private Long edjServeItemId;
 
     /**
      * 区域id
@@ -38,7 +38,7 @@ public class EdjServe extends EjdBaseEntity {
     /**
      * 城市id
      */
-    private Long edjCityId;
+    private Integer edjCityId;
 
     /**
      * 售卖状态（0草稿 1下架 2上架）
