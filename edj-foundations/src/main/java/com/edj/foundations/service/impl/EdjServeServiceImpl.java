@@ -1,19 +1,26 @@
 package com.edj.foundations.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.edj.common.domain.PageResult;
 import com.edj.common.expcetions.BadRequestException;
 import com.edj.common.utils.BeanUtils;
 import com.edj.common.utils.SqlUtils;
 import com.edj.foundations.domain.dto.ServeAddDTO;
+import com.edj.foundations.domain.dto.ServePageDTO;
 import com.edj.foundations.domain.entity.EdjRegion;
 import com.edj.foundations.domain.entity.EdjServe;
 import com.edj.foundations.domain.entity.EdjServeItem;
+import com.edj.foundations.domain.entity.EdjServeType;
+import com.edj.foundations.domain.vo.ServeVO;
 import com.edj.foundations.enums.EdjServeItemActiveStatus;
 import com.edj.foundations.mapper.EdjRegionMapper;
 import com.edj.foundations.mapper.EdjServeItemMapper;
 import com.edj.foundations.mapper.EdjServeMapper;
 import com.edj.foundations.service.EdjServeService;
+import com.edj.mysql.utils.PageUtils;
 import com.github.yulichang.base.MPJBaseServiceImpl;
+import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -112,5 +119,21 @@ public class EdjServeServiceImpl extends MPJBaseServiceImpl<EdjServeMapper, EdjS
                 })
                 .toList();
         SqlUtils.actionBatch(serveList, list -> list.forEach(serve -> baseMapper.insert(serve)));
+    }
+
+    @Override
+    public PageResult<ServeVO> page(ServePageDTO servePageDTO) {
+        Page<ServeVO> page = PageUtils.parsePageQuery(servePageDTO);
+        MPJLambdaWrapper<EdjServe> wrapper = new MPJLambdaWrapper<EdjServe>()
+                .selectAll(EdjServe.class)
+                .selectAs(EdjServeItem::getReferencePrice, ServeVO::getReferencePrice)
+                .selectAs(EdjServeItem::getName, ServeVO::getServeItemName)
+                .selectAs(EdjServeType::getName, ServeVO::getServeTypeName)
+                .innerJoin(EdjServeItem.class, EdjServeItem::getId, EdjServe::getEdjServeItemId)
+                .innerJoin(EdjServeType.class, EdjServeType::getId, EdjServeItem::getEdjServeTypeId)
+                .eq(EdjServe::getEdjRegionId, servePageDTO.getEdjRegionId());
+        Page<ServeVO> serveVOPage = baseMapper.selectJoinPage(page, ServeVO.class, wrapper);
+        return new PageResult<>((int) serveVOPage.getPages(), serveVOPage.getTotal(),
+                serveVOPage.getRecords());
     }
 }
