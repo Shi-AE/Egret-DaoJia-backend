@@ -24,7 +24,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 /**
- * 运营端 - 服务管理相关接口
+ * 运营端 - 区域服务管理相关接口
  *
  * @author A.E.
  * @date 2024/10/23
@@ -33,7 +33,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("operation/serve")
-@Tag(name = "运营端 - 服务管理相关接口")
+@Tag(name = "运营端 - 区域服务管理相关接口")
 public class OperationServeController {
 
     private final EdjServeService serveService;
@@ -43,7 +43,7 @@ public class OperationServeController {
      */
     @PostMapping
     @Operation(summary = "批量新增区域服务")
-    @PreAuthorize("permitAll()")
+    @PreAuthorize("hasAuthority('foundations:serve:add')")
     public void add(@RequestBody @NotEmpty List<@NotNull @Valid ServeAddDTO> serveAddDTOList) {
         serveService.add(serveAddDTOList);
     }
@@ -53,7 +53,7 @@ public class OperationServeController {
      */
     @PostMapping("page")
     @Operation(summary = "区域服务分页查询")
-    @PreAuthorize("permitAll()")
+    @PreAuthorize("hasAuthority('foundations:serve:page')")
     public PageResult<ServeVO> page(@RequestBody @Validated ServePageDTO servePageDTO) {
         return serveService.page(servePageDTO);
     }
@@ -63,7 +63,7 @@ public class OperationServeController {
      */
     @PutMapping("{id}")
     @Operation(summary = "区域服务价格修改")
-    @PreAuthorize("permitAll()")
+    @PreAuthorize("hasAuthority('foundations:serve:update')")
     public void update(
             @Schema(description = "区域服务id") @NotNull(message = "id不能为空") @Positive @PathVariable Long id,
             @Schema(description = "价格") @NotNull(message = "价格不能为空") @Digits(integer = 8, fraction = 2) @RequestParam BigDecimal price
@@ -76,7 +76,7 @@ public class OperationServeController {
      */
     @PutMapping("hot/on/{id}")
     @Operation(summary = "区域服务设置热门")
-    @PreAuthorize("permitAll()")
+    @PreAuthorize("hasAuthority('foundations:serve:onHot')")
     public void onHot(@Schema(description = "区域服务id") @NotNull(message = "id不能为空") @Positive @PathVariable Long id) {
         serveService.changeHotStatus(id, EdjServeIsHot.HOT);
     }
@@ -86,7 +86,7 @@ public class OperationServeController {
      */
     @PutMapping("hot/off/{id}")
     @Operation(summary = "区域服务取消热门")
-    @PreAuthorize("permitAll()")
+    @PreAuthorize("hasAuthority('foundations:serve:offHot')")
     public void offHot(@Schema(description = "区域服务id") @NotNull(message = "id不能为空") @Positive @PathVariable Long id) {
         serveService.changeHotStatus(id, EdjServeIsHot.NOT_HOT);
     }
@@ -96,7 +96,7 @@ public class OperationServeController {
      */
     @PutMapping("sale/on/{id}")
     @Operation(summary = "区域服务上架")
-    @PreAuthorize("permitAll()")
+    @PreAuthorize("hasAuthority('foundations:serve:onSale')")
     public void onSale(@Schema(description = "区域服务id") @NotNull(message = "id不能为空") @Positive @PathVariable Long id) {
         serveService.onSale(id);
     }
@@ -106,7 +106,7 @@ public class OperationServeController {
      */
     @PutMapping("sale/off/{id}")
     @Operation(summary = "区域服务下架")
-    @PreAuthorize("permitAll()")
+    @PreAuthorize("hasAuthority('foundations:serve:offSale')")
     public void offSale(@Schema(description = "区域服务id") @NotNull(message = "id不能为空") @Positive @PathVariable Long id) {
         serveService.offSale(id);
     }
@@ -116,7 +116,7 @@ public class OperationServeController {
      */
     @DeleteMapping("{id}")
     @Operation(summary = "区域服务删除")
-    @PreAuthorize("permitAll()")
+    @PreAuthorize("hasAuthority('foundations:serve:delete')")
     public void delete(@Schema(description = "区域服务id") @NotNull(message = "id不能为空") @Positive @PathVariable Long id) {
         serveService.deleteById(id);
     }

@@ -23,20 +23,21 @@ public class TempTest {
     @Test
     void addAuthority() {
         List.of(
-                        Pair.of("新增区域", "foundations:region:add"),
-                        Pair.of("修改区域", "foundations:region:update"),
-                        Pair.of("删除区域", "foundations:region:delete"),
-                        Pair.of("区域分页查询", "foundations:region:page"),
-                        Pair.of("根据id查询区域", "foundations:region:findById"),
-                        Pair.of("启用区域", "foundations:region:activate"),
-                        Pair.of("禁用区域", "foundations:region:deactivate")
+                        Pair.of("批量新增区域服务", "foundations:serve:add"),
+                        Pair.of("区域服务分页查询", "foundations:serve:page"),
+                        Pair.of("区域服务价格修改", "foundations:serve:update"),
+                        Pair.of("区域服务设置热门", "foundations:serve:onHot"),
+                        Pair.of("区域服务取消热门", "foundations:serve:offHot"),
+                        Pair.of("区域服务上架", "foundations:serve:onSale"),
+                        Pair.of("区域服务下架", "foundations:serve:offSale"),
+                        Pair.of("区域服务删除", "foundations:serve:delete")
                 )
                 .parallelStream()
                 .unordered()
                 .forEach(x -> {
                     EdjAuthority edjAuthority = EdjAuthority
                             .builder()
-                            .parentId(3168590889566208L)
+                            .parentId(4265771314790400L)
                             .name(x.getKey())
                             .permission(x.getValue())
                             .build();
