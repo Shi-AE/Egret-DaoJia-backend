@@ -74,9 +74,18 @@ public class OperationServeController {
     /**
      * 区域服务设置热门
      */
-    @PutMapping("hot/{id}")
+    @PutMapping("hot/on/{id}")
     @Operation(summary = "区域服务设置热门")
     public void onHot(@Schema(description = "区域服务id") @NotNull(message = "id不能为空") @Positive @PathVariable Long id) {
         serveService.changeHotStatus(id, EdjServeIsHot.HOT);
+    }
+
+    /**
+     * 区域服务取消热门
+     */
+    @PutMapping("hot/off/{id}")
+    @Operation(summary = "区域服务取消热门")
+    public void offHot(@Schema(description = "区域服务id") @NotNull(message = "id不能为空") @Positive @PathVariable Long id) {
+        serveService.changeHotStatus(id, EdjServeIsHot.NOT_HOT);
     }
 }
