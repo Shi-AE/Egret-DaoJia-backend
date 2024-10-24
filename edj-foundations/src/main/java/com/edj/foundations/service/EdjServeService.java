@@ -43,4 +43,9 @@ public interface EdjServeService extends MPJBaseService<EdjServe> {
      * 区域服务上架
      */
     void onSale(Long id);
+
+    /**
+     * 区域服务下架
+     */
+    void offSale(Long id);
 }

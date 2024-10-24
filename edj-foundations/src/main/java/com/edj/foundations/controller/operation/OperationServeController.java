@@ -100,4 +100,14 @@ public class OperationServeController {
     public void onSale(@Schema(description = "区域服务id") @NotNull(message = "id不能为空") @Positive @PathVariable Long id) {
         serveService.onSale(id);
     }
+
+    /**
+     * 区域服务下架
+     */
+    @PutMapping("sale/off/{id}")
+    @Operation(summary = "区域服务下架")
+    @PreAuthorize("permitAll()")
+    public void offSale(@Schema(description = "区域服务id") @NotNull(message = "id不能为空") @Positive @PathVariable Long id) {
+        serveService.offSale(id);
+    }
 }

@@ -217,4 +217,30 @@ public class EdjServeServiceImpl extends MPJBaseServiceImpl<EdjServeMapper, EdjS
                 .eq(EdjServe::getId, id);
         baseMapper.update(new EdjServe(), updateWrapper);
     }
+
+    @Override
+    public void offSale(Long id) {
+        // 检查服务
+        LambdaQueryWrapper<EdjServe> checkServer = new LambdaQueryWrapper<EdjServe>()
+                .select(EdjServe::getSaleStatus)
+                .eq(EdjServe::getId, id);
+        EdjServe serve = baseMapper.selectOne(checkServer);
+
+        // 检查存在
+        if (ObjectUtils.isNull(serve)) {
+            throw new BadRequestException("服务不存在");
+        }
+
+        // 检查服务状态
+        Integer saleStatus = serve.getSaleStatus();
+        if (EnumUtils.notEquals(EdjServeSaleStatus.PUBLISHED, saleStatus)) {
+            throw new BadRequestException("服务未上架");
+        }
+
+        // 跟新状态
+        LambdaUpdateWrapper<EdjServe> updateWrapper = new LambdaUpdateWrapper<EdjServe>()
+                .set(EdjServe::getSaleStatus, EdjServeSaleStatus.UNPUBLISHED)
+                .eq(EdjServe::getId, id);
+        baseMapper.update(new EdjServe(), updateWrapper);
+    }
 }
