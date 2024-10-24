@@ -5,6 +5,7 @@ import com.edj.foundations.domain.dto.ServeAddDTO;
 import com.edj.foundations.domain.dto.ServePageDTO;
 import com.edj.foundations.domain.entity.EdjServe;
 import com.edj.foundations.domain.vo.ServeVO;
+import com.edj.foundations.enums.EdjServeIsHot;
 import com.github.yulichang.base.MPJBaseService;
 
 import java.math.BigDecimal;
@@ -32,4 +33,9 @@ public interface EdjServeService extends MPJBaseService<EdjServe> {
      * 区域服务价格修改
      */
     void update(Long id, BigDecimal price);
+
+    /**
+     * 区域服务设置是否热门状态
+     */
+    void changeHotStatus(Long id, EdjServeIsHot edjServeIsHot);
 }

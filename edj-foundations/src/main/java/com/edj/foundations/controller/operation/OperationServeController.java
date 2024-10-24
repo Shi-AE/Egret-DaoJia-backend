@@ -5,6 +5,7 @@ import com.edj.common.domain.PageResult;
 import com.edj.foundations.domain.dto.ServeAddDTO;
 import com.edj.foundations.domain.dto.ServePageDTO;
 import com.edj.foundations.domain.vo.ServeVO;
+import com.edj.foundations.enums.EdjServeIsHot;
 import com.edj.foundations.service.EdjServeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -68,5 +69,14 @@ public class OperationServeController {
             @Schema(description = "价格") @NotNull(message = "价格不能为空") @Digits(integer = 8, fraction = 2) @RequestParam BigDecimal price
     ) {
         serveService.update(id, price);
+    }
+
+    /**
+     * 区域服务设置热门
+     */
+    @PutMapping("hot/{id}")
+    @Operation(summary = "区域服务设置热门")
+    public void onHot(@Schema(description = "区域服务id") @NotNull(message = "id不能为空") @Positive @PathVariable Long id) {
+        serveService.changeHotStatus(id, EdjServeIsHot.HOT);
     }
 }

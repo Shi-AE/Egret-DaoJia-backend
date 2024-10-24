@@ -14,6 +14,7 @@ import com.edj.foundations.domain.entity.EdjServe;
 import com.edj.foundations.domain.entity.EdjServeItem;
 import com.edj.foundations.domain.entity.EdjServeType;
 import com.edj.foundations.domain.vo.ServeVO;
+import com.edj.foundations.enums.EdjServeIsHot;
 import com.edj.foundations.enums.EdjServeItemActiveStatus;
 import com.edj.foundations.mapper.EdjRegionMapper;
 import com.edj.foundations.mapper.EdjServeItemMapper;
@@ -27,6 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -142,10 +144,19 @@ public class EdjServeServiceImpl extends MPJBaseServiceImpl<EdjServeMapper, EdjS
     @Override
     @Transactional
     public void update(Long id, BigDecimal price) {
-        System.out.println(price);
         LambdaUpdateWrapper<EdjServe> wrapper = new LambdaUpdateWrapper<EdjServe>()
                 .eq(EdjServe::getId, id)
                 .set(EdjServe::getPrice, price);
+        baseMapper.update(new EdjServe(), wrapper);
+    }
+
+    @Override
+    @Transactional
+    public void changeHotStatus(Long id, EdjServeIsHot edjServeIsHot) {
+        LambdaUpdateWrapper<EdjServe> wrapper = new LambdaUpdateWrapper<EdjServe>()
+                .eq(EdjServe::getId, id)
+                .set(EdjServe::getIsHot, edjServeIsHot)
+                .set(EdjServe::getHotTime, LocalDateTime.now());
         baseMapper.update(new EdjServe(), wrapper);
     }
 }
