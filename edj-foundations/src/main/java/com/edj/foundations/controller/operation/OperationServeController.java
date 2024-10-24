@@ -110,4 +110,14 @@ public class OperationServeController {
     public void offSale(@Schema(description = "区域服务id") @NotNull(message = "id不能为空") @Positive @PathVariable Long id) {
         serveService.offSale(id);
     }
+
+    /**
+     * 区域服务删除
+     */
+    @DeleteMapping("{id}")
+    @Operation(summary = "区域服务删除")
+    @PreAuthorize("permitAll()")
+    public void delete(@Schema(description = "区域服务id") @NotNull(message = "id不能为空") @Positive @PathVariable Long id) {
+        serveService.deleteById(id);
+    }
 }
