@@ -150,7 +150,10 @@ public class EdjServeServiceImpl extends MPJBaseServiceImpl<EdjServeMapper, EdjS
         LambdaUpdateWrapper<EdjServe> wrapper = new LambdaUpdateWrapper<EdjServe>()
                 .eq(EdjServe::getId, id)
                 .set(EdjServe::getPrice, price);
-        baseMapper.update(new EdjServe(), wrapper);
+        int update = baseMapper.update(new EdjServe(), wrapper);
+        if (update != 1) {
+            throw new BadRequestException("区域服务可能不存在");
+        }
     }
 
     @Override
