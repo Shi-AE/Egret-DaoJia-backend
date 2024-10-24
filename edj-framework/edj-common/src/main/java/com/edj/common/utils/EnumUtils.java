@@ -57,15 +57,15 @@ public class EnumUtils extends EnumUtil {
     /**
      * 判断是否与枚举值相等
      */
-    public static boolean equals(Enum<?> enumName, Object enumValue) {
+    public static boolean eq(Enum<?> enumName, Object enumValue) {
         return Objects.equals(value(enumName), enumValue);
     }
 
     /**
      * 判断是否与枚举值不等
      */
-    public static boolean notEquals(Enum<?> enumName, Object enumValue) {
-        return !equals(enumName, enumValue);
+    public static boolean ne(Enum<?> enumName, Object enumValue) {
+        return !eq(enumName, enumValue);
     }
 
     /**

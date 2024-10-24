@@ -103,7 +103,7 @@ public class EdjRegionServiceImpl extends MPJBaseServiceImpl<EdjRegionMapper, Ed
         }
         // 检查状态
         Integer activeStatus = region.getActiveStatus();
-        if (EnumUtils.notEquals(EdjRegionActiveStatus.DRAFTS, activeStatus)) {
+        if (EnumUtils.ne(EdjRegionActiveStatus.DRAFTS, activeStatus)) {
             throw new BadRequestException("草稿状态方可删除");
         }
 
@@ -136,7 +136,7 @@ public class EdjRegionServiceImpl extends MPJBaseServiceImpl<EdjRegionMapper, Ed
 
         // 检查启用
         Integer activeStatus = edjRegion.getActiveStatus();
-        if (EnumUtils.equals(EdjRegionActiveStatus.ENABLED, activeStatus)) {
+        if (EnumUtils.eq(EdjRegionActiveStatus.ENABLED, activeStatus)) {
             throw new BadRequestException("区域已启用");
         }
 
@@ -167,7 +167,7 @@ public class EdjRegionServiceImpl extends MPJBaseServiceImpl<EdjRegionMapper, Ed
 
         // 检查启用
         Integer activeStatus = edjRegion.getActiveStatus();
-        if (EnumUtils.notEquals(EdjRegionActiveStatus.ENABLED, activeStatus)) {
+        if (EnumUtils.ne(EdjRegionActiveStatus.ENABLED, activeStatus)) {
             throw new BadRequestException("区域未已启用");
         }
 

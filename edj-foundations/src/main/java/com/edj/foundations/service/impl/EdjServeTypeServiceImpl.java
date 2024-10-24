@@ -81,7 +81,7 @@ public class EdjServeTypeServiceImpl extends MPJBaseServiceImpl<EdjServeTypeMapp
 
         // 检查状态
         Integer activeStatus = serveType.getActiveStatus();
-        if (EnumUtils.equals(EdjServeTypeActiveStatus.ENABLED, activeStatus)) {
+        if (EnumUtils.eq(EdjServeTypeActiveStatus.ENABLED, activeStatus)) {
             throw new BadRequestException("服务类型已启用");
         }
 
@@ -104,7 +104,7 @@ public class EdjServeTypeServiceImpl extends MPJBaseServiceImpl<EdjServeTypeMapp
 
         // 检查状态
         Integer activeStatus = serveType.getActiveStatus();
-        if (EnumUtils.notEquals(EdjServeTypeActiveStatus.ENABLED, activeStatus)) {
+        if (EnumUtils.ne(EdjServeTypeActiveStatus.ENABLED, activeStatus)) {
             throw new BadRequestException("服务类型未启用");
         }
 
@@ -134,7 +134,7 @@ public class EdjServeTypeServiceImpl extends MPJBaseServiceImpl<EdjServeTypeMapp
 
         // 检查状态
         Integer activeStatus = serveType.getActiveStatus();
-        if (EnumUtils.notEquals(EdjServeTypeActiveStatus.DRAFTS, activeStatus)) {
+        if (EnumUtils.ne(EdjServeTypeActiveStatus.DRAFTS, activeStatus)) {
             throw new BadRequestException("只有草稿状态可删除");
         }
 

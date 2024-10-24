@@ -31,6 +31,6 @@ public class EnumsValidator implements ConstraintValidator<Enums, Integer> {
             return true;
         }
         Enum<?>[] enumConstants = value.getEnumConstants();
-        return Arrays.stream(enumConstants).anyMatch(x -> EnumUtils.equals(x, target));
+        return Arrays.stream(enumConstants).anyMatch(x -> EnumUtils.eq(x, target));
     }
 }

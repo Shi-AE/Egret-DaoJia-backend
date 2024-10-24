@@ -116,7 +116,7 @@ public class EdjServeItemServiceImpl extends MPJBaseServiceImpl<EdjServeItemMapp
 
         // 检查已启用
         Integer serveItemStatus = serveItem.getActiveStatus();
-        if (EnumUtils.equals(EdjServeItemActiveStatus.ENABLED, serveItemStatus)) {
+        if (EnumUtils.eq(EdjServeItemActiveStatus.ENABLED, serveItemStatus)) {
             throw new BadRequestException("服务项已启用");
         }
 
@@ -134,12 +134,12 @@ public class EdjServeItemServiceImpl extends MPJBaseServiceImpl<EdjServeItemMapp
 
         Integer serveTypeStatus = serveType.getActiveStatus();
         // 服务类型为草稿
-        if (EnumUtils.equals(EdjServeTypeActiveStatus.DRAFTS, serveTypeStatus)) {
+        if (EnumUtils.eq(EdjServeTypeActiveStatus.DRAFTS, serveTypeStatus)) {
             throw new BadRequestException("服务类型未启用");
         }
 
         // 服务类型禁用
-        if (EnumUtils.equals(EdjServeTypeActiveStatus.DISABLED, serveTypeStatus)) {
+        if (EnumUtils.eq(EdjServeTypeActiveStatus.DISABLED, serveTypeStatus)) {
             throw new BadRequestException("服务类型已禁用");
         }
 
@@ -166,7 +166,7 @@ public class EdjServeItemServiceImpl extends MPJBaseServiceImpl<EdjServeItemMapp
 
         // 检查已未启用
         Integer serveItemStatus = serveItem.getActiveStatus();
-        if (EnumUtils.notEquals(EdjServeItemActiveStatus.ENABLED, serveItemStatus)) {
+        if (EnumUtils.ne(EdjServeItemActiveStatus.ENABLED, serveItemStatus)) {
             throw new BadRequestException("服务项未启用");
         }
 
@@ -191,7 +191,7 @@ public class EdjServeItemServiceImpl extends MPJBaseServiceImpl<EdjServeItemMapp
 
         // 检查已未启用
         Integer serveItemStatus = serveItem.getActiveStatus();
-        if (EnumUtils.notEquals(EdjServeItemActiveStatus.DRAFTS, serveItemStatus)) {
+        if (EnumUtils.ne(EdjServeItemActiveStatus.DRAFTS, serveItemStatus)) {
             throw new BadRequestException("只有草稿状态可删除");
         }
 

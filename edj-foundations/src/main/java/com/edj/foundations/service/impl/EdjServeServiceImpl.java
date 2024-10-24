@@ -189,7 +189,7 @@ public class EdjServeServiceImpl extends MPJBaseServiceImpl<EdjServeMapper, EdjS
 
         // 检查服务状态
         Integer saleStatus = serve.getSaleStatus();
-        if (EnumUtils.equals(EdjServeSaleStatus.PUBLISHED, saleStatus)) {
+        if (EnumUtils.eq(EdjServeSaleStatus.PUBLISHED, saleStatus)) {
             throw new BadRequestException("服务已上架");
         }
 
@@ -207,7 +207,7 @@ public class EdjServeServiceImpl extends MPJBaseServiceImpl<EdjServeMapper, EdjS
 
         // 检查服务项状态
         Integer activeStatus = serveItem.getActiveStatus();
-        if (EnumUtils.notEquals(EdjServeItemActiveStatus.ENABLED, activeStatus)) {
+        if (EnumUtils.ne(EdjServeItemActiveStatus.ENABLED, activeStatus)) {
             throw new BadRequestException("服务项未启用");
         }
 
@@ -233,7 +233,7 @@ public class EdjServeServiceImpl extends MPJBaseServiceImpl<EdjServeMapper, EdjS
 
         // 检查服务状态
         Integer saleStatus = serve.getSaleStatus();
-        if (EnumUtils.notEquals(EdjServeSaleStatus.PUBLISHED, saleStatus)) {
+        if (EnumUtils.ne(EdjServeSaleStatus.PUBLISHED, saleStatus)) {
             throw new BadRequestException("服务未上架");
         }
 

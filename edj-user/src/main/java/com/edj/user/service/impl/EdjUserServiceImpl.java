@@ -40,7 +40,7 @@ public class EdjUserServiceImpl extends MPJBaseServiceImpl<EdjUserMapper, EdjUse
             throw new BadRequestException("用户名未找到");
         }
 
-        if (EnumUtils.notEquals(EdjUserStatus.NORMAL, user.getStatus())) {
+        if (EnumUtils.ne(EdjUserStatus.NORMAL, user.getStatus())) {
             log.debug("用户被冻结，冻结原因：{}", user.getRemark());
             throw new BadRequestException("用户被冻结");
         }
