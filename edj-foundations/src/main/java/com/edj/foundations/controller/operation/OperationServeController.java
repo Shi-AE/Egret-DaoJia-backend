@@ -76,6 +76,7 @@ public class OperationServeController {
      */
     @PutMapping("hot/on/{id}")
     @Operation(summary = "区域服务设置热门")
+    @PreAuthorize("permitAll()")
     public void onHot(@Schema(description = "区域服务id") @NotNull(message = "id不能为空") @Positive @PathVariable Long id) {
         serveService.changeHotStatus(id, EdjServeIsHot.HOT);
     }
@@ -85,7 +86,18 @@ public class OperationServeController {
      */
     @PutMapping("hot/off/{id}")
     @Operation(summary = "区域服务取消热门")
+    @PreAuthorize("permitAll()")
     public void offHot(@Schema(description = "区域服务id") @NotNull(message = "id不能为空") @Positive @PathVariable Long id) {
         serveService.changeHotStatus(id, EdjServeIsHot.NOT_HOT);
+    }
+
+    /**
+     * 区域服务上架
+     */
+    @PutMapping("sale/on/{id}")
+    @Operation(summary = "区域服务上架")
+    @PreAuthorize("permitAll()")
+    public void onSale(@Schema(description = "区域服务id") @NotNull(message = "id不能为空") @Positive @PathVariable Long id) {
+        serveService.onSale(id);
     }
 }

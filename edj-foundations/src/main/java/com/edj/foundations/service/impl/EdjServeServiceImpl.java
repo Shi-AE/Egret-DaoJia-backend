@@ -6,6 +6,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.edj.common.domain.PageResult;
 import com.edj.common.expcetions.BadRequestException;
 import com.edj.common.utils.BeanUtils;
+import com.edj.common.utils.EnumUtils;
+import com.edj.common.utils.ObjectUtils;
 import com.edj.common.utils.SqlUtils;
 import com.edj.foundations.domain.dto.ServeAddDTO;
 import com.edj.foundations.domain.dto.ServePageDTO;
@@ -16,6 +18,7 @@ import com.edj.foundations.domain.entity.EdjServeType;
 import com.edj.foundations.domain.vo.ServeVO;
 import com.edj.foundations.enums.EdjServeIsHot;
 import com.edj.foundations.enums.EdjServeItemActiveStatus;
+import com.edj.foundations.enums.EdjServeSaleStatus;
 import com.edj.foundations.mapper.EdjRegionMapper;
 import com.edj.foundations.mapper.EdjServeItemMapper;
 import com.edj.foundations.mapper.EdjServeMapper;
@@ -153,10 +156,65 @@ public class EdjServeServiceImpl extends MPJBaseServiceImpl<EdjServeMapper, EdjS
     @Override
     @Transactional
     public void changeHotStatus(Long id, EdjServeIsHot edjServeIsHot) {
+
+        LambdaQueryWrapper<EdjServe> check = new LambdaQueryWrapper<EdjServe>()
+                .select(EdjServe::getIsHot)
+                .eq(EdjServe::getId, id)
+                .eq(EdjServe::getIsHot, edjServeIsHot);
+        boolean exists = baseMapper.exists(check);
+        if (exists) {
+            throw new BadRequestException("状态已设置");
+        }
+
         LambdaUpdateWrapper<EdjServe> wrapper = new LambdaUpdateWrapper<EdjServe>()
                 .eq(EdjServe::getId, id)
                 .set(EdjServe::getIsHot, edjServeIsHot)
                 .set(EdjServe::getHotTime, LocalDateTime.now());
         baseMapper.update(new EdjServe(), wrapper);
+    }
+
+    @Override
+    @Transactional
+    public void onSale(Long id) {
+        // 检查服务
+        LambdaQueryWrapper<EdjServe> checkServer = new LambdaQueryWrapper<EdjServe>()
+                .select(EdjServe::getSaleStatus, EdjServe::getEdjServeItemId)
+                .eq(EdjServe::getId, id);
+        EdjServe serve = baseMapper.selectOne(checkServer);
+
+        // 检查存在
+        if (ObjectUtils.isNull(serve)) {
+            throw new BadRequestException("服务不存在");
+        }
+
+        // 检查服务状态
+        Integer saleStatus = serve.getSaleStatus();
+        if (EnumUtils.equals(EdjServeSaleStatus.PUBLISHED, saleStatus)) {
+            throw new BadRequestException("服务已上架");
+        }
+
+        // 检查服务项
+        Long edjServeItemId = serve.getEdjServeItemId();
+        LambdaQueryWrapper<EdjServeItem> serveItemCheck = new LambdaQueryWrapper<EdjServeItem>()
+                .select(EdjServeItem::getActiveStatus)
+                .eq(EdjServeItem::getId, edjServeItemId);
+        EdjServeItem serveItem = serveItemMapper.selectOne(serveItemCheck);
+
+        // 检查存在
+        if (ObjectUtils.isNull(serveItem)) {
+            throw new BadRequestException("服务项不存在");
+        }
+
+        // 检查服务项状态
+        Integer activeStatus = serveItem.getActiveStatus();
+        if (EnumUtils.notEquals(EdjServeItemActiveStatus.ENABLED, activeStatus)) {
+            throw new BadRequestException("服务项未启用");
+        }
+
+        // 更新上架
+        LambdaUpdateWrapper<EdjServe> updateWrapper = new LambdaUpdateWrapper<EdjServe>()
+                .set(EdjServe::getSaleStatus, EdjServeSaleStatus.PUBLISHED)
+                .eq(EdjServe::getId, id);
+        baseMapper.update(new EdjServe(), updateWrapper);
     }
 }

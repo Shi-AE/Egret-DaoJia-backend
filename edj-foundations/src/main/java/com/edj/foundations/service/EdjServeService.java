@@ -38,4 +38,9 @@ public interface EdjServeService extends MPJBaseService<EdjServe> {
      * 区域服务设置是否热门状态
      */
     void changeHotStatus(Long id, EdjServeIsHot edjServeIsHot);
+
+    /**
+     * 区域服务上架
+     */
+    void onSale(Long id);
 }
