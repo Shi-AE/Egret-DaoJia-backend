@@ -14,11 +14,14 @@ import com.edj.foundations.domain.dto.RegionPageDTO;
 import com.edj.foundations.domain.dto.RegionUpdateDTO;
 import com.edj.foundations.domain.entity.EdjCity;
 import com.edj.foundations.domain.entity.EdjRegion;
+import com.edj.foundations.domain.entity.EdjServe;
 import com.edj.foundations.domain.vo.RegionVO;
 import com.edj.foundations.enums.EdjCityType;
 import com.edj.foundations.enums.EdjRegionActiveStatus;
+import com.edj.foundations.enums.EdjServeSaleStatus;
 import com.edj.foundations.mapper.EdjCityMapper;
 import com.edj.foundations.mapper.EdjRegionMapper;
+import com.edj.foundations.mapper.EdjServeMapper;
 import com.edj.foundations.service.EdjConfigRegionService;
 import com.edj.foundations.service.EdjRegionService;
 import com.edj.mysql.utils.PageUtils;
@@ -40,6 +43,8 @@ public class EdjRegionServiceImpl extends MPJBaseServiceImpl<EdjRegionMapper, Ed
     private final EdjCityMapper cityMapper;
 
     private final EdjConfigRegionService configRegionService;
+
+    private final EdjServeMapper serveMapper;
 
     @Override
     @Transactional
@@ -140,7 +145,15 @@ public class EdjRegionServiceImpl extends MPJBaseServiceImpl<EdjRegionMapper, Ed
             throw new BadRequestException("区域已启用");
         }
 
-        // todo 如果需要启用区域，需要校验该区域下是否有上架的服务
+        // 检查区域服务
+        LambdaQueryWrapper<EdjServe> serveCheckWrapper = new LambdaQueryWrapper<EdjServe>()
+                .select(EdjServe::getId)
+                .eq(EdjServe::getEdjRegionId, id)
+                .eq(EdjServe::getSaleStatus, EdjServeSaleStatus.PUBLISHED);
+        boolean exists = serveMapper.exists(serveCheckWrapper);
+        if (!exists) {
+            throw new BadRequestException("区域下不存在上架的服务");
+        }
 
         // 更新状态
         LambdaUpdateWrapper<EdjRegion> updateWrapper = new LambdaUpdateWrapper<EdjRegion>()

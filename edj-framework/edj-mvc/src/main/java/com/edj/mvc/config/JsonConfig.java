@@ -42,7 +42,6 @@ public class JsonConfig {
             jacksonObjectMapperBuilder.serializerByType(BigInteger.class, ToStringSerializer.instance);
             // bigDecimal保留两位小数
             jacksonObjectMapperBuilder.serializerByType(BigDecimal.class, BigDecimalSerializer.instance);
-            //todo 是否需要反序列化？
         };
     }
 }
