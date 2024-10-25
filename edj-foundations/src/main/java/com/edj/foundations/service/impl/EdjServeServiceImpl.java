@@ -5,10 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.edj.common.domain.PageResult;
 import com.edj.common.expcetions.BadRequestException;
-import com.edj.common.utils.BeanUtils;
-import com.edj.common.utils.EnumUtils;
-import com.edj.common.utils.ObjectUtils;
-import com.edj.common.utils.SqlUtils;
+import com.edj.common.utils.*;
 import com.edj.foundations.domain.dto.ServeAddDTO;
 import com.edj.foundations.domain.dto.ServePageDTO;
 import com.edj.foundations.domain.entity.EdjRegion;
@@ -53,7 +50,7 @@ public class EdjServeServiceImpl extends MPJBaseServiceImpl<EdjServeMapper, EdjS
     @Override
     @Transactional
     public void add(List<ServeAddDTO> serveAddDTOList) {
-        // 检查重复项
+        // 检查提交的重复项
         boolean duplicate = serveAddDTOList.stream()
                 .collect(Collectors.groupingBy(
                         x -> x.getEdjRegionId() + "_" + x.getEdjServeItemId(),

@@ -116,6 +116,13 @@ public class EdjRegionServiceImpl extends MPJBaseServiceImpl<EdjRegionMapper, Ed
 
         // 异步移除区域配置
         AsyncUtils.runAsyncComplete(() -> configRegionService.delete(id));
+
+        // 异步删除已添加的区域服务，在草稿状态下添加的区域服务
+        AsyncUtils.runAsyncComplete(() -> {
+            LambdaQueryWrapper<EdjServe> serveDeleteWrapper = new LambdaQueryWrapper<EdjServe>()
+                    .eq(EdjServe::getEdjRegionId, id);
+            serveMapper.delete(serveDeleteWrapper);
+        });
     }
 
     @Override
