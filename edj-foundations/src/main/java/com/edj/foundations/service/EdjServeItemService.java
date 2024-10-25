@@ -17,11 +17,6 @@ import com.github.yulichang.base.MPJBaseService;
 public interface EdjServeItemService extends MPJBaseService<EdjServeItem> {
 
     /**
-     * 根据服务类型id查询启用的服务项数量
-     */
-    long activeServeItemCountByServeTypeId(long serveTypeId);
-
-    /**
      * 新增服务项
      */
     void add(ServeItemAddDTO serveItemAddDTO);

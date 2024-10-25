@@ -42,16 +42,8 @@ public class EdjServeItemServiceImpl extends MPJBaseServiceImpl<EdjServeItemMapp
     private final EdjServeTypeMapper serveTypeMapper;
 
     private final Snowflake snowflake;
-    private final EdjServeMapper serveMapper;
 
-    @Override
-    public long activeServeItemCountByServeTypeId(long serveTypeId) {
-        LambdaQueryWrapper<EdjServeItem> wrapper = new LambdaQueryWrapper<EdjServeItem>()
-                .select(EdjServeItem::getId)
-                .eq(EdjServeItem::getEdjServeTypeId, serveTypeId)
-                .eq(EdjServeItem::getActiveStatus, EdjServeTypeActiveStatus.ENABLED);
-        return baseMapper.selectCount(wrapper);
-    }
+    private final EdjServeMapper serveMapper;
 
     @Override
     @Transactional

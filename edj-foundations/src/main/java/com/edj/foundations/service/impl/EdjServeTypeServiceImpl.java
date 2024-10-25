@@ -11,10 +11,12 @@ import com.edj.common.utils.*;
 import com.edj.foundations.domain.dto.ServeTypeAddDTO;
 import com.edj.foundations.domain.dto.ServeTypePageDTO;
 import com.edj.foundations.domain.dto.ServeTypeUpdateDTO;
+import com.edj.foundations.domain.entity.EdjServeItem;
 import com.edj.foundations.domain.entity.EdjServeType;
 import com.edj.foundations.domain.vo.ServeTypeStatusGetVO;
 import com.edj.foundations.domain.vo.ServeTypeVO;
 import com.edj.foundations.enums.EdjServeTypeActiveStatus;
+import com.edj.foundations.mapper.EdjServeItemMapper;
 import com.edj.foundations.mapper.EdjServeTypeMapper;
 import com.edj.foundations.service.EdjServeItemService;
 import com.edj.foundations.service.EdjServeTypeService;
@@ -39,6 +41,7 @@ public class EdjServeTypeServiceImpl extends MPJBaseServiceImpl<EdjServeTypeMapp
     private final Snowflake snowflake;
 
     private final EdjServeItemService serveItemService;
+    private final EdjServeItemMapper edjServeItemMapper;
 
     @Override
     @Transactional
@@ -109,8 +112,12 @@ public class EdjServeTypeServiceImpl extends MPJBaseServiceImpl<EdjServeTypeMapp
         }
 
         // 检查是否存在启用的服务项
-        long count = serveItemService.activeServeItemCountByServeTypeId(id);
-        if (count > 0) {
+        LambdaQueryWrapper<EdjServeItem> wrapper = new LambdaQueryWrapper<EdjServeItem>()
+                .select(EdjServeItem::getId)
+                .eq(EdjServeItem::getEdjServeTypeId, id)
+                .eq(EdjServeItem::getActiveStatus, EdjServeTypeActiveStatus.ENABLED);
+        boolean exists = edjServeItemMapper.exists(wrapper);
+        if (exists) {
             throw new BadRequestException("该服务类型下有启用状态的服务项");
         }
 
