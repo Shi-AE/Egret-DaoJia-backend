@@ -108,13 +108,11 @@ public class EdjServeTypeServiceImpl extends MPJBaseServiceImpl<EdjServeTypeMapp
             throw new BadRequestException("服务类型未启用");
         }
 
-        // 检查服务项是否存在启用的
+        // 检查是否存在启用的服务项
         long count = serveItemService.activeServeItemCountByServeTypeId(id);
         if (count > 0) {
             throw new BadRequestException("该服务类型下有启用状态的服务项");
         }
-
-        // todo 有区域在使用该服务将无法禁用（存在关联的区域服务且状态为上架表示有区域在使用该服务项）
 
         LambdaUpdateWrapper<EdjServeType> updateWrapper = new LambdaUpdateWrapper<EdjServeType>()
                 .eq(EdjServeType::getId, id)

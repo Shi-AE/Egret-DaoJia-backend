@@ -11,12 +11,15 @@ import com.edj.common.utils.*;
 import com.edj.foundations.domain.dto.ServeItemAddDTO;
 import com.edj.foundations.domain.dto.ServeItemPageDTO;
 import com.edj.foundations.domain.dto.ServeItemUpdateDTO;
+import com.edj.foundations.domain.entity.EdjServe;
 import com.edj.foundations.domain.entity.EdjServeItem;
 import com.edj.foundations.domain.entity.EdjServeType;
 import com.edj.foundations.domain.vo.ServeItemVO;
 import com.edj.foundations.enums.EdjServeItemActiveStatus;
+import com.edj.foundations.enums.EdjServeSaleStatus;
 import com.edj.foundations.enums.EdjServeTypeActiveStatus;
 import com.edj.foundations.mapper.EdjServeItemMapper;
+import com.edj.foundations.mapper.EdjServeMapper;
 import com.edj.foundations.mapper.EdjServeTypeMapper;
 import com.edj.foundations.service.EdjServeItemService;
 import com.edj.mysql.utils.PageUtils;
@@ -39,6 +42,7 @@ public class EdjServeItemServiceImpl extends MPJBaseServiceImpl<EdjServeItemMapp
     private final EdjServeTypeMapper serveTypeMapper;
 
     private final Snowflake snowflake;
+    private final EdjServeMapper serveMapper;
 
     @Override
     public long activeServeItemCountByServeTypeId(long serveTypeId) {
@@ -170,7 +174,15 @@ public class EdjServeItemServiceImpl extends MPJBaseServiceImpl<EdjServeItemMapp
             throw new BadRequestException("服务项未启用");
         }
 
-        // todo 有区域在使用该服务将无法禁用（存在关联的区域服务且状态为上架表示有区域在使用该服务项）
+        // 检查区域使用服务
+        LambdaQueryWrapper<EdjServe> serveCheckWrapper = new LambdaQueryWrapper<EdjServe>()
+                .select(EdjServe::getId)
+                .eq(EdjServe::getEdjServeItemId, id)
+                .eq(EdjServe::getSaleStatus, EdjServeSaleStatus.PUBLISHED);
+        boolean exists = serveMapper.exists(serveCheckWrapper);
+        if (exists) {
+            throw new BadRequestException("存在区域服务，正在使用该服务项");
+        }
 
         LambdaUpdateWrapper<EdjServeItem> updateWrapper = new LambdaUpdateWrapper<EdjServeItem>()
                 .eq(EdjServeItem::getId, id)
