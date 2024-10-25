@@ -2,16 +2,13 @@ package com.edj.mysql.interceptor;
 
 import com.baomidou.mybatisplus.extension.plugins.inner.InnerInterceptor;
 import com.edj.common.expcetions.ServerErrorException;
-import com.edj.common.handler.UserInfoHandler;
 import com.edj.common.utils.ObjectUtils;
 import com.edj.common.utils.ReflectUtils;
 import com.edj.security.utils.SecurityUtils;
-import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.SqlCommandType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
@@ -23,11 +20,8 @@ import static com.edj.mysql.constants.DbValueConstants.EXIST;
  * @author A.E.
  * @date 2024/9/20
  */
-@RequiredArgsConstructor
+@Slf4j
 public class MyBatisAutoFillInterceptor implements InnerInterceptor {
-
-    private static final Logger log = LoggerFactory.getLogger(MyBatisAutoFillInterceptor.class);
-    private final UserInfoHandler userInfoHandler;
 
     @Override
     public void beforeUpdate(Executor executor, MappedStatement ms, Object parameter) {

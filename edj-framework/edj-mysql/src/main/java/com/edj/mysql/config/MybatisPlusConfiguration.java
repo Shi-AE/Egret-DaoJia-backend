@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.annotation.DbType;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.DynamicTableNameInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
-import com.edj.common.handler.UserInfoHandler;
 import com.edj.mysql.interceptor.MyBatisAutoFillInterceptor;
 import com.edj.mysql.properties.MybatisPlusProperties;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +18,7 @@ public class MybatisPlusConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public MybatisPlusInterceptor mybatisPlusInterceptor(@Autowired(required = false) DynamicTableNameInnerInterceptor innerInterceptor, UserInfoHandler userInfoHandler, MybatisPlusProperties mybatisPlusProperties) {
+    public MybatisPlusInterceptor mybatisPlusInterceptor(@Autowired(required = false) DynamicTableNameInnerInterceptor innerInterceptor, MybatisPlusProperties mybatisPlusProperties) {
         // 1.定义插件主体，注意顺序：表名 > 多租户 > 分页 > 乐观锁 > 字段填充
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
 
@@ -34,7 +33,7 @@ public class MybatisPlusConfiguration {
         interceptor.addInnerInterceptor(paginationInnerInterceptor);
 
         // 4.字段填充插件
-        interceptor.addInnerInterceptor(new MyBatisAutoFillInterceptor(userInfoHandler));
+        interceptor.addInnerInterceptor(new MyBatisAutoFillInterceptor());
         return interceptor;
     }
 }
