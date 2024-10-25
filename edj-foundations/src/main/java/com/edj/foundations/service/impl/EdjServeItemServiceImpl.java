@@ -91,6 +91,17 @@ public class EdjServeItemServiceImpl extends MPJBaseServiceImpl<EdjServeItemMapp
             throw new BadRequestException("存在相同的服务项名称");
         }
 
+        // 检查服务类型存在
+        Long edjServeTypeId = serveItemUpdateDTO.getEdjServeTypeId();
+        LambdaQueryWrapper<EdjServeType> existsWrapper = new LambdaQueryWrapper<EdjServeType>()
+                .select(EdjServeType::getId)
+                .eq(EdjServeType::getId, edjServeTypeId)
+                .eq(EdjServeType::getActiveStatus, EdjServeTypeActiveStatus.ENABLED);
+        boolean ServeItemExists = serveTypeMapper.exists(existsWrapper);
+        if (!ServeItemExists) {
+            throw new BadRequestException("服务类型不存在或者未启用");
+        }
+
         // 更新
         EdjServeItem serveItem = BeanUtil.toBean(serveItemUpdateDTO, EdjServeItem.class);
         baseMapper.updateById(serveItem);
