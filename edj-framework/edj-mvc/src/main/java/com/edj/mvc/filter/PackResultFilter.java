@@ -48,7 +48,7 @@ public class PackResultFilter implements Filter {
 
         // 2.2.包装
         byte[] bytes = Result.plainOk(responseWrapper.getResponseData());
-        log.debug("result : {}", new String(bytes));
+        log.debug("<== result: {}", new String(bytes));
         // 2.3.写入
         response.setContentType("application/json;charset=UTF-8");
         IoUtils.write(response.getOutputStream(), false, bytes);
