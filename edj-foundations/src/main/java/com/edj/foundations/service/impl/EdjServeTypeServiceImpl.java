@@ -18,7 +18,6 @@ import com.edj.foundations.domain.vo.ServeTypeVO;
 import com.edj.foundations.enums.EdjServeTypeActiveStatus;
 import com.edj.foundations.mapper.EdjServeItemMapper;
 import com.edj.foundations.mapper.EdjServeTypeMapper;
-import com.edj.foundations.service.EdjServeItemService;
 import com.edj.foundations.service.EdjServeTypeService;
 import com.edj.mysql.utils.PageUtils;
 import com.github.yulichang.base.MPJBaseServiceImpl;
@@ -40,7 +39,6 @@ public class EdjServeTypeServiceImpl extends MPJBaseServiceImpl<EdjServeTypeMapp
 
     private final Snowflake snowflake;
 
-    private final EdjServeItemService serveItemService;
     private final EdjServeItemMapper edjServeItemMapper;
 
     @Override
@@ -121,6 +119,7 @@ public class EdjServeTypeServiceImpl extends MPJBaseServiceImpl<EdjServeTypeMapp
             throw new BadRequestException("该服务类型下有启用状态的服务项");
         }
 
+        // 禁用服务类型
         LambdaUpdateWrapper<EdjServeType> updateWrapper = new LambdaUpdateWrapper<EdjServeType>()
                 .eq(EdjServeType::getId, id)
                 .set(EdjServeType::getActiveStatus, EdjServeTypeActiveStatus.DISABLED);
