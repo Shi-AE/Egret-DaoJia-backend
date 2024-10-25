@@ -184,7 +184,15 @@ public class EdjRegionServiceImpl extends MPJBaseServiceImpl<EdjRegionMapper, Ed
             throw new BadRequestException("区域未已启用");
         }
 
-        // todo 如果禁用区域下有上架的服务则无法禁用
+        // 检查区域服务上架
+        LambdaQueryWrapper<EdjServe> serveCheckWrapper = new LambdaQueryWrapper<EdjServe>()
+                .select(EdjServe::getId)
+                .eq(EdjServe::getEdjRegionId, id)
+                .eq(EdjServe::getSaleStatus, EdjServeSaleStatus.PUBLISHED);
+        boolean exists = serveMapper.exists(serveCheckWrapper);
+        if (exists) {
+            throw new BadRequestException("区域下存在已上架的服务");
+        }
 
         // 更新状态
         LambdaUpdateWrapper<EdjRegion> updateWrapper = new LambdaUpdateWrapper<EdjRegion>()
