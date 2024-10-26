@@ -109,7 +109,8 @@ public class MyBatisAutoFillInterceptor implements InnerInterceptor {
         try (Statement stmt = connection.createStatement(); ResultSet rs = stmt.executeQuery(explainSql)) {
             while (rs.next()) {
                 log.debug("""
-                                        <== EXPLAIN: {}
+                        
+                        <== EXPLAIN: {}
                         | id            | {}
                         | select_type   | {}
                         | table         | {}
