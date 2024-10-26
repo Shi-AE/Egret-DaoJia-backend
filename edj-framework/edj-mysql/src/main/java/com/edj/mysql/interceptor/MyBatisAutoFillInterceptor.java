@@ -2,6 +2,7 @@ package com.edj.mysql.interceptor;
 
 import com.baomidou.mybatisplus.extension.plugins.inner.InnerInterceptor;
 import com.edj.common.expcetions.ServerErrorException;
+import com.edj.common.utils.EnumUtils;
 import com.edj.common.utils.ObjectUtils;
 import com.edj.common.utils.ReflectUtils;
 import com.edj.security.utils.SecurityUtils;
@@ -82,6 +83,9 @@ public class MyBatisAutoFillInterceptor implements InnerInterceptor {
                     // 检查对象中是否存在该属性的 getter 方法，如果存在就取出来进行替换
                     if (metaObject.hasGetter(propertyName)) {
                         Object obj = metaObject.getValue(propertyName);
+                        if (obj.getClass().isEnum()) {
+                            obj = EnumUtils.value((Enum<?>) obj);
+                        }
                         sql = sql.replaceFirst("\\?", Matcher.quoteReplacement(getParameterValue(obj)));
                         // 检查 BoundSql 对象中是否存在附加参数
                     } else if (boundSql.hasAdditionalParameter(propertyName)) {
@@ -105,49 +109,33 @@ public class MyBatisAutoFillInterceptor implements InnerInterceptor {
         try (Statement stmt = connection.createStatement(); ResultSet rs = stmt.executeQuery(explainSql)) {
             log.debug("<== {}", sql);
             while (rs.next()) {
-                // 创建字段名和字段值的格式化字符串
-                StringBuilder headers = new StringBuilder();
-                StringBuilder values = new StringBuilder();
-
-                // 构建字段名和对应的值
-                headers.append(String.format("%-" + COLUMN_WIDTH + "s", "id"));
-                values.append(String.format("%-" + COLUMN_WIDTH + "s", rs.getString("id")));
-
-                headers.append(String.format("%-" + COLUMN_WIDTH + "s", "select_type"));
-                values.append(String.format("%-" + COLUMN_WIDTH + "s", rs.getString("select_type")));
-
-                headers.append(String.format("%-" + COLUMN_WIDTH + "s", "table"));
-                values.append(String.format("%-" + COLUMN_WIDTH + "s", rs.getString("table")));
-
-                headers.append(String.format("%-" + COLUMN_WIDTH + "s", "partitions"));
-                values.append(String.format("%-" + COLUMN_WIDTH + "s", rs.getString("partitions")));
-
-                headers.append(String.format("%-" + COLUMN_WIDTH + "s", "type"));
-                values.append(String.format("%-" + COLUMN_WIDTH + "s", rs.getString("type")));
-
-                headers.append(String.format("%-" + COLUMN_WIDTH + "s", "possible_keys"));
-                values.append(String.format("%-" + COLUMN_WIDTH + "s", rs.getString("possible_keys")));
-
-                headers.append(String.format("%-" + COLUMN_WIDTH + "s", "key"));
-                values.append(String.format("%-" + COLUMN_WIDTH + "s", rs.getString("key")));
-
-                headers.append(String.format("%-" + COLUMN_WIDTH + "s", "key_len"));
-                values.append(String.format("%-" + COLUMN_WIDTH + "s", rs.getString("key_len")));
-
-                headers.append(String.format("%-" + COLUMN_WIDTH + "s", "ref"));
-                values.append(String.format("%-" + COLUMN_WIDTH + "s", rs.getString("ref")));
-
-                headers.append(String.format("%-" + COLUMN_WIDTH + "s", "rows"));
-                values.append(String.format("%-" + COLUMN_WIDTH + "s", rs.getInt("rows")));
-
-                headers.append(String.format("%-" + COLUMN_WIDTH + "s", "filtered"));
-                values.append(String.format("%-" + COLUMN_WIDTH + "s", rs.getInt("filtered")));
-
-                headers.append(String.format("%-" + COLUMN_WIDTH + "s", "Extra"));
-                values.append(String.format("%-" + COLUMN_WIDTH + "s", rs.getString("Extra")));
-
-                // 输出字段名和字段值
-                log.debug("<== EXPLAIN:\n{}\n{}", headers, values);
+                log.debug("""
+                        <== EXPLAIN:
+                        | id            | {}
+                        | select_type   | {}
+                        | table         | {}
+                        | partitions    | {}
+                        | type          | {}
+                        | possible_keys | {}
+                        | key           | {}
+                        | key_len       | {}
+                        | ref           | {}
+                        | rows          | {}
+                        | filtered      | {}
+                        | Extra         | {}""",
+                        rs.getString("id"),
+                        rs.getString("select_type"),
+                        rs.getString("table"),
+                        rs.getString("partitions"),
+                        rs.getString("type"),
+                        rs.getString("possible_keys"),
+                        rs.getString("key"),
+                        rs.getString("key_len"),
+                        rs.getString("ref"),
+                        rs.getInt("rows"),
+                        rs.getInt("filtered"),
+                        rs.getString("Extra")
+                );
             }
         } catch (Exception e) {
             log.error("Failed to execute EXPLAIN for SQL: {}", sql, e);
