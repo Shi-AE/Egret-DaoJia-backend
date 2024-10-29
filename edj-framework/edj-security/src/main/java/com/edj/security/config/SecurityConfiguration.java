@@ -69,7 +69,7 @@ public class SecurityConfiguration {
                         // swagger 文档
                         .requestMatchers(HttpMethod.GET, "/v3/api-docs").permitAll()
                         // 登录 \ 注册
-                        .requestMatchers(HttpMethod.POST, "/login", "/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/open/login", "/open/register").permitAll()
                         // 拦截
                         .anyRequest().authenticated()
                 )

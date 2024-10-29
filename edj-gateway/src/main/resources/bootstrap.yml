@@ -56,5 +56,5 @@ gateway:
       - /edj-user/v3/api-docs
       - /edj-publics/v3/api-docs
       # 登录 \ 注册
-      - /edj-user/register
-      - /edj-user/login
+      - /edj-user/open/register
+      - /edj-user/open/login

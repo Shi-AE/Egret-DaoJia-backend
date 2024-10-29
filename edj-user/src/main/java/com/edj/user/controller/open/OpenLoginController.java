@@ -1,4 +1,4 @@
-package com.edj.user.controller;
+package com.edj.user.controller.open;
 
 import cn.hutool.http.useragent.UserAgent;
 import com.edj.common.domain.Result;
@@ -27,6 +27,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
@@ -48,7 +49,8 @@ import static org.springframework.http.HttpHeaders.USER_AGENT;
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "用户管理")
-public class LoginController {
+@RequestMapping("open")
+public class OpenLoginController {
 
     private final AuthenticationManager authenticationManager;
 
