@@ -7,12 +7,16 @@ import com.edj.api.api.publics.dto.OpenIdDTO;
 import com.edj.common.constants.ErrorInfo;
 import com.edj.common.expcetions.BadRequestException;
 import com.edj.common.expcetions.CommonException;
+import com.edj.common.expcetions.ServerErrorException;
 import com.edj.common.utils.*;
 import com.edj.security.domain.dto.AuthorizationUserDTO;
 import com.edj.user.domain.dto.UserLoginDTO;
 import com.edj.user.domain.dto.WechatLoginDTO;
 import com.edj.user.domain.entity.EdjUser;
+import com.edj.user.domain.entity.EdjUserRole;
 import com.edj.user.domain.vo.UserTokenVO;
+import com.edj.user.enums.EdjSysRole;
+import com.edj.user.service.EdjUserRoleService;
 import com.edj.user.service.EdjUserService;
 import com.edj.user.service.LoginService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -61,6 +65,8 @@ public class LoginServiceImpl implements LoginService {
     private final RedisTemplate<String, AuthorizationUserDTO> redisTemplate;
 
     private final AuthenticationManager authenticationManager;
+
+    private final EdjUserRoleService userRoleService;
 
     @Override
     public UserTokenVO createToken(AuthorizationUserDTO principal, HttpServletRequest request) {
@@ -130,6 +136,7 @@ public class LoginServiceImpl implements LoginService {
         // 根据code获取openId
         String code = wechatLoginDTO.getCode();
         OpenIdDTO openIdDTO = wechatApi.getOpenId(code);
+        // oLexy7ZRawjq2D4POGTIi31bGf_Y
         String openId = openIdDTO.getOpenId();
         if (StringUtils.isBlank(openId)) {
             // openid申请失败
@@ -151,7 +158,18 @@ public class LoginServiceImpl implements LoginService {
             // 随机生成密码
             user.setPassword(passwordEncoder.encode(IdUtils.fastSimpleUUID()));
             userService.save(user);
-            // todo 添加普通用户权限
+            // 添加客户端用户权限
+            Long id = user.getId();
+            if (ObjectUtils.isEmpty(id)) {
+                log.error("用户注册失败: {}", user);
+                throw new ServerErrorException("用户注册失败");
+            }
+            userRoleService.save(EdjUserRole
+                    .builder()
+                    .edjUserId(id)
+                    .edjRoleId((Long) EnumUtils.value(EdjSysRole.CONSUMER))
+                    .build()
+            );
         }
 
         // 获取权限
