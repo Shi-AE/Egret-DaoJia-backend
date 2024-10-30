@@ -28,6 +28,11 @@ public class AuthorizationUserDTO implements UserDetails {
     private String username;
 
     /**
+     * 微信用户凭证
+     */
+    private String openId;
+
+    /**
      * 用户名称
      */
     private String nickname;
