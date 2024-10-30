@@ -53,6 +53,10 @@
             <groupId>com.edj</groupId>
             <artifactId>edj-thirdparty</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.edj</groupId>
+            <artifactId>edj-api</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

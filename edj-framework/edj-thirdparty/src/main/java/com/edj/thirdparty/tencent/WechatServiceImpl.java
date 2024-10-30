@@ -25,12 +25,21 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class WechatServiceImpl implements WechatService {
 
-    // 登录
+    /**
+     * 登录
+     */
     private static final String REQUEST_URL = "https://api.weixin.qq.com/sns/jscode2session?grant_type=authorization_code";
-    // 获取token
+
+    /**
+     * 获取token
+     */
     private static final String TOKEN_URL = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential";
-    // 获取手机号
+
+    /**
+     * 获取手机号
+     */
     private static final String PHONE_REQUEST_URL = "https://api.weixin.qq.com/wxa/business/getuserphonenumber?access_token=";
+
     private final WechatProperties wechatProperties;
 
     /**
@@ -47,7 +56,6 @@ public class WechatServiceImpl implements WechatService {
         // 发送post请求读取调用微信接口获取openid用户唯一标识
         String result = HttpUtil.get(REQUEST_URL, requestUrlParam);
         log.info("getOpenid result:{}", result);
-        // {"session_key":"QbEw1Bp2OpkeCQ36gXvPRg==","openid":"oV4KY1Exd7NebGjfbYK7_KTPeNm4"}
         JSONObject jsonObject = JSONUtil.parseObj(result);
         if (ObjectUtil.isNotEmpty(jsonObject.getInt("errcode"))) {
             throw new ServerErrorException(jsonObject.getStr("errmsg"));

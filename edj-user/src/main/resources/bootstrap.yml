@@ -36,3 +36,6 @@ swagger:
 snowflake:
   workerId: 20
   datacenterId: 20
+
+feign:
+  enable: true

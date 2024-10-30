@@ -21,6 +21,7 @@
         <module>../edj-foundations</module>
         <module>../edj-user</module>
         <module>../edj-publics</module>
+        <module>../edj-api</module>
     </modules>
 
     <properties>
@@ -238,6 +239,11 @@
             <dependency>
                 <groupId>com.edj</groupId>
                 <artifactId>edj-cache</artifactId>
+                <version>${edj.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.edj</groupId>
+                <artifactId>edj-api</artifactId>
                 <version>${edj.version}</version>
             </dependency>
         </dependencies>

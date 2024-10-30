@@ -58,3 +58,4 @@ gateway:
       # 登录 \ 注册
       - /edj-user/open/register
       - /edj-user/open/login
+      - /edj-user/open/consumer/login
