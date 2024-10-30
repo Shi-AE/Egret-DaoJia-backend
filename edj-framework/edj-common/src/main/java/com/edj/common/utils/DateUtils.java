@@ -215,6 +215,9 @@ public class DateUtils extends LocalDateTimeUtil {
         return localDateTimeList.stream().max(Comparator.naturalOrder()).orElse(null);
     }
 
+    /**
+     * GenerateDateTime 转为字符串可视时间
+     */
     public static String getFormatLong(long time) {
         LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(time), ZoneId.systemDefault());
 

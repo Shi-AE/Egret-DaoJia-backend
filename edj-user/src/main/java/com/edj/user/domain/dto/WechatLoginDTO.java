@@ -29,12 +29,6 @@ public class WechatLoginDTO {
     private String code;
 
     /**
-     * 昵称
-     */
-    @Schema(description = "昵称")
-    private String nickname;
-
-    /**
      * 头像
      */
     @Schema(description = "头像")

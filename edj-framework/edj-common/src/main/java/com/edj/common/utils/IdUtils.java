@@ -10,6 +10,10 @@ public class IdUtils extends IdUtil {
 
     public static final String ID = "id";
 
+    public static final String EDJ = "EDJ";
+
+    public static final String wechat = "wx";
+
     public static final long DEFAULT_TWEPOCH = 1728745117883L;
 
     public static final long DEFAULT_TIME_OFFSET = 2000L;
@@ -34,11 +38,27 @@ public class IdUtils extends IdUtil {
         return id & 0xFFFL;
     }
 
+    /**
+     * 雪花id转为可视编号
+     */
     public static String toCode(long id) {
         long generateDateTime = IdUtils.getGenerateDateTime(id);
         long dataCenterId = IdUtils.getDataCenterId(id);
         long workerId = IdUtils.getWorkerId(id);
         long sequence = IdUtils.getSequence(id);
-        return String.format("EDJ_%s_%2d%2d%04d", DateUtils.getFormatLong(generateDateTime), dataCenterId, workerId, sequence);
+        return String.format("%s_%s_%2d%2d%04d",
+                EDJ,
+                DateUtils.getFormatLong(generateDateTime),
+                dataCenterId,
+                workerId,
+                sequence
+        );
+    }
+
+    /**
+     * 雪花id转微信用户名
+     */
+    public static String toWechatUserName(long id) {
+        return String.format("%s_%s_%s", EDJ, wechat, id);
     }
 }

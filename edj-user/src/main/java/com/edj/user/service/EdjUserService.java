@@ -21,4 +21,9 @@ public interface EdjUserService extends MPJBaseService<EdjUser> {
      * 异步任务记录用户登录信息
      */
     Runnable RecordLoginInfo(Long id, String getLoginIp);
+
+    /**
+     * 根据openid查找用户名
+     */
+    String selectUsernameByOpenId(String openId);
 }

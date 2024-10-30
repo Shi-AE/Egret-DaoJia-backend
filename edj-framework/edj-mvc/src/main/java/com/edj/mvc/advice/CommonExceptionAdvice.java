@@ -78,7 +78,7 @@ public class CommonExceptionAdvice {
     @ExceptionHandler({CommonException.class})
     public Result<?> customException(CommonException e) {
 
-        log.error("请求异常, message:{}, e", e.getMessage(), e);
+        log.error("请求异常, message:{}", e.getMessage(), e);
         // 标识异常已被处理
         ResponseUtils.setResponseHeader(BODY_PROCESSED, "1");
         if (Objects.requireNonNull(RequestUtils.getRequest()).getRequestURL().toString().contains("/inner/")) {

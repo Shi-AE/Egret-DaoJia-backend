@@ -27,14 +27,12 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class EdjUserServiceImpl extends MPJBaseServiceImpl<EdjUserMapper, EdjUser> implements EdjUserService {
 
-    private final EdjUserMapper edjUserMapper;
-
     public EdjUser selectByUsername(String username) {
 
         LambdaQueryWrapper<EdjUser> queryWrapper = new LambdaQueryWrapper<EdjUser>()
                 .eq(EdjUser::getUsername, username);
 
-        EdjUser user = edjUserMapper.selectOne(queryWrapper);
+        EdjUser user = baseMapper.selectOne(queryWrapper);
 
         if (user == null) {
             throw new BadRequestException("用户名未找到");
@@ -57,8 +55,30 @@ public class EdjUserServiceImpl extends MPJBaseServiceImpl<EdjUserMapper, EdjUse
                     .set(EdjUser::getLoginTime, LocalDateTime.now());
 
 
-            edjUserMapper.update(new EdjUser(), updateWrapper);
+            baseMapper.update(new EdjUser(), updateWrapper);
         };
+    }
+
+    @Override
+    public String selectUsernameByOpenId(String openId) {
+
+        LambdaQueryWrapper<EdjUser> wrapper = new LambdaQueryWrapper<EdjUser>()
+                .select(EdjUser::getUsername, EdjUser::getStatus)
+                .eq(EdjUser::getOpenId, openId);
+
+        EdjUser user = baseMapper.selectOne(wrapper);
+
+        // 如果未找到用户，返回注册
+        if (user == null) {
+            return null;
+        }
+
+        if (EnumUtils.ne(EdjUserStatus.NORMAL, user.getStatus())) {
+            log.debug("微信用户被冻结，冻结原因：{}", user.getRemark());
+            throw new BadRequestException("用户被冻结");
+        }
+
+        return user.getUsername();
     }
 }
 
