@@ -1,6 +1,6 @@
 package com.edj.user.controller.open;
 
-import com.edj.user.domain.dto.WechatLoginDTO;
+import com.edj.user.domain.dto.PhoneLoginDTO;
 import com.edj.user.domain.vo.UserTokenVO;
 import com.edj.user.service.LoginService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -15,26 +15,26 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Consumer 用户登录
+ * Worker 服务端用户登录
  *
  * @author A.E.
  * @date 2024/10/31
  */
 @RestController
 @RequiredArgsConstructor
-@Tag(name = "Consumer 用户登录")
-@RequestMapping("open/consumer")
-public class OpenConsumerLoginController {
+@Tag(name = "Worker 服务端用户登录")
+@RequestMapping("open/worker")
+public class OpenWorkerLoginController {
 
     private final LoginService loginService;
 
     /**
-     * c端用户登录
+     * 服务端用户登录
      */
     @PostMapping("login")
     @Operation(summary = "登录")
     @PreAuthorize("isAnonymous()")
-    public UserTokenVO consumerLogin(@Validated @RequestBody WechatLoginDTO WechatLoginDTO, HttpServletRequest request) {
-        return loginService.loginForWechat(WechatLoginDTO, request);
+    public UserTokenVO consumerLogin(@Validated @RequestBody PhoneLoginDTO phoneLoginDTO, HttpServletRequest request) {
+        return loginService.loginForPhone(phoneLoginDTO, request);
     }
 }

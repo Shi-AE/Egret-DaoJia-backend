@@ -1,6 +1,7 @@
 package com.edj.user.service;
 
 import com.edj.security.domain.dto.AuthorizationUserDTO;
+import com.edj.user.domain.dto.PhoneLoginDTO;
 import com.edj.user.domain.dto.UserLoginDTO;
 import com.edj.user.domain.dto.WechatLoginDTO;
 import com.edj.user.domain.vo.UserTokenVO;
@@ -28,4 +29,16 @@ public interface LoginService {
      * 微信登录服务
      */
     UserTokenVO loginForWechat(WechatLoginDTO wechatLoginDTO, HttpServletRequest request);
+
+    /**
+     * 手机登录服务
+     */
+    UserTokenVO loginForPhone(PhoneLoginDTO phoneLoginDTO, HttpServletRequest request);
+
+    /**
+     * 创建手机号用户
+     *
+     * @return 用户名
+     */
+    String createUser(String phone, String verifyCode);
 }

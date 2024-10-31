@@ -2,14 +2,17 @@ package com.edj.user.service.impl;
 
 import cn.hutool.core.lang.Snowflake;
 import cn.hutool.http.useragent.UserAgent;
+import com.edj.api.api.publics.SmsCodeApi;
 import com.edj.api.api.publics.WechatApi;
 import com.edj.api.api.publics.dto.OpenIdDTO;
+import com.edj.api.api.publics.dto.SmsCodeDTO;
 import com.edj.common.constants.ErrorInfo;
 import com.edj.common.expcetions.BadRequestException;
 import com.edj.common.expcetions.CommonException;
 import com.edj.common.expcetions.ServerErrorException;
 import com.edj.common.utils.*;
 import com.edj.security.domain.dto.AuthorizationUserDTO;
+import com.edj.user.domain.dto.PhoneLoginDTO;
 import com.edj.user.domain.dto.UserLoginDTO;
 import com.edj.user.domain.dto.WechatLoginDTO;
 import com.edj.user.domain.entity.EdjUser;
@@ -22,6 +25,7 @@ import com.edj.user.service.LoginService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationContext;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -52,7 +56,11 @@ import static org.springframework.http.HttpHeaders.USER_AGENT;
 @RequiredArgsConstructor
 public class LoginServiceImpl implements LoginService {
 
+    private final ApplicationContext applicationContext;
+
     private final WechatApi wechatApi;
+
+    private final SmsCodeApi smsCodeApi;
 
     private final EdjUserService userService;
 
@@ -176,5 +184,78 @@ public class LoginServiceImpl implements LoginService {
         AuthorizationUserDTO principal = (AuthorizationUserDTO) userDetailsService.loadUserByUsername(username);
 
         return createToken(principal, request);
+    }
+
+    @Override
+    public UserTokenVO loginForPhone(PhoneLoginDTO phoneLoginDTO, HttpServletRequest request) {
+
+        // 根据手机号查找用户
+        String phone = phoneLoginDTO.getPhone();
+        String verifyCode = phoneLoginDTO.getVerifyCode();
+        String password = phoneLoginDTO.getPassword();
+        String username = userService.selectUsernameByPhone(phone);
+
+        // 判断用户是否存在
+        if (StringUtils.isBlank(username)) {
+            LoginService loginService = applicationContext.getBean(LoginService.class);
+            username = loginService.createUser(phone, verifyCode);
+        }
+        // 判断是否存在密码
+        else if (StringUtils.isNotBlank(password)) {
+            // 存在密码直接使用密码登录
+            return loginForUsername(
+                    UserLoginDTO.builder()
+                            .username(username)
+                            .password(password)
+                            .build(),
+                    request
+            );
+        } else {
+            // 使用验证码登录
+            SmsCodeDTO verify = smsCodeApi.verify(phone, verifyCode);
+            if (BooleanUtils.isFalse(verify.getIsSuccess())) {
+                throw new BadRequestException("验证码错误");
+            }
+        }
+
+        // 获取权限
+        AuthorizationUserDTO principal = (AuthorizationUserDTO) userDetailsService.loadUserByUsername(username);
+
+        return createToken(principal, request);
+    }
+
+    @Transactional
+    public String createUser(String phone, String verifyCode) {
+        String username;
+        // 不存在使用验证码注册
+        SmsCodeDTO verify = smsCodeApi.verify(phone, verifyCode);
+        if (BooleanUtils.isFalse(verify.getIsSuccess())) {
+            throw new BadRequestException("验证码错误");
+        }
+        // 注册
+        // 生成用户标识
+        username = IdUtils.toWechatUserName(snowflake.nextId());
+        EdjUser user = EdjUser
+                .builder()
+                .username(username)
+                .nickname(username)
+                // 随机生成密码
+                .password(passwordEncoder.encode(IdUtils.fastSimpleUUID()))
+                .phoneNumber(phone)
+                .build();
+        userService.save(user);
+        // 添加服务端用户权限
+        Long id = user.getId();
+        if (ObjectUtils.isEmpty(id)) {
+            log.error("服务端手机号用户注册失败: {}", user);
+            throw new ServerErrorException("用户注册失败");
+        }
+        userRoleService.save(EdjUserRole
+                .builder()
+                .edjUserId(id)
+                .edjRoleId((Long) EnumUtils.value(EdjSysRole.WORKER))
+                .build()
+        );
+        return username;
     }
 }

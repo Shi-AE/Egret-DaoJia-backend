@@ -69,7 +69,18 @@ public class SecurityConfiguration {
                         // swagger 文档
                         .requestMatchers(HttpMethod.GET, "/v3/api-docs").permitAll()
                         // 登录 \ 注册
-                        .requestMatchers(HttpMethod.POST, "/open/login", "/open/register", "/open/consumer/login").permitAll()
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/open/login",
+                                "/open/register",
+                                "/open/consumer/login",
+                                "/open/worker/login",
+                                "/open/institution/login"
+                        ).permitAll()
+                        // 验证码
+                        .requestMatchers(HttpMethod.POST, "/sms/code/send").permitAll()
+                        // 城市接口
+                        .requestMatchers(HttpMethod.GET, "/open/city").permitAll()
                         // 内部请求
                         .requestMatchers("/inner/**").permitAll()
                         // 拦截

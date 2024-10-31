@@ -26,4 +26,9 @@ public interface EdjUserService extends MPJBaseService<EdjUser> {
      * 根据openid查找用户名
      */
     String selectUsernameByOpenId(String openId);
+
+    /**
+     * 根据手机号查找用户名
+     */
+    String selectUsernameByPhone(String phone);
 }

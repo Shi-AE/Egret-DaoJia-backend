@@ -59,3 +59,7 @@ gateway:
       - /edj-user/open/register
       - /edj-user/open/login
       - /edj-user/open/consumer/login
+      - /edj-user/open/worker/login
+      - /edj-user/open/institution/login
+      # 验证码
+      - /edj-publics/sms/code/send

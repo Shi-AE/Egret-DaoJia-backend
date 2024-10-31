@@ -16,7 +16,8 @@ import lombok.Getter;
 public enum EdjSysRole {
 
     ADMIN(1L, "管理员角色"),
-    CONSUMER(2L, "客户端角色");
+    CONSUMER(2L, "客户端角色"),
+    WORKER(3L, "服务端角色");
 
     @EnumValue
     private final Long value;

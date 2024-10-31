@@ -80,6 +80,27 @@ public class EdjUserServiceImpl extends MPJBaseServiceImpl<EdjUserMapper, EdjUse
 
         return user.getUsername();
     }
+
+    @Override
+    public String selectUsernameByPhone(String phone) {
+        LambdaQueryWrapper<EdjUser> wrapper = new LambdaQueryWrapper<EdjUser>()
+                .select(EdjUser::getUsername, EdjUser::getStatus)
+                .eq(EdjUser::getPhoneNumber, phone);
+
+        EdjUser user = baseMapper.selectOne(wrapper);
+
+        // 如果未找到用户，返回注册
+        if (user == null) {
+            return null;
+        }
+
+        if (EnumUtils.ne(EdjUserStatus.NORMAL, user.getStatus())) {
+            log.debug("手机号用户被冻结，冻结原因：{}", user.getRemark());
+            throw new BadRequestException("用户被冻结");
+        }
+
+        return user.getUsername();
+    }
 }
 
 

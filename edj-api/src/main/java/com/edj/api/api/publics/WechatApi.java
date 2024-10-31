@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * @author A.E.
  * @date 2024/10/29
  */
-@FeignClient(name = "edj-publics", path = "inner/wechat")
+@FeignClient(contextId = "WechatApi", name = "edj-publics", path = "inner/wechat")
 public interface WechatApi {
 
     @GetMapping("openId")

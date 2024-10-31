@@ -12,8 +12,6 @@ public class IdUtils extends IdUtil {
 
     public static final String EDJ = "EDJ";
 
-    public static final String wechat = "wx";
-
     public static final long DEFAULT_TWEPOCH = 1728745117883L;
 
     public static final long DEFAULT_TIME_OFFSET = 2000L;
@@ -59,6 +57,6 @@ public class IdUtils extends IdUtil {
      * 雪花id转微信用户名
      */
     public static String toWechatUserName(long id) {
-        return String.format("%s_%s_%s", EDJ, wechat, id);
+        return String.format("%s_%s", EDJ, id);
     }
 }
