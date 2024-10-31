@@ -17,5 +17,5 @@ public class SmsCodeSendDTO {
      * 手机号
      */
     @Schema(description = "手机号")
-    private String phoneNumber;
+    private String phone;
 }

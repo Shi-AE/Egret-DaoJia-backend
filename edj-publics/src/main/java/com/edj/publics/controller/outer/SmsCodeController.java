@@ -27,6 +27,6 @@ public class SmsCodeController {
     @PostMapping("/send")
     @Operation(summary = "发送短信验证码")
     public void smsCodeSend(@RequestBody SmsCodeSendDTO smsCodeSendDTO) {
-        smsCodeService.smsCodeSend(smsCodeSendDTO.getPhoneNumber());
+        smsCodeService.smsCodeSend(smsCodeSendDTO.getPhone());
     }
 }
