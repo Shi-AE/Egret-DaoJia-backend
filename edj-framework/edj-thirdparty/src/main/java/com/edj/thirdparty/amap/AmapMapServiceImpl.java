@@ -1,10 +1,10 @@
 package com.edj.thirdparty.amap;
 
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import com.edj.common.utils.StringUtils;
 import com.edj.thirdparty.amap.properties.AmapProperties;
 import com.edj.thirdparty.core.map.MapService;
 import com.edj.thirdparty.dto.MapLocationDTO;
@@ -78,28 +78,31 @@ public class AmapMapServiceImpl implements MapService {
 
         //3.从json中解析出经纬度坐标信息
         JSONObject jsonObject = JSONUtil.parseObj(jsonStr);
+        JSONObject regeocode = jsonObject.getJSONObject("regeocode");
+        JSONObject addressComponent = regeocode.getJSONObject("addressComponent");
+
         //城市编码
-        String cityCode = (String) jsonObject.getJSONObject("regeocode").getJSONObject("addressComponent").get("citycode");
+        String cityCode = (String) addressComponent.get("citycode");
 
         //省份
-        Object province = jsonObject.getJSONObject("regeocode").getJSONObject("addressComponent").get("province");
+        Object province = addressComponent.get("province");
 
         //市
-        Object city = jsonObject.getJSONObject("regeocode").getJSONObject("addressComponent").get("city");
+        Object city = addressComponent.get("city");
 
         //区
-        Object district = jsonObject.getJSONObject("regeocode").getJSONObject("addressComponent").get("district");
+        Object district = addressComponent.get("district");
 
         //详细地址
-        Object fullAddress = jsonObject.getJSONObject("regeocode").get("formatted_address");
+        Object fullAddress = regeocode.get("formatted_address");
 
         //4.封装响应结果
         return MapLocationDTO
                 .builder()
-                .province(StringUtils.nullToDefault((CharSequence) province, ""))
-                .city(StringUtils.nullToDefault((CharSequence) city, ""))
-                .district(StringUtils.nullToDefault((CharSequence) district, ""))
-                .fullAddress(StringUtils.nullToDefault((CharSequence) fullAddress, ""))
+                .province(ObjectUtil.isEmpty(province) ? null : province.toString())
+                .city(ObjectUtil.isEmpty(city) ? null : city.toString())
+                .district(ObjectUtil.isEmpty(district) ? null : district.toString())
+                .fullAddress(ObjectUtil.isEmpty(fullAddress) ? null : fullAddress.toString())
                 .cityCode(cityCode)
                 .build();
     }
