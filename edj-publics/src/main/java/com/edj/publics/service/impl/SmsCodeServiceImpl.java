@@ -11,8 +11,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
+
 import static com.edj.common.constants.SmsConstants.RedisKey.PHONE_CODE_VERIFY_KEY;
-import static com.edj.common.constants.SmsConstants.Timeout.PHONE_CODE_VERIFY_TIMEOUT;
+import static com.edj.common.constants.SmsConstants.Timeout.*;
 
 /**
  * 验证码服务实现
@@ -39,6 +41,15 @@ public class SmsCodeServiceImpl implements SmsCodeService {
         // 生成key
         String redisKey = String.format(PHONE_CODE_VERIFY_KEY, phoneNumber);
         log.debug("redisKey:{}", redisKey);
+
+        // 检验一分钟内是否生成验证码
+        Long expire = redisTemplate.getExpire(redisKey);
+        if (expire != null && expire > 0) {
+            Duration now = Duration.of(expire, TIMEOUT_UNIT);
+            if (!VERIFY_CODE_CREATE_TIMEOUT.plus(now).minus(PHONE_CODE_VERIFY_TIMEOUT).isNegative()) {
+                throw new BadRequestException("验证码已发送，请稍后重试");
+            }
+        }
 
         // 生成验证码
         String code = RandomUtils.randomNumbers(codeLength);

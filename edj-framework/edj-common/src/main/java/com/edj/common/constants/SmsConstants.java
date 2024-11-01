@@ -37,10 +37,16 @@ public final class SmsConstants {
          * 时间单位
          */
         public static final TemporalUnit TIMEOUT_UNIT = ChronoUnit.SECONDS;
+
         /**
          * 验证码过期时间
          */
         public static final Duration PHONE_CODE_VERIFY_TIMEOUT = Duration.of(300, TIMEOUT_UNIT);
 
+
+        /**
+         * 验证码生成最小间隔
+         */
+        public static final Duration VERIFY_CODE_CREATE_TIMEOUT = Duration.of(60, TIMEOUT_UNIT);
     }
 }
