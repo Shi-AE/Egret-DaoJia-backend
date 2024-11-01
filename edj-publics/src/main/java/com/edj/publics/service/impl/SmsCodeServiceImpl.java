@@ -46,7 +46,7 @@ public class SmsCodeServiceImpl implements SmsCodeService {
         Long expire = redisTemplate.getExpire(redisKey);
         if (expire != null && expire > 0) {
             Duration now = Duration.of(expire, TIMEOUT_UNIT);
-            if (!VERIFY_CODE_CREATE_TIMEOUT.plus(now).minus(PHONE_CODE_VERIFY_TIMEOUT).isNegative()) {
+            if (VERIFY_CODE_CREATE_TIMEOUT.plus(now).minus(PHONE_CODE_VERIFY_TIMEOUT).isPositive()) {
                 throw new BadRequestException("验证码已发送，请稍后重试");
             }
         }

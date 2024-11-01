@@ -108,7 +108,7 @@ public class CollUtils extends CollectionUtil {
         if (CollUtils.isEmpty(list)) {
             return null;
         }
-        return function.apply(list.get(0));
+        return function.apply(list.getFirst());
     }
 
     /**

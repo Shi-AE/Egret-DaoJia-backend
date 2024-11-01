@@ -164,8 +164,8 @@ public class CacheHelper {
         if (CollUtils.isEmpty(data)) {
             return;
         }
-        K apply = keyFunction.apply(data.get(0));
-        Map<K, T> map = data.stream().collect(Collectors.toMap(d -> keyFunction.apply(d), d -> d));
+        K apply = keyFunction.apply(data.getFirst());
+        Map<K, T> map = data.stream().collect(Collectors.toMap(keyFunction, d -> d));
         //5.存储数据到缓存
         redisTemplate.opsForHash().putAll(redisKey, map);
         if (ttl > 0) {

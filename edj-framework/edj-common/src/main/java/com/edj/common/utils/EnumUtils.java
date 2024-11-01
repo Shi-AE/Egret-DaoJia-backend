@@ -41,7 +41,7 @@ public class EnumUtils extends EnumUtil {
             log.error("没有找到可解析的字段");
             throw new ServerErrorException();
         } else if (fieldList.size() == 1) {
-            Field field = fieldList.get(0);
+            Field field = fieldList.getFirst();
             Object value = getValue(enumName, field, enumClass);
             ENUM_VALUE_CACHE.put(enumName, value);
             return value;
