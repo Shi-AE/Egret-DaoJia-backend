@@ -226,7 +226,11 @@ public class LoginServiceImpl implements LoginService {
 
     @Transactional
     public String createUser(String phone, String verifyCode) {
-        String username;
+        // 校验参数
+        if (StringUtils.isBlank(verifyCode)) {
+            throw new BadRequestException("登录失败");
+        }
+
         // 不存在使用验证码注册
         SmsCodeDTO verify = smsCodeApi.verify(phone, verifyCode);
         if (BooleanUtils.isFalse(verify.getIsSuccess())) {
@@ -234,7 +238,7 @@ public class LoginServiceImpl implements LoginService {
         }
         // 注册
         // 生成用户标识
-        username = IdUtils.toWechatUserName(snowflake.nextId());
+        String username = IdUtils.toWechatUserName(snowflake.nextId());
         EdjUser user = EdjUser
                 .builder()
                 .username(username)
