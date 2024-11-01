@@ -15,6 +15,7 @@ import com.edj.foundations.domain.dto.RegionUpdateDTO;
 import com.edj.foundations.domain.entity.EdjCity;
 import com.edj.foundations.domain.entity.EdjRegion;
 import com.edj.foundations.domain.entity.EdjServe;
+import com.edj.foundations.domain.vo.RegionSimpleVO;
 import com.edj.foundations.domain.vo.RegionVO;
 import com.edj.foundations.enums.EdjCityType;
 import com.edj.foundations.enums.EdjRegionActiveStatus;
@@ -26,9 +27,12 @@ import com.edj.foundations.service.EdjConfigRegionService;
 import com.edj.foundations.service.EdjRegionService;
 import com.edj.mysql.utils.PageUtils;
 import com.github.yulichang.base.MPJBaseServiceImpl;
+import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
  * 针对表【edj_region(区域表)】的数据库操作Service实现
@@ -206,5 +210,18 @@ public class EdjRegionServiceImpl extends MPJBaseServiceImpl<EdjRegionMapper, Ed
                 .eq(EdjRegion::getId, id)
                 .set(EdjRegion::getActiveStatus, EdjRegionActiveStatus.DISABLED);
         baseMapper.update(new EdjRegion(), updateWrapper);
+    }
+
+    @Override
+    public List<RegionSimpleVO> getActiveRegionList() {
+
+        MPJLambdaWrapper<EdjRegion> wrapper = new MPJLambdaWrapper<EdjRegion>()
+                .select(EdjRegion::getId, EdjRegion::getName)
+                .select(EdjCity::getCityCode)
+                .innerJoin(EdjCity.class, EdjCity::getId, EdjRegion::getEdjCityId)
+                .eq(EdjRegion::getActiveStatus, EdjRegionActiveStatus.ENABLED)
+                .orderByAsc(EdjRegion::getSortNum);
+
+        return baseMapper.selectJoinList(RegionSimpleVO.class, wrapper);
     }
 }

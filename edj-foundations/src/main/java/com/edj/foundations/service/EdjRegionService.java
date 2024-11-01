@@ -5,8 +5,11 @@ import com.edj.foundations.domain.dto.RegionAddDTO;
 import com.edj.foundations.domain.dto.RegionPageDTO;
 import com.edj.foundations.domain.dto.RegionUpdateDTO;
 import com.edj.foundations.domain.entity.EdjRegion;
+import com.edj.foundations.domain.vo.RegionSimpleVO;
 import com.edj.foundations.domain.vo.RegionVO;
 import com.github.yulichang.base.MPJBaseService;
+
+import java.util.List;
 
 /**
  * 针对表【edj_region(区域表)】的数据库操作Service
@@ -45,4 +48,9 @@ public interface EdjRegionService extends MPJBaseService<EdjRegion> {
      * 禁用区域
      */
     void deactivate(Long id);
+
+    /**
+     * 已开通服务区域列表
+     */
+    List<RegionSimpleVO> getActiveRegionList();
 }
