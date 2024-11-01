@@ -22,7 +22,7 @@ public interface SmsCodeApi {
      * @param verifyCode 验证码
      * @return 验证结果
      */
-    @GetMapping("/verify")
+    @GetMapping("verify")
     SmsCodeDTO verify(
             @RequestParam @Schema(description = "验证手机号") String phone,
             @RequestParam @Schema(description = "验证码") String verifyCode

@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @date 2024/10/31
  */
 @RestController
-@RequestMapping("/inner/sms/code")
+@RequestMapping("inner/sms/code")
 @RequiredArgsConstructor
 @Tag(name = "内部接口 - 验证码相关接口")
 public class InnerSmsCodeController implements SmsCodeApi {
@@ -34,7 +34,7 @@ public class InnerSmsCodeController implements SmsCodeApi {
      * @return 验证结果
      */
     @Override
-    @GetMapping("/verify")
+    @GetMapping("verify")
     @Operation(summary = "校验短信验证码")
     public SmsCodeDTO verify(
             @RequestParam @Schema(description = "验证手机号") String phone,

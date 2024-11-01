@@ -18,13 +18,13 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/sms/code")
+@RequestMapping("sms/code")
 @Tag(name = "验证码相关接口")
 public class SmsCodeController {
 
     private final SmsCodeService smsCodeService;
 
-    @PostMapping("/send")
+    @PostMapping("send")
     @Operation(summary = "发送短信验证码")
     public void smsCodeSend(@RequestBody SmsCodeSendDTO smsCodeSendDTO) {
         smsCodeService.smsCodeSend(smsCodeSendDTO.getPhone());
