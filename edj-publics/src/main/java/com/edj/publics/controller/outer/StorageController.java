@@ -26,14 +26,14 @@ import java.io.IOException;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/storage")
+@RequestMapping("storage")
 @Tag(name = "存储相关接口")
 public class StorageController {
 
     private final StorageService storageService;
 
     @Operation(summary = "文件上传")
-    @PostMapping("/upload")
+    @PostMapping("upload")
     public StorageUploadResDTO upload(@RequestPart("file") MultipartFile file) {
         //获得文件扩展名
         String filename = file.getOriginalFilename();

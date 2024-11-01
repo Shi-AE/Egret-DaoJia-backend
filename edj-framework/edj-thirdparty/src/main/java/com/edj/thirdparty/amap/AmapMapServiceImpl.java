@@ -1,10 +1,10 @@
 package com.edj.thirdparty.amap;
 
-import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.edj.common.utils.StringUtils;
 import com.edj.thirdparty.amap.properties.AmapProperties;
 import com.edj.thirdparty.core.map.MapService;
 import com.edj.thirdparty.dto.MapLocationDTO;
@@ -55,7 +55,7 @@ public class AmapMapServiceImpl implements MapService {
         //4.从json中解析出经纬度坐标信息
         JSONObject jsonObject = JSONUtil.parseObj(jsonStr);
         JSONArray geocodes = JSONUtil.parseArray(jsonObject.get("geocodes"));
-        Object location = JSONUtil.parseObj(geocodes.get(0)).get("location");
+        Object location = JSONUtil.parseObj(geocodes.getFirst()).get("location");
 
         return location.toString();
     }
@@ -96,10 +96,10 @@ public class AmapMapServiceImpl implements MapService {
         //4.封装响应结果
         return MapLocationDTO
                 .builder()
-                .province(ObjectUtil.isEmpty(province) ? null : province.toString())
-                .city(ObjectUtil.isEmpty(city) ? null : city.toString())
-                .district(ObjectUtil.isEmpty(district) ? null : district.toString())
-                .fullAddress(ObjectUtil.isEmpty(fullAddress) ? null : fullAddress.toString())
+                .province(StringUtils.nullToDefault((CharSequence) province, ""))
+                .city(StringUtils.nullToDefault((CharSequence) city, ""))
+                .district(StringUtils.nullToDefault((CharSequence) district, ""))
+                .fullAddress(StringUtils.nullToDefault((CharSequence) fullAddress, ""))
                 .cityCode(cityCode)
                 .build();
     }
