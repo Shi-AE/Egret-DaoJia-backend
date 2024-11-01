@@ -47,6 +47,7 @@ public class OpenInstitutionLoginController {
      */
     @PostMapping("register")
     @Operation(summary = "机构端用户注册")
+    @PreAuthorize("isAnonymous()")
     public void register(@Validated @RequestBody InstitutionRegisterDTO institutionRegisterDTO) {
         registerInstitution.institutionRegister(institutionRegisterDTO);
     }

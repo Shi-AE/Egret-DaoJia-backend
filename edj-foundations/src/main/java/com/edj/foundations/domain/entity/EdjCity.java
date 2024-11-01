@@ -38,6 +38,11 @@ public class EdjCity extends EjdBaseEntity {
     private String name;
 
     /**
+     * 城市名称
+     */
+    private String cityCode;
+
+    /**
      * 城市名称拼音首字母
      */
     private String pinyinInitial;
