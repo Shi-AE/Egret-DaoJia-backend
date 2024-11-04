@@ -30,9 +30,9 @@ public class ConsumerServeController {
     /**
      * 获取首页服务列表
      */
-    @GetMapping
+    @GetMapping("category")
     @Operation(summary = "获取首页服务列表")
-    @PreAuthorize("permitAll()")
+    @PreAuthorize("hasAuthority('consumer:serve:category')")
     public List<ServeCategoryVO> serveCategory(@RequestParam Long regionId) {
         return consumerHomeService.getServeIconCategoryByRegionIdCache(regionId);
     }

@@ -3,6 +3,7 @@ package com.edj.user;
 import cn.hutool.core.lang.Pair;
 import com.edj.user.domain.entity.EdjAuthority;
 import com.edj.user.domain.entity.EdjRoleAuthority;
+import com.edj.user.enums.EdjSysRole;
 import com.edj.user.mapper.EdjAuthorityMapper;
 import com.edj.user.mapper.EdjRoleAuthorityMapper;
 import org.junit.jupiter.api.Test;
@@ -23,32 +24,33 @@ public class TempTest {
     @Test
     void addAuthority() {
         List.of(
-                        Pair.of("批量新增区域服务", "foundations:serve:add"),
-                        Pair.of("区域服务分页查询", "foundations:serve:page"),
-                        Pair.of("区域服务价格修改", "foundations:serve:update"),
-                        Pair.of("区域服务设置热门", "foundations:serve:onHot"),
-                        Pair.of("区域服务取消热门", "foundations:serve:offHot"),
-                        Pair.of("区域服务上架", "foundations:serve:onSale"),
-                        Pair.of("区域服务下架", "foundations:serve:offSale"),
-                        Pair.of("区域服务删除", "foundations:serve:delete")
+                        Pair.of("获取首页服务列表", "consumer:serve:category"),
+                        Pair.of("已开通服务区域列表", "consumer:region:active")
                 )
                 .parallelStream()
                 .unordered()
-                .forEach(x -> {
+                .forEach(authority -> {
+
                     EdjAuthority edjAuthority = EdjAuthority
                             .builder()
                             .parentId(4265771314790400L)
-                            .name(x.getKey())
-                            .permission(x.getValue())
+                            .name(authority.getKey())
+                            .permission(authority.getValue())
                             .build();
                     authorityMapper.insert(edjAuthority);
 
-                    roleAuthorityMapper.insert(EdjRoleAuthority
-                            .builder()
-                            .edjAuthorityId(edjAuthority.getId())
-                            .edjRoleId(1L)
-                            .build()
-                    );
+                    List.of(
+                                    EdjSysRole.ADMIN.getValue(),
+                                    EdjSysRole.CONSUMER.getValue()
+                            )
+                            .parallelStream()
+                            .unordered()
+                            .forEach(roleId -> roleAuthorityMapper.insert(EdjRoleAuthority
+                                    .builder()
+                                    .edjAuthorityId(edjAuthority.getId())
+                                    .edjRoleId(roleId)
+                                    .build()
+                            ));
                 });
     }
 }

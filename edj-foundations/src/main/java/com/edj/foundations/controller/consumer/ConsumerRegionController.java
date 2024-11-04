@@ -31,7 +31,7 @@ public class ConsumerRegionController {
      */
     @GetMapping("active")
     @Operation(summary = "已开通服务区域列表")
-    @PreAuthorize("permitAll()")
+    @PreAuthorize("hasAuthority('consumer:region:active')")
     public List<RegionSimpleVO> activeRegionList() {
         return consumerHomeService.getActiveRegionList();
     }
