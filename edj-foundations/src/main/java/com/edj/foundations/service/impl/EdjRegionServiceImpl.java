@@ -211,17 +211,4 @@ public class EdjRegionServiceImpl extends MPJBaseServiceImpl<EdjRegionMapper, Ed
                 .set(EdjRegion::getActiveStatus, EdjRegionActiveStatus.DISABLED);
         baseMapper.update(new EdjRegion(), updateWrapper);
     }
-
-    @Override
-    public List<RegionSimpleVO> getActiveRegionList() {
-
-        MPJLambdaWrapper<EdjRegion> wrapper = new MPJLambdaWrapper<EdjRegion>()
-                .select(EdjRegion::getId, EdjRegion::getName)
-                .select(EdjCity::getCityCode)
-                .innerJoin(EdjCity.class, EdjCity::getId, EdjRegion::getEdjCityId)
-                .eq(EdjRegion::getActiveStatus, EdjRegionActiveStatus.ENABLED)
-                .orderByAsc(EdjRegion::getSortNum);
-
-        return baseMapper.selectJoinList(RegionSimpleVO.class, wrapper);
-    }
 }
