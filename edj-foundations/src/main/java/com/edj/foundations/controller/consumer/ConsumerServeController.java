@@ -1,9 +1,12 @@
 package com.edj.foundations.controller.consumer;
 
+import com.edj.foundations.domain.vo.ServeAggregationSimpleVO;
 import com.edj.foundations.domain.vo.ServeCategoryVO;
 import com.edj.foundations.service.ConsumerHomeService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,7 +36,17 @@ public class ConsumerServeController {
     @GetMapping("category")
     @Operation(summary = "获取首页服务列表")
     @PreAuthorize("hasAuthority('consumer:serve:category')")
-    public List<ServeCategoryVO> serveCategory(@RequestParam Long regionId) {
+    public List<ServeCategoryVO> serveCategory(@RequestParam @Positive @Schema(description = "区域id") Long regionId) {
         return consumerHomeService.getServeIconCategoryByRegionIdCache(regionId);
+    }
+
+    /**
+     * 首页热门服务列表
+     */
+    @GetMapping("hot")
+    @Operation(summary = "首页热门服务列表")
+//    @PreAuthorize("hasAuthority('consumer:serve:hot')")
+    public List<ServeAggregationSimpleVO> hot(@RequestParam @Positive @Schema(description = "区域id") Long regionId) {
+        return consumerHomeService.getHotByRegionId(regionId);
     }
 }

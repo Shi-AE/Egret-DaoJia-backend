@@ -1,6 +1,7 @@
 package com.edj.foundations.service;
 
 import com.edj.foundations.domain.vo.RegionSimpleVO;
+import com.edj.foundations.domain.vo.ServeAggregationSimpleVO;
 import com.edj.foundations.domain.vo.ServeCategoryVO;
 
 import java.util.List;
@@ -22,4 +23,9 @@ public interface ConsumerHomeService {
      * 根据区域id获取服务图标信息
      */
     List<ServeCategoryVO> getServeIconCategoryByRegionIdCache(Long regionId);
+
+    /**
+     * 根据区域id查询热门服务
+     */
+    List<ServeAggregationSimpleVO> getHotByRegionId(Long regionId);
 }

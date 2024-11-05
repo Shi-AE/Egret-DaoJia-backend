@@ -1,10 +1,14 @@
 package com.edj.foundations.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.edj.common.utils.CollUtils;
 import com.edj.foundations.domain.entity.*;
 import com.edj.foundations.domain.vo.RegionSimpleVO;
+import com.edj.foundations.domain.vo.ServeAggregationSimpleVO;
 import com.edj.foundations.domain.vo.ServeCategoryVO;
 import com.edj.foundations.domain.vo.ServeIconVO;
 import com.edj.foundations.enums.EdjRegionActiveStatus;
+import com.edj.foundations.enums.EdjServeIsHot;
 import com.edj.foundations.enums.EdjServeSaleStatus;
 import com.edj.foundations.mapper.EdjRegionMapper;
 import com.edj.foundations.mapper.EdjServeMapper;
@@ -45,6 +49,16 @@ public class ConsumerHomeServiceImpl implements ConsumerHomeService {
     @Override
     public List<ServeCategoryVO> getServeIconCategoryByRegionIdCache(Long regionId) {
 
+        // 检查区域启用
+        LambdaQueryWrapper<EdjRegion> check = new LambdaQueryWrapper<EdjRegion>()
+                .select(EdjRegion::getId)
+                .eq(EdjRegion::getId, regionId)
+                .eq(EdjRegion::getActiveStatus, EdjRegionActiveStatus.ENABLED);
+        boolean exists = regionMapper.exists(check);
+        if (!exists) {
+            return CollUtils.emptyList();
+        }
+
         MPJLambdaWrapper<EdjServe> wrapper = new MPJLambdaWrapper<EdjServe>()
                 .selectAs(EdjServeType::getId, ServeCategoryVO::getServeTypeId)
                 .selectAs(EdjServeType::getName, ServeCategoryVO::getServeTypeName)
@@ -76,5 +90,34 @@ public class ConsumerHomeServiceImpl implements ConsumerHomeService {
                         .limit(4)
                         .toList()))
                 .toList();
+    }
+
+    @Override
+    public List<ServeAggregationSimpleVO> getHotByRegionId(Long regionId) {
+
+        // 检查区域启用
+        LambdaQueryWrapper<EdjRegion> check = new LambdaQueryWrapper<EdjRegion>()
+                .select(EdjRegion::getId)
+                .eq(EdjRegion::getId, regionId)
+                .eq(EdjRegion::getActiveStatus, EdjRegionActiveStatus.ENABLED);
+        boolean exists = regionMapper.exists(check);
+        if (!exists) {
+            return CollUtils.emptyList();
+        }
+
+        MPJLambdaWrapper<EdjServe> wrapper = new MPJLambdaWrapper<EdjServe>()
+                .select(EdjServe::getId, EdjServe::getPrice)
+                .selectAs(EdjServe::getEdjServeItemId, ServeAggregationSimpleVO::getServeItemId)
+                .selectAs(EdjServeItem::getName, ServeAggregationSimpleVO::getServeItemName)
+                .selectAs(EdjServeItem::getImg, ServeAggregationSimpleVO::getServeItemImg)
+                .selectAs(EdjServeItem::getUnit, ServeAggregationSimpleVO::getUnit)
+                .selectAs(EdjServeItem::getDetailImg, ServeAggregationSimpleVO::getDetailImg)
+                .innerJoin(EdjServeItem.class, EdjServeItem::getId, EdjServe::getEdjServeItemId)
+                .eq(EdjServe::getIsHot, EdjServeIsHot.HOT)
+                .eq(EdjServe::getSaleStatus, EdjServeSaleStatus.PUBLISHED)
+                .eq(EdjServe::getEdjRegionId, regionId)
+                .orderByDesc(EdjServe::getId);
+
+        return serveMapper.selectJoinList(ServeAggregationSimpleVO.class, wrapper);
     }
 }
