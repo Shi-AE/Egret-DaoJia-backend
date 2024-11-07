@@ -1,16 +1,15 @@
 package com.edj.customer.controller.consumer;
 
 import com.edj.customer.domain.dto.AddressBookAddDTO;
+import com.edj.customer.domain.dto.AddressBookUpdateDTO;
 import com.edj.customer.service.EdjAddressBookService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * 用户端 - 地址薄相关接口
@@ -35,5 +34,18 @@ public class ConsumerAddressBookController {
     @PreAuthorize("permitAll()")
     public void add(@RequestBody @Validated AddressBookAddDTO addressBookAddDTO) {
         addressBookService.add(addressBookAddDTO);
+    }
+
+    /**
+     * 修改地址薄
+     */
+    @PutMapping("{id}")
+    @Operation(summary = "修改地址薄")
+    @PreAuthorize("permitAll()")
+    public void update(
+            @NotNull(message = "id不能为空") @PathVariable Long id,
+            @RequestBody @Validated AddressBookUpdateDTO addressBookUpdateDTO
+    ) {
+        addressBookService.update(id, addressBookUpdateDTO);
     }
 }

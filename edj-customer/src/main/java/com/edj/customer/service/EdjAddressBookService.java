@@ -1,6 +1,7 @@
 package com.edj.customer.service;
 
 import com.edj.customer.domain.dto.AddressBookAddDTO;
+import com.edj.customer.domain.dto.AddressBookUpdateDTO;
 import com.edj.customer.domain.entity.EdjAddressBook;
 import com.github.yulichang.base.MPJBaseService;
 
@@ -16,4 +17,9 @@ public interface EdjAddressBookService extends MPJBaseService<EdjAddressBook> {
      * 地址薄新增
      */
     void add(AddressBookAddDTO addressBookAddDTO);
+
+    /**
+     * 修改地址薄
+     */
+    void update(Long id, AddressBookUpdateDTO addressBookUpdateDTO);
 }

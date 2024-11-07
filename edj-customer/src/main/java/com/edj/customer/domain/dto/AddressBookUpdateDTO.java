@@ -5,14 +5,13 @@ import com.edj.mvc.annotation.enums.Enums;
 import com.edj.mvc.annotation.phone.Phone;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 新增地址薄
+ * 修改地址薄
  *
  * @author A.E.
  * @date 2024/11/7
@@ -21,13 +20,12 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "新增地址薄")
-public class AddressBookAddDTO {
+@Schema(description = "修改地址薄")
+public class AddressBookUpdateDTO {
 
     /**
      * 名称
      */
-    @NotBlank(message = "名称不能为空")
     @Schema(description = "名称")
     private String name;
 
@@ -35,7 +33,6 @@ public class AddressBookAddDTO {
      * 电话
      */
     @Phone
-    @NotBlank(message = "电话不能为空")
     @Schema(description = "电话")
     private String phone;
 
@@ -70,7 +67,6 @@ public class AddressBookAddDTO {
     /**
      * 是否为默认地址（0否 1是）
      */
-    @NotNull(message = "默认选项不能为空")
     @Enums(EdjAddressBookIsDefault.class)
     @Schema(description = "是否为默认地址（0否 1是）")
     private Integer isDefault;

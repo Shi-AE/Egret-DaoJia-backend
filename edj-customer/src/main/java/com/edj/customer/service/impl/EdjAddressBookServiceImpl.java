@@ -9,6 +9,7 @@ import com.edj.common.utils.BeanUtils;
 import com.edj.common.utils.EnumUtils;
 import com.edj.common.utils.StringUtils;
 import com.edj.customer.domain.dto.AddressBookAddDTO;
+import com.edj.customer.domain.dto.AddressBookUpdateDTO;
 import com.edj.customer.domain.entity.EdjAddressBook;
 import com.edj.customer.enums.EdjAddressBookIsDefault;
 import com.edj.customer.mapper.EdjAddressBookMapper;
@@ -78,6 +79,53 @@ public class EdjAddressBookServiceImpl extends MPJBaseServiceImpl<EdjAddressBook
         addressBook.setLat(new BigDecimal(locationSplit[1]));
 
         baseMapper.insert(addressBook);
+    }
+
+    @Override
+    @Transactional
+    public void update(Long id, AddressBookUpdateDTO addressBookUpdateDTO) {
+        // 获取当前用户id
+        Long userId = SecurityUtils.getUserId();
+
+        // 检查默认地址
+        Integer isDefault = addressBookUpdateDTO.getIsDefault();
+        if (EnumUtils.eq(EdjAddressBookIsDefault.DEFAULT, isDefault)) {
+            // 清空其他默认
+            clearDefault(userId);
+        }
+
+        // 如果请求体中没有经纬度，调用第三方api根据详细地址获取经纬度
+        String location = addressBookUpdateDTO.getLocation();
+        if (StringUtils.isBlank(location)) {
+            // 组装详细地址
+            String completeAddress = addressBookUpdateDTO.getProvince() +
+                    addressBookUpdateDTO.getCity() +
+                    addressBookUpdateDTO.getCounty() +
+                    addressBookUpdateDTO.getAddress();
+            // 远程请求高德获取经纬度
+            LocationDTO locationDto = mapApi.getLocationByAddress(completeAddress);
+            // 经纬度(字符串格式：经度,纬度),经度在前，纬度在后
+            location = locationDto.getLocation();
+        }
+
+        EdjAddressBook addressBook = BeanUtils.toBean(addressBookUpdateDTO, EdjAddressBook.class);
+        addressBook.setId(id);
+
+        if (StringUtils.isBlank(location)) {
+            throw new BadRequestException("地址错误");
+        }
+
+        String[] locationSplit = location.split(",");
+        if (locationSplit.length != 2) {
+            throw new ServerErrorException();
+        }
+
+        // 经度
+        addressBook.setLon(new BigDecimal(locationSplit[0]));
+        // 纬度
+        addressBook.setLat(new BigDecimal(locationSplit[1]));
+
+        baseMapper.updateById(addressBook);
     }
 
     /**
