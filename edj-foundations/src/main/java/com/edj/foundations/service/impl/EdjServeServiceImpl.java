@@ -5,7 +5,10 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.edj.common.domain.PageResult;
 import com.edj.common.expcetions.BadRequestException;
-import com.edj.common.utils.*;
+import com.edj.common.utils.BeanUtils;
+import com.edj.common.utils.EnumUtils;
+import com.edj.common.utils.ObjectUtils;
+import com.edj.common.utils.SqlUtils;
 import com.edj.foundations.domain.dto.ServeAddDTO;
 import com.edj.foundations.domain.dto.ServePageDTO;
 import com.edj.foundations.domain.entity.EdjRegion;
@@ -122,7 +125,7 @@ public class EdjServeServiceImpl extends MPJBaseServiceImpl<EdjServeMapper, EdjS
                     return serve;
                 })
                 .toList();
-        SqlUtils.actionBatch(serveList, list -> list.forEach(serve -> baseMapper.insert(serve)));
+        SqlUtils.actionBatch(serveList, list -> list.forEach(serve -> baseMapper.insert(serve)), true);
     }
 
     @Override

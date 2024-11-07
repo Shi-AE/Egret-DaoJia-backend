@@ -7,6 +7,7 @@ import com.edj.common.expcetions.BadRequestException;
 import com.edj.common.expcetions.ServerErrorException;
 import com.edj.common.utils.BeanUtils;
 import com.edj.common.utils.EnumUtils;
+import com.edj.common.utils.SqlUtils;
 import com.edj.common.utils.StringUtils;
 import com.edj.customer.domain.dto.AddressBookAddDTO;
 import com.edj.customer.domain.dto.AddressBookUpdateDTO;
@@ -17,10 +18,13 @@ import com.edj.customer.service.EdjAddressBookService;
 import com.edj.security.utils.SecurityUtils;
 import com.github.yulichang.base.MPJBaseServiceImpl;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * 针对表【edj_address_book(地址簿)】的数据库操作Service实现
@@ -29,10 +33,13 @@ import java.math.BigDecimal;
  * @date 2024/11/07
  */
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class EdjAddressBookServiceImpl extends MPJBaseServiceImpl<EdjAddressBookMapper, EdjAddressBook> implements EdjAddressBookService {
 
     private final MapApi mapApi;
+
+    private final PlatformTransactionManager transactionManager;
 
     @Override
     @Transactional
@@ -145,6 +152,17 @@ public class EdjAddressBookServiceImpl extends MPJBaseServiceImpl<EdjAddressBook
                 .eq(EdjAddressBook::getId, id);
 
         baseMapper.update(new EdjAddressBook(), wrapper);
+    }
+
+    @Override
+    public void batchDelete(List<Long> idList) {
+        SqlUtils.actionBatch(idList, list -> {
+            int delete = baseMapper.deleteByIds(list);
+            if (delete != list.size()) {
+                log.debug("list: {}, delete: {}", list, delete);
+                throw new BadRequestException("地址簿不存在");
+            }
+        }, true);
     }
 
     /**

@@ -2,9 +2,15 @@ package com.edj.common.utils;
 
 import cn.hutool.core.collection.ListUtil;
 import cn.hutool.db.sql.SqlUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -20,20 +26,53 @@ public class SqlUtils extends SqlUtil {
      */
     public static final int BATCH_SIZE = 2;
 
+    private static final PlatformTransactionManager transactionManager;
+
+    static {
+        transactionManager = SpringUtil.getBean(PlatformTransactionManager.class);
+    }
+
     /**
      * 仅执行批处理
      */
-    public static <T> void actionBatch(List<T> list, Consumer<List<T>> action) {
-        actionBatch(list, action, BATCH_SIZE);
+    public static <T> void actionBatch(List<T> list, Consumer<List<T>> action, boolean transaction) {
+        actionBatch(list, action, transaction, BATCH_SIZE);
     }
 
     /**
      * 仅执行批处理，自定义大小批处理
      */
-    public static <T> void actionBatch(List<T> list, Consumer<List<T>> action, int batchSize) {
+    public static <T> void actionBatch(List<T> list, Consumer<List<T>> action, boolean transaction, int batchSize) {
         List<List<T>> split = ListUtil.split(list, batchSize);
         log.debug("actionBatch 拆分批处理 split = {}", split);
-        split.parallelStream().forEach(action);
+        // 是否开启事务
+        if (transaction) {
+            // 高并发写入线程安全队列
+            Queue<TransactionStatus> transactionStatusList = new ConcurrentLinkedQueue<>();
+
+            // 批处理
+            try {
+                split.parallelStream().forEach(item -> {
+                    // 开启事务
+                    DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+                    TransactionStatus status = transactionManager.getTransaction(def);
+                    // 将事务交由主线程总结
+                    transactionStatusList.add(status);
+                    // 执行
+                    action.accept(item);
+                });
+
+                // 执行成功，提交事务
+                transactionStatusList.forEach(transactionManager::commit);
+            } catch (RuntimeException e) {
+                // 执行失败，回滚事务
+                transactionStatusList.forEach(transactionManager::rollback);
+                // 继续上抛异常
+                throw e;
+            }
+        } else {
+            split.parallelStream().forEach(action);
+        }
     }
 
     /**

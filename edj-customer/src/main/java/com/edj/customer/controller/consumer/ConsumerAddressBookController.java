@@ -9,12 +9,17 @@ import com.edj.customer.enums.EdjAddressBookIsDefault;
 import com.edj.customer.service.EdjAddressBookService;
 import com.edj.mvc.annotation.enums.Enums;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * 用户端 - 地址薄相关接口
@@ -72,9 +77,33 @@ public class ConsumerAddressBookController {
     @Operation(summary = "地址薄设为默认/取消默认")
     @PreAuthorize("permitAll()")
     public void updateDefaultStatus(
-            @NotNull(message = "id不能为空") @RequestParam Long id,
-            @NotNull(message = "状态值不能为空") @Enums(EdjAddressBookIsDefault.class) @RequestParam Integer flag
+            @Schema(description = "地址簿id")
+            @NotNull(message = "id不能为空")
+            @RequestParam
+            Long id,
+            @Schema(description = "是否为默认地址（0否 1是）")
+            @NotNull(message = "状态值不能为空")
+            @Enums(EdjAddressBookIsDefault.class)
+            @RequestParam
+            Integer flag
     ) {
         addressBookService.updateDefaultStatus(id, flag);
+    }
+
+    /**
+     * 批量删除地址薄
+     */
+    @DeleteMapping("batch")
+    @Operation(summary = "批量删除地址薄")
+    @PreAuthorize("permitAll()")
+    public void batchDelete(
+            @RequestBody
+            @Validated
+            @Schema(description = "地址簿id列表")
+            @NotNull(message = "地址簿id列表不能为空")
+            @NotEmpty(message = "地址簿id列表不能为空")
+            List<@Positive @NotNull Long> idList
+    ) {
+        addressBookService.batchDelete(idList);
     }
 }

@@ -1,7 +1,6 @@
 package com.edj.mysql.interceptor;
 
 import com.baomidou.mybatisplus.extension.plugins.inner.InnerInterceptor;
-import com.edj.common.expcetions.ServerErrorException;
 import com.edj.common.utils.EnumUtils;
 import com.edj.common.utils.ObjectUtils;
 import com.edj.common.utils.ReflectUtils;
@@ -39,8 +38,6 @@ import static com.edj.mysql.constants.DbValueConstants.EXIST;
  */
 @Slf4j
 public class MyBatisAutoFillInterceptor implements InnerInterceptor {
-
-    private static final int COLUMN_WIDTH = 20;
 
     @Override
     public void beforeUpdate(Executor executor, MappedStatement ms, Object parameter) {
@@ -193,8 +190,8 @@ public class MyBatisAutoFillInterceptor implements InnerInterceptor {
                 }
 
                 if (t == null) {
-                    log.error("修改代码格式为: update(new Entity(), updateWrapper)");
-                    throw new ServerErrorException();
+                    log.debug("尽量修改代码格式为: update(new Entity(), updateWrapper)");
+                    return;
                 }
 
                 // 当前用户设置到更新人字段
