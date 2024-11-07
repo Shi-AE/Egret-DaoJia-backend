@@ -22,4 +22,9 @@ public interface EdjAddressBookService extends MPJBaseService<EdjAddressBook> {
      * 修改地址薄
      */
     void update(Long id, AddressBookUpdateDTO addressBookUpdateDTO);
+
+    /**
+     * 地址薄设为默认/取消默认
+     */
+    void updateDefaultStatus(Long id, Integer flag);
 }

@@ -5,7 +5,9 @@ import com.edj.customer.domain.dto.AddressBookAddDTO;
 import com.edj.customer.domain.dto.AddressBookUpdateDTO;
 import com.edj.customer.domain.entity.EdjAddressBook;
 import com.edj.customer.domain.vo.AddressBookVO;
+import com.edj.customer.enums.EdjAddressBookIsDefault;
 import com.edj.customer.service.EdjAddressBookService;
+import com.edj.mvc.annotation.enums.Enums;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotNull;
@@ -57,8 +59,22 @@ public class ConsumerAddressBookController {
      */
     @GetMapping("{id}")
     @Operation(summary = "地址薄详情")
+    @PreAuthorize("permitAll()")
     public AddressBookVO detail(@NotNull(message = "id不能为空") @PathVariable Long id) {
         EdjAddressBook addressBook = addressBookService.getById(id);
         return BeanUtil.toBean(addressBook, AddressBookVO.class);
+    }
+
+    /**
+     * 地址薄设为默认/取消默认
+     */
+    @PutMapping("default")
+    @Operation(summary = "地址薄设为默认/取消默认")
+    @PreAuthorize("permitAll()")
+    public void updateDefaultStatus(
+            @NotNull(message = "id不能为空") @RequestParam Long id,
+            @NotNull(message = "状态值不能为空") @Enums(EdjAddressBookIsDefault.class) @RequestParam Integer flag
+    ) {
+        addressBookService.updateDefaultStatus(id, flag);
     }
 }

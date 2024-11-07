@@ -128,6 +128,25 @@ public class EdjAddressBookServiceImpl extends MPJBaseServiceImpl<EdjAddressBook
         baseMapper.updateById(addressBook);
     }
 
+    @Override
+    @Transactional
+    public void updateDefaultStatus(Long id, Integer flag) {
+        // 获取当前用户id
+        Long userId = SecurityUtils.getUserId();
+
+        // 检查默认地址
+        if (EnumUtils.eq(EdjAddressBookIsDefault.DEFAULT, flag)) {
+            // 清空其他默认
+            clearDefault(userId);
+        }
+
+        LambdaUpdateWrapper<EdjAddressBook> wrapper = new LambdaUpdateWrapper<EdjAddressBook>()
+                .set(EdjAddressBook::getIsDefault, flag)
+                .eq(EdjAddressBook::getId, id);
+
+        baseMapper.update(new EdjAddressBook(), wrapper);
+    }
+
     /**
      * 清空其他默认
      */
