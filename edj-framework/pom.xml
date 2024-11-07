@@ -22,6 +22,7 @@
         <module>../edj-user</module>
         <module>../edj-publics</module>
         <module>../edj-api</module>
+        <module>../edj-customer</module>
     </modules>
 
     <properties>

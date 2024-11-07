@@ -6,10 +6,12 @@ import com.edj.thirdparty.core.wechat.WechatService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -30,7 +32,7 @@ public class InnerWechatController implements WechatApi {
     @Override
     @GetMapping("openId")
     @Operation(summary = "获取openId")
-    public OpenIdDTO getOpenId(@Schema(description = "微信登录凭证") String code) {
+    public OpenIdDTO getOpenId(@RequestParam @Schema(description = "微信登录凭证") @NotBlank String code) {
         String openId = wechatService.getOpenid(code);
         return new OpenIdDTO(openId);
     }

@@ -5,6 +5,7 @@ import cn.hutool.http.HttpRequest;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.edj.common.expcetions.BadRequestException;
 import com.edj.thirdparty.amap.properties.AmapProperties;
 import com.edj.thirdparty.core.map.MapService;
 import com.edj.thirdparty.dto.MapLocationDTO;
@@ -55,7 +56,13 @@ public class AmapMapServiceImpl implements MapService {
         //4.从json中解析出经纬度坐标信息
         JSONObject jsonObject = JSONUtil.parseObj(jsonStr);
         JSONArray geocodes = JSONUtil.parseArray(jsonObject.get("geocodes"));
+        if (geocodes.isEmpty()) {
+            throw new BadRequestException("地址错误");
+        }
         Object location = JSONUtil.parseObj(geocodes.getFirst()).get("location");
+        if (ObjectUtil.isNull(location)) {
+            throw new BadRequestException("地址错误");
+        }
 
         return location.toString();
     }

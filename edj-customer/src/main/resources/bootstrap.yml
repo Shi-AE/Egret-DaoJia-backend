@@ -1,7 +1,7 @@
 #################     服务器配置     #################
 
 server:
-  port: 33530 #端口
+  port: 33540 #端口
 
 #################     spring公共配置     #################
 
@@ -9,7 +9,7 @@ spring:
   profiles:
     active: dev
   application:
-    name: edj-foundations
+    name: edj-customer
   cloud:
     nacos:
       config:
@@ -25,14 +25,17 @@ spring:
 #################     项目独有配置     #################
 
 mysql:
-  db-name: edj-foundation
+  db-name: edj-customer
 mybatis-plus:
-  mapper-locations: mapper/foundations/*.xml
-  type-aliases-package: com.edj.foundations.mapper
+  mapper-locations: mapper/customer/*.xml
+  type-aliases-package: com.edj.customer.mapper
 swagger:
-  title: 白鹭到家-运营基础服务接口文档
-  description: 用于服务、区域进行管理
+  title: 白鹭到家-客户中心服务
+  description: 用于客户信息管理
 
 snowflake:
-  workerId: 3
-  datacenterId: 3
+  workerId: 4
+  datacenterId: 4
+
+feign:
+  enable: true

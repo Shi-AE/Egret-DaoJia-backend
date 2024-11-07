@@ -6,6 +6,7 @@ import com.edj.publics.service.SmsCodeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,8 +38,8 @@ public class InnerSmsCodeController implements SmsCodeApi {
     @GetMapping("verify")
     @Operation(summary = "校验短信验证码")
     public SmsCodeDTO verify(
-            @RequestParam @Schema(description = "验证手机号") String phone,
-            @RequestParam @Schema(description = "验证码") String verifyCode
+            @RequestParam @Schema(description = "验证手机号") @NotBlank String phone,
+            @RequestParam @Schema(description = "验证码") @NotBlank String verifyCode
     ) {
         return new SmsCodeDTO(smsCodeService.verify(phone, verifyCode));
     }

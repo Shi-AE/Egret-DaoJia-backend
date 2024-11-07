@@ -2,6 +2,7 @@ package com.edj.api.api.publics;
 
 import com.edj.api.api.publics.dto.SmsCodeDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -24,7 +25,7 @@ public interface SmsCodeApi {
      */
     @GetMapping("verify")
     SmsCodeDTO verify(
-            @RequestParam @Schema(description = "验证手机号") String phone,
-            @RequestParam @Schema(description = "验证码") String verifyCode
+            @RequestParam @Schema(description = "验证手机号") @NotBlank String phone,
+            @RequestParam @Schema(description = "验证码") @NotBlank String verifyCode
     );
 }
