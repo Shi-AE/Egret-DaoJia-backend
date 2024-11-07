@@ -1,7 +1,10 @@
 package com.edj.customer.controller.consumer;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.edj.customer.domain.dto.AddressBookAddDTO;
 import com.edj.customer.domain.dto.AddressBookUpdateDTO;
+import com.edj.customer.domain.entity.EdjAddressBook;
+import com.edj.customer.domain.vo.AddressBookVO;
 import com.edj.customer.service.EdjAddressBookService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -47,5 +50,15 @@ public class ConsumerAddressBookController {
             @RequestBody @Validated AddressBookUpdateDTO addressBookUpdateDTO
     ) {
         addressBookService.update(id, addressBookUpdateDTO);
+    }
+
+    /**
+     * 地址薄详情
+     */
+    @GetMapping("{id}")
+    @Operation(summary = "地址薄详情")
+    public AddressBookVO detail(@NotNull(message = "id不能为空") @PathVariable Long id) {
+        EdjAddressBook addressBook = addressBookService.getById(id);
+        return BeanUtil.toBean(addressBook, AddressBookVO.class);
     }
 }
