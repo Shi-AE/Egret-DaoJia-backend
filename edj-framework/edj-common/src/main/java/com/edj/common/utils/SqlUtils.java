@@ -3,6 +3,8 @@ package com.edj.common.utils;
 import cn.hutool.core.collection.ListUtil;
 import cn.hutool.db.sql.SqlUtil;
 import cn.hutool.extra.spring.SpringUtil;
+import com.edj.common.domain.dto.TransactionResourceDTO;
+import com.edj.common.expcetions.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
@@ -10,6 +12,7 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -48,28 +51,48 @@ public class SqlUtils extends SqlUtil {
         // 是否开启事务
         if (transaction) {
             // 高并发写入线程安全队列
-            Queue<TransactionStatus> transactionStatusList = new ConcurrentLinkedQueue<>();
+            Queue<TransactionResourceDTO> transactionResourceList = new ConcurrentLinkedQueue<>();
 
-            // 批处理
+            List<CompletableFuture<Void>> futureList = split
+                    .stream()
+                    .map(item -> AsyncUtils.runAsync(() -> {
+                        // 开启事务
+                        DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+                        def.setTimeout(10);
+                        TransactionStatus status = transactionManager.getTransaction(def);
+                        log.debug("开启事务");
+
+                        // 复制事务资源交由主线程管理
+                        transactionResourceList.add(TransactionResourceDTO.copyTransactionResource(status));
+                        log.debug("复制事务资源交由主线程管理");
+
+                        // 执行
+                        action.accept(item);
+                        log.debug("任务执行完成");
+                    }))
+                    .toList();
+
             try {
-                split.parallelStream().forEach(item -> {
-                    // 开启事务
-                    DefaultTransactionDefinition def = new DefaultTransactionDefinition();
-                    TransactionStatus status = transactionManager.getTransaction(def);
-                    // 将事务交由主线程总结
-                    transactionStatusList.add(status);
-                    // 执行
-                    action.accept(item);
-                });
-
-                // 执行成功，提交事务
-                transactionStatusList.forEach(transactionManager::commit);
-            } catch (RuntimeException e) {
+                CompletableFuture.allOf(futureList.toArray(new CompletableFuture[]{})).join();
+            } catch (Exception e) {
                 // 执行失败，回滚事务
-                transactionStatusList.forEach(transactionManager::rollback);
-                // 继续上抛异常
-                throw e;
+                log.debug("执行失败，回滚事务");
+                transactionResourceList.forEach(tr -> {
+                    tr.autoWiredTransactionResource();
+                    transactionManager.rollback(tr.getTransactionStatus());
+                    tr.removeTransactionResource();
+                });
+                log.debug("事务回滚完成");
+                throw new BadRequestException(e.getMessage());
             }
+            // 执行成功，提交事务
+            log.debug("执行成功，提交事务");
+            transactionResourceList.forEach(tr -> {
+                tr.autoWiredTransactionResource();
+                transactionManager.commit(tr.getTransactionStatus());
+                tr.removeTransactionResource();
+            });
+            log.debug("事务提交成功");
         } else {
             split.parallelStream().forEach(action);
         }
