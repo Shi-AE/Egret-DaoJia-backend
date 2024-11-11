@@ -117,4 +117,13 @@ public class ConsumerAddressBookController {
     public PageResult<AddressBookVO> page(AddressBookPageDTO addressBookPageDTO) {
         return addressBookService.page(addressBookPageDTO);
     }
+
+    /**
+     * 获取默认地址
+     */
+    @GetMapping("default")
+    @Operation(summary = "获取默认地址")
+    public AddressBookVO defaultAddress() {
+        return addressBookService.getDefaultAddress();
+    }
 }

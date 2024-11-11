@@ -38,5 +38,13 @@ public interface EdjAddressBookService extends MPJBaseService<EdjAddressBook> {
      */
     void batchDelete(List<Long> idList);
 
+    /**
+     * 地址薄分页查询
+     */
     PageResult<AddressBookVO> page(AddressBookPageDTO addressBookPageDTO);
+
+    /**
+     * 获取默认地址
+     */
+    AddressBookVO getDefaultAddress();
 }

@@ -187,6 +187,15 @@ public class EdjAddressBookServiceImpl extends MPJBaseServiceImpl<EdjAddressBook
         return PageUtils.toPage(addressBookPage, AddressBookVO.class);
     }
 
+    @Override
+    public AddressBookVO getDefaultAddress() {
+        LambdaQueryWrapper<EdjAddressBook> wrapper = new LambdaQueryWrapper<EdjAddressBook>()
+                .eq(EdjAddressBook::getEdjUserId, SecurityUtils.getUserId())
+                .eq(EdjAddressBook::getIsDefault, EdjAddressBookIsDefault.DEFAULT);
+        EdjAddressBook addressBook = baseMapper.selectOne(wrapper);
+        return BeanUtils.toBean(addressBook, AddressBookVO.class);
+    }
+
     /**
      * 清空其他默认
      */
