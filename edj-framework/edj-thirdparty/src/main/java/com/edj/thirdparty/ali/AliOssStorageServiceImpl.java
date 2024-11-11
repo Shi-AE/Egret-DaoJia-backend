@@ -49,7 +49,7 @@ public class AliOssStorageServiceImpl implements StorageService {
         String basePath = aliOssProperties.getBasePath();
 
         String datePath = DateUtils.format(LocalDate.now(), DEFAULT_DAY_FORMAT_SLASH);
-        String fileName = String.format("%s%s/%s%s", basePath, datePath, IdUtils.randomUUID(), extension);
+        String fileName = String.format("%s/%s/%s%s", basePath, datePath, IdUtils.randomUUID(), extension);
 
         // 创建OSSClient实例。
         OSS ossClient = new OSSClientBuilder().build(endpoint, accessKeyId, accessKeySecret);
