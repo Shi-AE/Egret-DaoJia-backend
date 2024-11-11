@@ -112,9 +112,9 @@ public class ConsumerAddressBookController {
     /**
      * 地址薄分页查询
      */
-    @GetMapping("page")
+    @PostMapping("page")
     @Operation(summary = "地址薄分页查询")
-    public PageResult<AddressBookVO> page(AddressBookPageDTO addressBookPageDTO) {
+    public PageResult<AddressBookVO> page(@RequestBody @Validated AddressBookPageDTO addressBookPageDTO) {
         return addressBookService.page(addressBookPageDTO);
     }
 
