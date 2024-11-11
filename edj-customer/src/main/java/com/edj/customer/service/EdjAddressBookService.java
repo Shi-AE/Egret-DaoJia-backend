@@ -1,8 +1,11 @@
 package com.edj.customer.service;
 
+import com.edj.common.domain.PageResult;
 import com.edj.customer.domain.dto.AddressBookAddDTO;
+import com.edj.customer.domain.dto.AddressBookPageDTO;
 import com.edj.customer.domain.dto.AddressBookUpdateDTO;
 import com.edj.customer.domain.entity.EdjAddressBook;
+import com.edj.customer.domain.vo.AddressBookVO;
 import com.github.yulichang.base.MPJBaseService;
 
 import java.util.List;
@@ -34,4 +37,6 @@ public interface EdjAddressBookService extends MPJBaseService<EdjAddressBook> {
      * 批量删除地址薄
      */
     void batchDelete(List<Long> idList);
+
+    PageResult<AddressBookVO> page(AddressBookPageDTO addressBookPageDTO);
 }

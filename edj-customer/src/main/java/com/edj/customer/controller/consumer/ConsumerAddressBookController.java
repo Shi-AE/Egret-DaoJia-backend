@@ -1,7 +1,9 @@
 package com.edj.customer.controller.consumer;
 
 import cn.hutool.core.bean.BeanUtil;
+import com.edj.common.domain.PageResult;
 import com.edj.customer.domain.dto.AddressBookAddDTO;
+import com.edj.customer.domain.dto.AddressBookPageDTO;
 import com.edj.customer.domain.dto.AddressBookUpdateDTO;
 import com.edj.customer.domain.entity.EdjAddressBook;
 import com.edj.customer.domain.vo.AddressBookVO;
@@ -105,5 +107,14 @@ public class ConsumerAddressBookController {
             List<@Positive @NotNull Long> idList
     ) {
         addressBookService.batchDelete(idList);
+    }
+
+    /**
+     * 地址薄分页查询
+     */
+    @GetMapping("page")
+    @Operation(summary = "地址薄分页查询")
+    public PageResult<AddressBookVO> page(AddressBookPageDTO addressBookPageDTO) {
+        return addressBookService.page(addressBookPageDTO);
     }
 }

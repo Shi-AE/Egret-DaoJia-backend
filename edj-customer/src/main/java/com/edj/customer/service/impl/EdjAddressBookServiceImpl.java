@@ -1,8 +1,11 @@
 package com.edj.customer.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.edj.api.api.publics.MapApi;
 import com.edj.api.api.publics.dto.LocationDTO;
+import com.edj.common.domain.PageResult;
 import com.edj.common.expcetions.BadRequestException;
 import com.edj.common.expcetions.ServerErrorException;
 import com.edj.common.utils.BeanUtils;
@@ -10,11 +13,14 @@ import com.edj.common.utils.EnumUtils;
 import com.edj.common.utils.SqlUtils;
 import com.edj.common.utils.StringUtils;
 import com.edj.customer.domain.dto.AddressBookAddDTO;
+import com.edj.customer.domain.dto.AddressBookPageDTO;
 import com.edj.customer.domain.dto.AddressBookUpdateDTO;
 import com.edj.customer.domain.entity.EdjAddressBook;
+import com.edj.customer.domain.vo.AddressBookVO;
 import com.edj.customer.enums.EdjAddressBookIsDefault;
 import com.edj.customer.mapper.EdjAddressBookMapper;
 import com.edj.customer.service.EdjAddressBookService;
+import com.edj.mysql.utils.PageUtils;
 import com.edj.security.utils.SecurityUtils;
 import com.github.yulichang.base.MPJBaseServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -170,6 +176,15 @@ public class EdjAddressBookServiceImpl extends MPJBaseServiceImpl<EdjAddressBook
                 },
                 false
         );
+    }
+
+    @Override
+    public PageResult<AddressBookVO> page(AddressBookPageDTO addressBookPageDTO) {
+        Page<EdjAddressBook> page = PageUtils.parsePageQuery(addressBookPageDTO);
+        LambdaQueryWrapper<EdjAddressBook> wrapper = new LambdaQueryWrapper<EdjAddressBook>()
+                .eq(EdjAddressBook::getEdjUserId, SecurityUtils.getUserId());
+        Page<EdjAddressBook> addressBookPage = baseMapper.selectPage(page, wrapper);
+        return PageUtils.toPage(addressBookPage, AddressBookVO.class);
     }
 
     /**
