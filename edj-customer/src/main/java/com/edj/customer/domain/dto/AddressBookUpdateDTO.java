@@ -5,6 +5,7 @@ import com.edj.mvc.annotation.enums.Enums;
 import com.edj.mvc.annotation.phone.Phone;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -46,14 +47,14 @@ public class AddressBookUpdateDTO {
     /**
      * 市
      */
-    @NotBlank(message = "市不能为空")
+    @NotNull(message = "市不能为空")
     @Schema(description = "市")
     private String city;
 
     /**
      * 区 / 县
      */
-    @NotBlank(message = "区 / 县不能为空")
+    @NotNull(message = "区 / 县不能为空")
     @Schema(description = "区 / 县")
     private String county;
 

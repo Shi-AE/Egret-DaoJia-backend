@@ -49,14 +49,14 @@ public class AddressBookAddDTO {
     /**
      * 市
      */
-    @NotBlank(message = "市不能为空")
+    @NotNull(message = "市不能为空")
     @Schema(description = "市")
     private String city;
 
     /**
      * 区 / 县
      */
-    @NotBlank(message = "区 / 县不能为空")
+    @NotNull(message = "区 / 县不能为空")
     @Schema(description = "区 / 县")
     private String county;
 
