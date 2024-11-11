@@ -156,13 +156,20 @@ public class EdjAddressBookServiceImpl extends MPJBaseServiceImpl<EdjAddressBook
 
     @Override
     public void batchDelete(List<Long> idList) {
-        SqlUtils.actionBatch(idList, list -> {
-            int delete = baseMapper.deleteByIds(list);
-            if (delete != list.size()) {
-                log.debug("list: {}, delete: {}", list, delete);
-                throw new BadRequestException("地址簿不存在");
-            }
-        }, true);
+        SqlUtils.actionBatch(
+                idList.stream()
+                        .distinct()
+                        .sorted()
+                        .toList(),
+                list -> {
+                    int delete = baseMapper.deleteByIds(list);
+                    if (delete != list.size()) {
+                        log.debug("list: {}, delete: {}", list, delete);
+                        throw new BadRequestException("地址簿不存在");
+                    }
+                },
+                false
+        );
     }
 
     /**
