@@ -43,7 +43,7 @@ public class ConsumerAddressBookController {
      */
     @PostMapping
     @Operation(summary = "地址薄新增")
-    @PreAuthorize("permitAll()")
+    @PreAuthorize("hasAuthority('consumer:addressBook:add')")
     public void add(@RequestBody @Validated AddressBookAddDTO addressBookAddDTO) {
         addressBookService.add(addressBookAddDTO);
     }
@@ -53,7 +53,7 @@ public class ConsumerAddressBookController {
      */
     @PutMapping("{id}")
     @Operation(summary = "修改地址薄")
-    @PreAuthorize("permitAll()")
+    @PreAuthorize("hasAuthority('consumer:addressBook:update')")
     public void update(
             @NotNull(message = "id不能为空") @PathVariable Long id,
             @RequestBody @Validated AddressBookUpdateDTO addressBookUpdateDTO
@@ -66,7 +66,7 @@ public class ConsumerAddressBookController {
      */
     @GetMapping("{id}")
     @Operation(summary = "地址薄详情")
-    @PreAuthorize("permitAll()")
+    @PreAuthorize("hasAuthority('consumer:addressBook:detail')")
     public AddressBookVO detail(@NotNull(message = "id不能为空") @PathVariable Long id) {
         EdjAddressBook addressBook = addressBookService.getById(id);
         return BeanUtil.toBean(addressBook, AddressBookVO.class);
@@ -77,7 +77,7 @@ public class ConsumerAddressBookController {
      */
     @PutMapping("default")
     @Operation(summary = "地址薄设为默认/取消默认")
-    @PreAuthorize("permitAll()")
+    @PreAuthorize("hasAuthority('consumer:addressBook:updateDefault')")
     public void updateDefaultStatus(
             @Schema(description = "地址簿id")
             @NotNull(message = "id不能为空")
@@ -97,7 +97,7 @@ public class ConsumerAddressBookController {
      */
     @DeleteMapping("batch")
     @Operation(summary = "批量删除地址薄")
-    @PreAuthorize("permitAll()")
+    @PreAuthorize("hasAuthority('consumer:addressBook:delete')")
     public void batchDelete(
             @RequestBody
             @Validated
@@ -114,6 +114,7 @@ public class ConsumerAddressBookController {
      */
     @PostMapping("page")
     @Operation(summary = "地址薄分页查询")
+    @PreAuthorize("hasAuthority('consumer:addressBook:page')")
     public PageResult<AddressBookVO> page(@RequestBody @Validated AddressBookPageDTO addressBookPageDTO) {
         return addressBookService.page(addressBookPageDTO);
     }
@@ -123,6 +124,7 @@ public class ConsumerAddressBookController {
      */
     @GetMapping("default")
     @Operation(summary = "获取默认地址")
+    @PreAuthorize("hasAuthority('consumer:addressBook:default')")
     public AddressBookVO defaultAddress() {
         return addressBookService.getDefaultAddress();
     }
