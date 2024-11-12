@@ -2,6 +2,7 @@ package com.edj.user.service.impl;
 
 import cn.hutool.core.lang.Snowflake;
 import cn.hutool.http.useragent.UserAgent;
+import com.edj.api.api.customer.WorkerApi;
 import com.edj.api.api.publics.SmsCodeApi;
 import com.edj.api.api.publics.WechatApi;
 import com.edj.api.api.publics.dto.OpenIdDTO;
@@ -61,6 +62,8 @@ public class LoginServiceImpl implements LoginService {
     private final WechatApi wechatApi;
 
     private final SmsCodeApi smsCodeApi;
+
+    private final WorkerApi workerApi;
 
     private final EdjUserService userService;
 
@@ -197,8 +200,9 @@ public class LoginServiceImpl implements LoginService {
 
         // 判断用户是否存在
         if (StringUtils.isBlank(username)) {
+            // 不存在创建用户
             LoginService loginService = applicationContext.getBean(LoginService.class);
-            username = loginService.createUser(phone, verifyCode);
+            username = loginService.createWorkerUser(phone, verifyCode);
         }
         // 判断是否存在密码
         else if (StringUtils.isNotBlank(password)) {
@@ -225,7 +229,7 @@ public class LoginServiceImpl implements LoginService {
     }
 
     @Transactional
-    public String createUser(String phone, String verifyCode) {
+    public String createWorkerUser(String phone, String verifyCode) {
         // 校验参数
         if (StringUtils.isBlank(verifyCode)) {
             throw new BadRequestException("登录失败");
@@ -248,8 +252,13 @@ public class LoginServiceImpl implements LoginService {
                 .phoneNumber(phone)
                 .build();
         userService.save(user);
-        // 添加服务端用户权限
+
         Long id = user.getId();
+
+        // 创建额外信息
+        workerApi.add(id);
+
+        // 添加服务端用户权限
         if (ObjectUtils.isEmpty(id)) {
             log.error("服务端手机号用户注册失败: {}", user);
             throw new ServerErrorException("用户注册失败");

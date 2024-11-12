@@ -44,7 +44,7 @@ public class IdUtils extends IdUtil {
         long dataCenterId = IdUtils.getDataCenterId(id);
         long workerId = IdUtils.getWorkerId(id);
         long sequence = IdUtils.getSequence(id);
-        return String.format("%s_%s_%2d%2d%04d",
+        return String.format("%s_%s_%02d%02d%04d",
                 EDJ,
                 DateUtils.getFormatLong(generateDateTime),
                 dataCenterId,

@@ -30,7 +30,7 @@ public class EdjServeProvider extends EjdBaseEntity {
     private String code;
 
     /**
-     * 认证设置状态（1未完成 2已完成）
+     * 认证设置状态（0未完成 1已完成）
      */
     private Integer settingsStatus;
 

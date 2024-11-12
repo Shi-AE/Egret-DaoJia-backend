@@ -40,5 +40,5 @@ public interface LoginService {
      *
      * @return 用户名
      */
-    String createUser(String phone, String verifyCode);
+    String createWorkerUser(String phone, String verifyCode);
 }
