@@ -1,6 +1,7 @@
 package com.edj.customer.controller.worker;
 
 import com.edj.customer.domain.dto.ServePickUpDTO;
+import com.edj.customer.domain.dto.ServeScopeSetDTO;
 import com.edj.customer.service.EdjServeProviderSettingsService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -33,5 +34,14 @@ public class WorkerServeProviderSettingsController {
     @Operation(summary = "接单设置")
     public void setPickUp(@RequestBody ServePickUpDTO servePickUpDTO) {
         serveProviderSettingsService.setPickUp(servePickUpDTO.getCanPickUp());
+    }
+
+    /**
+     * 服务范围设置
+     */
+    @PutMapping("scope")
+    @Operation(summary = "服务范围设置")
+    public void setServeScope(@RequestBody @Validated ServeScopeSetDTO serveScopeSetDTO) {
+        serveProviderSettingsService.setServeScope(serveScopeSetDTO);
     }
 }
