@@ -19,6 +19,7 @@ public class FeignInterceptor implements RequestInterceptor {
 
     @Override
     public void apply(RequestTemplate requestTemplate) {
+        // todo 解决用户token传递问题
         // 1.用户信息
         AuthorizationUserDTO loginUser = SecurityUtils.getLoginUser();
         String userInfoStr = Base64Utils.encodeStr(JsonUtils.toJsonStr(loginUser));

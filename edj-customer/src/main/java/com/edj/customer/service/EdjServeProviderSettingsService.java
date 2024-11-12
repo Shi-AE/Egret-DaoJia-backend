@@ -10,4 +10,9 @@ import com.github.yulichang.base.MPJBaseService;
  * @date 2024/11/12
  */
 public interface EdjServeProviderSettingsService extends MPJBaseService<EdjServeProviderSettings> {
+
+    /**
+     * 接单设置
+     */
+    void setPickUp(Integer canPickUp);
 }

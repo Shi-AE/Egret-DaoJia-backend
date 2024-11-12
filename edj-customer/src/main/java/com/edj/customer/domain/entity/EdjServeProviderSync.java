@@ -49,7 +49,7 @@ public class EdjServeProviderSync extends EjdBaseEntity {
     private String cityCode;
 
     /**
-     * 接单
+     * 是否可以接单（-1未知 0关闭接单 1开启接单）
      */
     private Integer pickUp;
 
