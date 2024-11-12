@@ -8,6 +8,8 @@ import com.edj.mvc.utils.RequestUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import static com.edj.common.constants.AuthorizationConstants.HeaderKey.AUTHORIZATION_ACCESS_TOKEN;
+
 /**
  * @author A.E.
  * @date 2024/9/20
@@ -27,5 +29,10 @@ public class RequestIdHandlerImpl implements RequestIdHandler {
         } else {
             return requestId;
         }
+    }
+
+    @Override
+    public String getAccessToken() {
+        return RequestUtils.getValueFromHeader(AUTHORIZATION_ACCESS_TOKEN);
     }
 }

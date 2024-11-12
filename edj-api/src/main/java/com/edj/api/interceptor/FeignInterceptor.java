@@ -10,6 +10,7 @@ import feign.RequestInterceptor;
 import feign.RequestTemplate;
 import lombok.RequiredArgsConstructor;
 
+import static com.edj.common.constants.AuthorizationConstants.HeaderKey.AUTHORIZATION_ACCESS_TOKEN;
 import static com.edj.common.constants.HeaderConstants.*;
 
 @RequiredArgsConstructor
@@ -19,11 +20,12 @@ public class FeignInterceptor implements RequestInterceptor {
 
     @Override
     public void apply(RequestTemplate requestTemplate) {
-        // todo 解决用户token传递问题
         // 1.用户信息
         AuthorizationUserDTO loginUser = SecurityUtils.getLoginUser();
         String userInfoStr = Base64Utils.encodeStr(JsonUtils.toJsonStr(loginUser));
         requestTemplate.header(USER_INFO, userInfoStr);
+        // 用户token
+        requestTemplate.header(AUTHORIZATION_ACCESS_TOKEN, requestIdHandler.getAccessToken());
         // 2.访问来源信息
         requestTemplate.header(HeaderConstants.REQUEST_ORIGIN_FLAG, REQUEST_ORIGIN_FLAG_INNER);
         // 3.访问id

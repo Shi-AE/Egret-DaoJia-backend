@@ -9,4 +9,6 @@ package com.edj.common.handler;
 public interface RequestIdHandler {
 
     String getRequestId();
+
+    String getAccessToken();
 }
