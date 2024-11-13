@@ -6,7 +6,7 @@ import cn.hutool.extra.spring.SpringUtil;
 import com.edj.common.domain.dto.TransactionResourceDTO;
 import com.edj.common.expcetions.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.jdbc.support.JdbcTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
@@ -29,10 +29,10 @@ public class SqlUtils extends SqlUtil {
      */
     public static final int BATCH_SIZE = 2;
 
-    private static final PlatformTransactionManager transactionManager;
+    private static final JdbcTransactionManager transactionManager;
 
     static {
-        transactionManager = SpringUtil.getBean(PlatformTransactionManager.class);
+        transactionManager = SpringUtil.getBean(JdbcTransactionManager.class);
     }
 
     /**
