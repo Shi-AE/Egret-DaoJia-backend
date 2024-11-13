@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -24,8 +23,6 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TransactionResourceDTO {
-    // 事务状态
-    private TransactionStatus transactionStatus;
 
     // 事务结束后默认会移除集合中的DataSource作为key关联的资源记录
     private Map<Object, Object> resources;
@@ -41,10 +38,9 @@ public class TransactionResourceDTO {
 
     private Boolean actualTransactionActive;
 
-    public static TransactionResourceDTO copyTransactionResource(TransactionStatus transactionStatus) {
+    public static TransactionResourceDTO copyTransactionResource() {
         return TransactionResourceDTO.builder()
                 // 返回的是不可变集合
-                .transactionStatus(transactionStatus)
                 .resources(TransactionSynchronizationManager.getResourceMap())
                 // 如果需要注册事务监听者,这里记得修改--我们这里不需要,就采用默认负责--spring事务内部默认也是这个值
                 .synchronizations(new HashSet<>())

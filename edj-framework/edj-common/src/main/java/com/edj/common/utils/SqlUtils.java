@@ -11,9 +11,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import java.util.List;
-import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -50,48 +48,40 @@ public class SqlUtils extends SqlUtil {
         log.debug("actionBatch 拆分批处理 split = {}", split);
         // 是否开启事务
         if (transaction) {
-            // 高并发写入线程安全队列
-            Queue<TransactionResourceDTO> transactionResourceList = new ConcurrentLinkedQueue<>();
+            // 主线程开启事务
+            DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+            def.setTimeout(30);
+            TransactionStatus status = transactionManager.getTransaction(def);
+
+            // 获取主线程事务资源
+            TransactionResourceDTO transactionResourceDTO = TransactionResourceDTO.copyTransactionResource();
 
             List<CompletableFuture<Void>> futureList = split
                     .stream()
                     .map(item -> AsyncUtils.runAsync(() -> {
-                        // 开启事务
-                        DefaultTransactionDefinition def = new DefaultTransactionDefinition();
-                        def.setTimeout(10);
-                        TransactionStatus status = transactionManager.getTransaction(def);
-                        log.debug("开启事务");
-
-                        // 复制事务资源交由主线程管理
-                        transactionResourceList.add(TransactionResourceDTO.copyTransactionResource(status));
-                        log.debug("复制事务资源交由主线程管理");
-
-                        // 执行
-                        action.accept(item);
-                        log.debug("任务执行完成");
+                        // 子线程绑定事务资源
+                        transactionResourceDTO.autoWiredTransactionResource();
+                        try {
+                            // 执行
+                            action.accept(item);
+                        } finally {
+                            // 子线程解除事务资源
+                            transactionResourceDTO.removeTransactionResource();
+                        }
                     }))
                     .toList();
-
             try {
                 CompletableFuture.allOf(futureList.toArray(new CompletableFuture[]{})).join();
             } catch (Exception e) {
                 // 执行失败，回滚事务
                 log.debug("执行失败，回滚事务");
-                transactionResourceList.forEach(tr -> {
-                    tr.autoWiredTransactionResource();
-                    transactionManager.rollback(tr.getTransactionStatus());
-                    tr.removeTransactionResource();
-                });
+                transactionManager.rollback(status);
                 log.debug("事务回滚完成");
                 throw new BadRequestException(e.getMessage());
             }
             // 执行成功，提交事务
             log.debug("执行成功，提交事务");
-            transactionResourceList.forEach(tr -> {
-                tr.autoWiredTransactionResource();
-                transactionManager.commit(tr.getTransactionStatus());
-                tr.removeTransactionResource();
-            });
+            transactionManager.commit(status);
             log.debug("事务提交成功");
         } else {
             split.parallelStream().forEach(action);
