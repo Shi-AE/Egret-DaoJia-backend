@@ -1,5 +1,6 @@
 package com.edj.customer.domain.entity;
 
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.edj.common.domain.entity.EjdBaseEntity;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -7,7 +8,7 @@ import lombok.experimental.SuperBuilder;
 import java.util.Date;
 
 /**
- * 服务人员认证信息表
+ * 服务人员认证审核表
  *
  * @author A.E.
  * @date 2024/11/13
@@ -18,11 +19,17 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString(callSuper = true)
-public class EdjWorkerCertification extends EjdBaseEntity {
+public class EdjWorkerCertificationAudit extends EjdBaseEntity {
     /**
-     * 服务人员认证信息id
+     * 审核id
      */
+    @TableId
     private Long id;
+
+    /**
+     * 服务人员id
+     */
+    private Long edjUserId;
 
     /**
      * 姓名
@@ -45,9 +52,29 @@ public class EdjWorkerCertification extends EjdBaseEntity {
     private String backImg;
 
     /**
-     * 证明资料
+     * 证明材料
      */
     private String certificationMaterial;
+
+    /**
+     * 审核状态（0未审核 1已审核）
+     */
+    private Integer auditStatus;
+
+    /**
+     * 审核人id
+     */
+    private Long auditId;
+
+    /**
+     * 审核人姓名
+     */
+    private String auditName;
+
+    /**
+     * 审核时间
+     */
+    private Date auditTime;
 
     /**
      * 认证状态（0初始态 1认证中 2认证成功 3认证失败）
@@ -55,7 +82,7 @@ public class EdjWorkerCertification extends EjdBaseEntity {
     private Integer certificationStatus;
 
     /**
-     * 认证时间
+     * 驳回原因
      */
-    private Date certificationTime;
+    private String rejectReason;
 }
