@@ -42,6 +42,7 @@ public class SqlUtils extends SqlUtil {
 
     /**
      * 仅执行批处理，自定义大小批处理
+     * 默认加入当前事务
      */
     public static <T> void actionBatch(List<T> list, Consumer<List<T>> action, boolean transaction, int batchSize) {
         List<List<T>> split = ListUtil.split(list, batchSize);
