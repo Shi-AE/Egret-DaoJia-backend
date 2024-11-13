@@ -186,7 +186,7 @@ public class MyBatisAutoFillInterceptor implements InnerInterceptor {
                 Object t = parameter;
                 // 如果通过 update wrapper 更新
                 if (t instanceof Map<?, ?>) {
-                    t = ((Map<?, ?>) t).get("et");
+                    t = ((Map<?, ?>) t).getOrDefault("et", null);
                 }
 
                 if (t == null) {
