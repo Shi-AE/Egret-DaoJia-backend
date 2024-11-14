@@ -80,6 +80,10 @@ public class MyBatisAutoFillInterceptor implements InnerInterceptor {
                     // 检查对象中是否存在该属性的 getter 方法，如果存在就取出来进行替换
                     if (metaObject.hasGetter(propertyName)) {
                         Object obj = metaObject.getValue(propertyName);
+                        if (obj == null) {
+                            sql = sql.replaceFirst("\\?", "缺失");
+                            continue;
+                        }
                         if (obj.getClass().isEnum()) {
                             obj = EnumUtils.value((Enum<?>) obj);
                         }

@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 
 /**
@@ -140,6 +142,46 @@ public class AsyncUtils {
      */
     public static CompletableFuture<Void> runAsyncComplete(Runnable runnable) {
         return runAsync(runnable).whenComplete((result, throwable) -> {
+            if (throwable != null) {
+                exceptionHandle(Thread.currentThread(), throwable);
+            }
+        });
+    }
+
+    /**
+     * 异步执行一个带有返回值的任务
+     */
+    public static <U> CompletableFuture<U> supplyAsync(Supplier<U> supplier) {
+        if (supplier == null) throw new ServerErrorException("异步任务为空");
+        return CompletableFuture.supplyAsync(supplier, ASYNC_POOL);
+    }
+
+    /**
+     * 异步执行一个带有返回值的任务
+     * 默认异常处理
+     */
+    public static <U> CompletableFuture<U> supplyAsyncComplete(Supplier<U> supplier) {
+        return supplyAsync(supplier).whenComplete((result, throwable) -> {
+            if (throwable != null) {
+                exceptionHandle(Thread.currentThread(), throwable);
+            }
+        });
+    }
+
+    /**
+     * 异步执行一个带有返回值的任务
+     */
+    public static <T, U> CompletableFuture<U> thenApplyAsync(CompletableFuture<T> apply, Function<T, U> function) {
+        if (apply == null || function == null) throw new ServerErrorException("异步任务为空");
+        return apply.thenApplyAsync(function, ASYNC_POOL);
+    }
+
+    /**
+     * 异步执行一个带有返回值的任务
+     * 默认异常处理
+     */
+    public static <T, U> CompletableFuture<U> thenApplyAsyncComplete(CompletableFuture<T> apply, Function<T, U> function) {
+        return thenApplyAsync(apply, function).whenComplete((result, throwable) -> {
             if (throwable != null) {
                 exceptionHandle(Thread.currentThread(), throwable);
             }

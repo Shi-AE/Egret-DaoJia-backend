@@ -1,6 +1,8 @@
 package com.edj.foundations.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.edj.api.api.foundations.dto.ServeItemCategoryDTO;
+import com.edj.api.api.foundations.dto.ServeTypeCategoryDTO;
 import com.edj.common.utils.CollUtils;
 import com.edj.foundations.domain.entity.*;
 import com.edj.foundations.domain.vo.RegionSimpleVO;
@@ -9,10 +11,12 @@ import com.edj.foundations.domain.vo.ServeCategoryVO;
 import com.edj.foundations.domain.vo.ServeIconVO;
 import com.edj.foundations.enums.EdjRegionActiveStatus;
 import com.edj.foundations.enums.EdjServeIsHot;
+import com.edj.foundations.enums.EdjServeItemActiveStatus;
 import com.edj.foundations.enums.EdjServeSaleStatus;
 import com.edj.foundations.mapper.EdjRegionMapper;
 import com.edj.foundations.mapper.EdjServeMapper;
 import com.edj.foundations.service.ConsumerHomeService;
+import com.edj.foundations.service.EdjServeItemService;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -32,6 +36,8 @@ public class ConsumerHomeServiceImpl implements ConsumerHomeService {
     private final EdjRegionMapper regionMapper;
 
     private final EdjServeMapper serveMapper;
+
+    private final EdjServeItemService serveItemService;
 
     @Override
     public List<RegionSimpleVO> getActiveRegionList() {
@@ -119,5 +125,22 @@ public class ConsumerHomeServiceImpl implements ConsumerHomeService {
                 .orderByDesc(EdjServe::getId);
 
         return serveMapper.selectJoinList(ServeAggregationSimpleVO.class, wrapper);
+    }
+
+    @Override
+    public List<ServeTypeCategoryDTO> getActiveServeItemCategory() {
+        MPJLambdaWrapper<EdjServeItem> wrapper = new MPJLambdaWrapper<EdjServeItem>()
+                .selectAs(EdjServeType::getId, ServeCategoryVO::getServeTypeId)
+                .selectAs(EdjServeType::getName, ServeCategoryVO::getServeTypeName)
+                .selectCollection(ServeTypeCategoryDTO::getServeItemCategoryDTOList, map -> map
+                        .result(EdjServeItem::getId, ServeItemCategoryDTO::getServeItemId)
+                        .result(EdjServeItem::getName, ServeItemCategoryDTO::getServeItemName))
+                .innerJoin(EdjServeType.class, EdjServeType::getId, EdjServeItem::getEdjServeTypeId)
+                .eq(EdjServeItem::getActiveStatus, EdjServeItemActiveStatus.ENABLED)
+                .orderByAsc(EdjServeType::getSortNum)
+                .orderByDesc(EdjServeType::getId)
+                .orderByAsc(EdjServeItem::getSortNum)
+                .orderByAsc(EdjServeItem::getId);
+        return serveItemService.selectJoinList(ServeTypeCategoryDTO.class, wrapper);
     }
 }

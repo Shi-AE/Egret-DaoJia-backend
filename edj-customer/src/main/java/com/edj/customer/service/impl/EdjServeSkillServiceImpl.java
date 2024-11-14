@@ -1,14 +1,16 @@
 package com.edj.customer.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.edj.api.api.foundations.ServeItemApi;
+import com.edj.api.api.foundations.dto.ServeTypeCategoryDTO;
 import com.edj.common.expcetions.BadRequestException;
-import com.edj.common.utils.CollUtils;
-import com.edj.common.utils.EnumUtils;
-import com.edj.common.utils.SqlUtils;
+import com.edj.common.utils.*;
 import com.edj.customer.domain.dto.ServeSkillUpsertDTO;
 import com.edj.customer.domain.entity.EdjServeProviderSettings;
 import com.edj.customer.domain.entity.EdjServeProviderSync;
 import com.edj.customer.domain.entity.EdjServeSkill;
+import com.edj.customer.domain.vo.ServeSkillCategoryVO;
+import com.edj.customer.domain.vo.ServeSkillItemVO;
 import com.edj.customer.enums.EdjServeProviderSettingsHaveSkill;
 import com.edj.customer.mapper.EdjServeProviderSettingsMapper;
 import com.edj.customer.mapper.EdjServeProviderSyncMapper;
@@ -21,6 +23,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 /**
@@ -36,6 +41,8 @@ public class EdjServeSkillServiceImpl extends MPJBaseServiceImpl<EdjServeSkillMa
     private final EdjServeProviderSyncMapper serveProviderSyncMapper;
 
     private final EdjServeProviderSettingsMapper serveProviderSettingsMapper;
+
+    private final ServeItemApi serveItemApi;
 
     @Override
     @Transactional
@@ -115,5 +122,60 @@ public class EdjServeSkillServiceImpl extends MPJBaseServiceImpl<EdjServeSkillMa
                 .serveItemIdList(ServeItemIdList)
                 .build()
         );
+    }
+
+    @Override
+    public List<ServeSkillCategoryVO> category() {
+
+        // 1.1 获取全量已启用服务目录
+        CompletableFuture<List<ServeSkillCategoryVO>> task11 = AsyncUtils.supplyAsyncComplete(() -> {
+            List<ServeTypeCategoryDTO> activeServeItemCategory = serveItemApi.getActiveServeItemCategory();
+            // 复制属性
+            return BeanUtils.copyToList(
+                    activeServeItemCategory,
+                    ServeSkillCategoryVO.class,
+                    (o, t) -> t.setServeSkillItemVOList(BeanUtils.copyToList(o.getServeItemCategoryDTOList(), ServeSkillItemVO.class))
+            );
+        });
+
+
+        // 1.2 查询用户技能
+        Long userId = SecurityUtils.getUserId();
+        CompletableFuture<List<EdjServeSkill>> task12 = AsyncUtils.supplyAsyncComplete(() -> {
+            LambdaQueryWrapper<EdjServeSkill> wrapper = new LambdaQueryWrapper<EdjServeSkill>()
+                    .select(EdjServeSkill::getEdjServeTypeId, EdjServeSkill::getEdjServeItemId)
+                    .eq(EdjServeSkill::getServeProviderId, userId);
+            return baseMapper.selectList(wrapper);
+        });
+
+        // 2.1 统计服务类型下服务项数量
+        CompletableFuture<Map<Long, Long>> task21 = AsyncUtils.thenApplyAsyncComplete(task12,
+                serveSkillList -> serveSkillList
+                        .stream()
+                        .collect(Collectors.groupingBy(
+                                EdjServeSkill::getEdjServeTypeId,
+                                Collectors.counting()
+                        ))
+        );
+
+        // 2.2 集合服务项
+        CompletableFuture<Set<Long>> task22 = AsyncUtils.thenApplyAsyncComplete(task12,
+                serveSkillList -> serveSkillList
+                        .stream()
+                        .map(EdjServeSkill::getEdjServeItemId)
+                        .collect(Collectors.toSet())
+        );
+
+        List<ServeSkillCategoryVO> serveSkillCategoryVOList = task11.join();
+        Map<Long, Long> serveTypeItemCount = task21.join();
+        Set<Long> serveItemIdSet = task22.join();
+
+        // 3 装载属性
+        serveSkillCategoryVOList.forEach(type -> {
+            type.setCount(serveTypeItemCount.getOrDefault(type.getServeTypeId(), 0L));
+            type.getServeSkillItemVOList().forEach(item -> item.setIsSelected(serveItemIdSet.contains(item.getServeItemId())));
+        });
+
+        return serveSkillCategoryVOList;
     }
 }
