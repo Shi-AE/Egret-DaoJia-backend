@@ -24,13 +24,7 @@ public class TempTest {
     @Test
     void addAuthority() {
         List.of(
-                        Pair.of("地址薄新增", "consumer:addressBook:add"),
-                        Pair.of("修改地址薄", "consumer:addressBook:update"),
-                        Pair.of("地址薄详情", "consumer:addressBook:detail"),
-                        Pair.of("地址薄设为默认/取消默认", "consumer:addressBook:updateDefault"),
-                        Pair.of("批量删除地址薄", "consumer:addressBook:delete"),
-                        Pair.of("地址薄分页查询", "consumer:addressBook:page"),
-                        Pair.of("获取默认地址", "consumer:addressBook:default")
+                        Pair.of("首页热门服务列表", "consumer:serve:hot")
                 )
                 .parallelStream()
                 .unordered()
@@ -38,7 +32,7 @@ public class TempTest {
 
                     EdjAuthority edjAuthority = EdjAuthority
                             .builder()
-                            .parentId(10772346994696192L)
+                            .parentId(10767315721527296L)
                             .name(authority.getKey())
                             .permission(authority.getValue())
                             .build();

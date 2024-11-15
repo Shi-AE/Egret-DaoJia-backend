@@ -45,7 +45,7 @@ public class ConsumerServeController {
      */
     @GetMapping("hot")
     @Operation(summary = "首页热门服务列表")
-//    @PreAuthorize("hasAuthority('consumer:serve:hot')")
+    @PreAuthorize("hasAuthority('consumer:serve:hot')")
     public List<ServeAggregationSimpleVO> hot(@RequestParam @Positive @Schema(description = "区域id") Long regionId) {
         return consumerHomeService.getHotByRegionId(regionId);
     }
