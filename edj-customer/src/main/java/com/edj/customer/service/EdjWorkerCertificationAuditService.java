@@ -1,5 +1,6 @@
 package com.edj.customer.service;
 
+import com.edj.customer.domain.dto.WorkerCertificationAuditApplyDTO;
 import com.edj.customer.domain.entity.EdjWorkerCertificationAudit;
 import com.github.yulichang.base.MPJBaseService;
 
@@ -10,4 +11,9 @@ import com.github.yulichang.base.MPJBaseService;
  * @date 2024/11/13
  */
 public interface EdjWorkerCertificationAuditService extends MPJBaseService<EdjWorkerCertificationAudit> {
+
+    /**
+     * 服务人员提交认证申请
+     */
+    void applyCertification(WorkerCertificationAuditApplyDTO workerCertificationAuditApplyDTO);
 }

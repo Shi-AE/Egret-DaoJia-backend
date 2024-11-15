@@ -29,7 +29,7 @@ public class EdjWorkerCertificationAudit extends EjdBaseEntity {
     /**
      * 服务人员id
      */
-    private Long edjUserId;
+    private Long edjServeProviderId;
 
     /**
      * 姓名
