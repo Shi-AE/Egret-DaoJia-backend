@@ -110,13 +110,4 @@ public class OperationServeTypeController {
     ) {
         return serveTypeService.selectByStatus(activeStatus);
     }
-
-    /**
-     * 测试
-     */
-    @GetMapping("test")
-    @Operation(summary = "test")
-    public String test() {
-        return "test";
-    }
 }
