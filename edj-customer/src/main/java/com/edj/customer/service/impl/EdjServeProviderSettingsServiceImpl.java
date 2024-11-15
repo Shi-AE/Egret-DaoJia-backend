@@ -1,12 +1,22 @@
 package com.edj.customer.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.edj.common.expcetions.BadRequestException;
-import com.edj.common.utils.BeanUtils;
+import com.edj.common.utils.*;
 import com.edj.customer.domain.dto.ServeScopeSetDTO;
+import com.edj.customer.domain.entity.EdjServeProvider;
 import com.edj.customer.domain.entity.EdjServeProviderSettings;
 import com.edj.customer.domain.entity.EdjServeProviderSync;
+import com.edj.customer.domain.entity.EdjWorkerCertification;
+import com.edj.customer.domain.vo.ServeSettingsStatusVo;
+import com.edj.customer.enums.EdjCertificationStatus;
+import com.edj.customer.enums.EdjServeProviderSettingsCanPickUp;
+import com.edj.customer.enums.EdjServeProviderSettingsHaveSkill;
+import com.edj.customer.enums.EdjSettingStatus;
+import com.edj.customer.mapper.EdjServeProviderMapper;
 import com.edj.customer.mapper.EdjServeProviderSettingsMapper;
 import com.edj.customer.mapper.EdjServeProviderSyncMapper;
+import com.edj.customer.mapper.EdjWorkerCertificationMapper;
 import com.edj.customer.service.EdjServeProviderSettingsService;
 import com.edj.security.utils.SecurityUtils;
 import com.github.yulichang.base.MPJBaseServiceImpl;
@@ -15,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * 针对表【edj_serve_provider_settings(服务人员/机构认证信息)】的数据库操作Service实现
@@ -26,7 +37,11 @@ import java.math.BigDecimal;
 @RequiredArgsConstructor
 public class EdjServeProviderSettingsServiceImpl extends MPJBaseServiceImpl<EdjServeProviderSettingsMapper, EdjServeProviderSettings> implements EdjServeProviderSettingsService {
 
+    private final EdjServeProviderMapper serveProviderMapper;
+
     private final EdjServeProviderSyncMapper serveProviderSyncMapper;
+
+    private final EdjWorkerCertificationMapper workerCertificationMapper;
 
     @Override
     @Transactional
@@ -82,5 +97,89 @@ public class EdjServeProviderSettingsServiceImpl extends MPJBaseServiceImpl<EdjS
                 .cityCode(serveScopeSetDTO.getCityCode())
                 .build()
         );
+    }
+
+    @Override
+    public ServeSettingsStatusVo getSettingStatus() {
+        // 获取用户id
+        Long userId = SecurityUtils.getUserId();
+
+        CompletableFuture<EdjServeProviderSettings> task1 = AsyncUtils.supplyAsyncComplete(() -> {
+            LambdaQueryWrapper<EdjServeProviderSettings> settingsLambdaQueryWrapper = new LambdaQueryWrapper<EdjServeProviderSettings>()
+                    .select(EdjServeProviderSettings::getCanPickUp, EdjServeProviderSettings::getHaveSkill, EdjServeProviderSettings::getIntentionScope)
+                    .eq(EdjServeProviderSettings::getId, userId);
+            return baseMapper.selectOne(settingsLambdaQueryWrapper);
+        });
+
+        CompletableFuture<EdjWorkerCertification> task2 = AsyncUtils.supplyAsyncComplete(() -> {
+            LambdaQueryWrapper<EdjWorkerCertification> certificationLambdaQueryWrapper = new LambdaQueryWrapper<EdjWorkerCertification>()
+                    .select(EdjWorkerCertification::getCertificationStatus)
+                    .eq(EdjWorkerCertification::getId, userId);
+            return workerCertificationMapper.selectOne(certificationLambdaQueryWrapper);
+        });
+
+        EdjServeProviderSettings serveProviderSettings = task1.join();
+
+        // 检查存在
+        if (ObjectUtils.isNull(serveProviderSettings)) {
+            throw new BadRequestException("用户不存在");
+        }
+
+        // 检查状态
+        ServeSettingsStatusVo serveSettingsStatusVo = new ServeSettingsStatusVo();
+
+        // 检查接单
+        boolean canPickUp = EnumUtils.eq(EdjServeProviderSettingsCanPickUp.ON, serveProviderSettings.getCanPickUp());
+        serveSettingsStatusVo.setCanPickUp(canPickUp);
+
+        // 检查技能
+        boolean serveSkillHasSet = EnumUtils.eq(EdjServeProviderSettingsHaveSkill.SKILLED, serveProviderSettings.getHaveSkill());
+        serveSettingsStatusVo.setServeSkillHasSet(serveSkillHasSet);
+
+        // 检查区域设置
+        boolean serveScopeHasSet = StringUtils.isNotBlank(serveProviderSettings.getIntentionScope());
+        serveSettingsStatusVo.setServeScopeHasSet(serveScopeHasSet);
+
+        EdjWorkerCertification edjWorkerCertification = task2.join();
+
+        // 检查认证状态
+        Integer certificationStatus = ObjectUtils.defaultIfNull(edjWorkerCertification, EdjWorkerCertification::getCertificationStatus, 0);
+        serveSettingsStatusVo.setCertificationStatus(certificationStatus);
+
+        // 检查是否全部设置完成
+        EdjSettingStatus settingStatus = EdjSettingStatus.NOT_COMPLETED;
+        if (canPickUp &&
+                serveSkillHasSet &&
+                serveScopeHasSet &&
+                EnumUtils.eq(EdjCertificationStatus.SUCCESS, certificationStatus)
+        ) {
+            settingStatus = EdjSettingStatus.COMPLETED;
+
+            CompletableFuture<Void> update1 = AsyncUtils.runAsyncComplete(() -> {
+                // 设置到用户状态
+                serveProviderMapper.updateById(EdjServeProvider
+                        .builder()
+                        .id(userId)
+                        .settingsStatus((Integer) EnumUtils.value(EdjSettingStatus.COMPLETED))
+                        .build()
+                );
+            });
+
+            CompletableFuture<Void> update2 = AsyncUtils.runAsyncComplete(() -> {
+                // 同步表
+                serveProviderSyncMapper.updateById(EdjServeProviderSync
+                        .builder()
+                        .id(userId)
+                        .settingStatus((Integer) EnumUtils.value(EdjSettingStatus.COMPLETED))
+                        .build()
+                );
+            });
+
+            CompletableFuture.allOf(update1, update2).join();
+        }
+
+        serveSettingsStatusVo.setSettingsStatus((Integer) EnumUtils.value(settingStatus));
+
+        return serveSettingsStatusVo;
     }
 }

@@ -2,6 +2,7 @@ package com.edj.customer.service;
 
 import com.edj.customer.domain.dto.ServeScopeSetDTO;
 import com.edj.customer.domain.entity.EdjServeProviderSettings;
+import com.edj.customer.domain.vo.ServeSettingsStatusVo;
 import com.github.yulichang.base.MPJBaseService;
 
 /**
@@ -21,4 +22,9 @@ public interface EdjServeProviderSettingsService extends MPJBaseService<EdjServe
      * 服务范围设置
      */
     void setServeScope(ServeScopeSetDTO serveScopeSetDTO);
+
+    /**
+     * 获取所有设置状态
+     */
+    ServeSettingsStatusVo getSettingStatus();
 }
