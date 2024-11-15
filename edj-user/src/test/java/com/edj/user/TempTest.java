@@ -52,4 +52,14 @@ public class TempTest {
                             ));
                 });
     }
+
+    @Test
+    void addRoleAuthority() {
+        roleAuthorityMapper.insert(EdjRoleAuthority
+                .builder()
+                .edjAuthorityId(10769316840742912L)
+                .edjRoleId(EdjSysRole.WORKER.getValue())
+                .build()
+        );
+    }
 }

@@ -2,6 +2,7 @@ package com.edj.customer.controller.worker;
 
 import com.edj.customer.domain.dto.ServePickUpDTO;
 import com.edj.customer.domain.dto.ServeScopeSetDTO;
+import com.edj.customer.domain.vo.ServeProviderSettingsVO;
 import com.edj.customer.domain.vo.ServeSettingsStatusVo;
 import com.edj.customer.service.EdjServeProviderSettingsService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -41,6 +42,15 @@ public class WorkerServeProviderSettingsController {
     @Operation(summary = "服务范围设置")
     public void setServeScope(@RequestBody @Validated ServeScopeSetDTO serveScopeSetDTO) {
         serveProviderSettingsService.setServeScope(serveScopeSetDTO);
+    }
+
+    /**
+     * 获取服务范围设置
+     */
+    @GetMapping
+    @Operation(summary = "获取服务范围设置")
+    public ServeProviderSettingsVO getServeScope() {
+        return serveProviderSettingsService.getServeScope();
     }
 
     /**

@@ -8,6 +8,7 @@ import com.edj.customer.domain.entity.EdjServeProvider;
 import com.edj.customer.domain.entity.EdjServeProviderSettings;
 import com.edj.customer.domain.entity.EdjServeProviderSync;
 import com.edj.customer.domain.entity.EdjWorkerCertification;
+import com.edj.customer.domain.vo.ServeProviderSettingsVO;
 import com.edj.customer.domain.vo.ServeSettingsStatusVo;
 import com.edj.customer.enums.EdjCertificationStatus;
 import com.edj.customer.enums.EdjServeProviderSettingsCanPickUp;
@@ -21,10 +22,12 @@ import com.edj.customer.service.EdjServeProviderSettingsService;
 import com.edj.security.utils.SecurityUtils;
 import com.github.yulichang.base.MPJBaseServiceImpl;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -34,6 +37,7 @@ import java.util.concurrent.CompletableFuture;
  * @date 2024/11/12
  */
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class EdjServeProviderSettingsServiceImpl extends MPJBaseServiceImpl<EdjServeProviderSettingsMapper, EdjServeProviderSettings> implements EdjServeProviderSettingsService {
 
@@ -97,6 +101,35 @@ public class EdjServeProviderSettingsServiceImpl extends MPJBaseServiceImpl<EdjS
                 .cityCode(serveScopeSetDTO.getCityCode())
                 .build()
         );
+    }
+
+    @Override
+    public ServeProviderSettingsVO getServeScope() {
+        Long userId = SecurityUtils.getUserId();
+        EdjServeProviderSettings serveProviderSettings = baseMapper.selectById(userId);
+
+        if (ObjectUtils.isNull(serveProviderSettings)) {
+            log.warn("未知用户设置服务范围 userId: {}", userId);
+            baseMapper.insertOrUpdate(EdjServeProviderSettings
+                    .builder()
+                    .id(userId)
+                    .build()
+            );
+            serveProviderSyncMapper.insertOrUpdate(EdjServeProviderSync
+                    .builder()
+                    .id(userId)
+                    .serveItemIdList(List.of())
+                    .build()
+            );
+            return new ServeProviderSettingsVO();
+        }
+
+        ServeProviderSettingsVO serveProviderSettingsVO = BeanUtils.toBean(serveProviderSettings, ServeProviderSettingsVO.class);
+        if (serveProviderSettings.getLon().compareTo(BigDecimal.ZERO) != 0) {
+            serveProviderSettingsVO.setLocation(serveProviderSettings.getLon().toPlainString() + "," + serveProviderSettings.getLat().toPlainString());
+        }
+
+        return serveProviderSettingsVO;
     }
 
     @Override
