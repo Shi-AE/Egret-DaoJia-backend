@@ -1,6 +1,7 @@
 package com.edj.customer.service;
 
 import com.edj.common.domain.PageResult;
+import com.edj.customer.domain.dto.CertificationAuditDTO;
 import com.edj.customer.domain.dto.WorkerCertificationAuditApplyDTO;
 import com.edj.customer.domain.dto.WorkerCertificationAuditPageDTO;
 import com.edj.customer.domain.entity.EdjWorkerCertificationAudit;
@@ -24,4 +25,9 @@ public interface EdjWorkerCertificationAuditService extends MPJBaseService<EdjWo
      * 服务人员认证审核信息分页查询
      */
     PageResult<WorkerCertificationAuditPageVO> page(WorkerCertificationAuditPageDTO workerCertificationAuditPageDTO);
+
+    /**
+     * 审核服务人员认证信息
+     */
+    void auditCertification(Long id, CertificationAuditDTO certificationAuditDTO);
 }

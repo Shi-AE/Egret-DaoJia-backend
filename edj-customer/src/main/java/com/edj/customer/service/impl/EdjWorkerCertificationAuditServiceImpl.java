@@ -1,17 +1,21 @@
 package com.edj.customer.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.edj.api.api.user.UserApi;
 import com.edj.common.domain.PageResult;
 import com.edj.common.utils.BeanUtils;
 import com.edj.common.utils.EnumUtils;
 import com.edj.common.utils.ObjectUtils;
 import com.edj.common.utils.StringUtils;
+import com.edj.customer.domain.dto.CertificationAuditDTO;
 import com.edj.customer.domain.dto.WorkerCertificationAuditApplyDTO;
 import com.edj.customer.domain.dto.WorkerCertificationAuditPageDTO;
 import com.edj.customer.domain.entity.EdjWorkerCertification;
 import com.edj.customer.domain.entity.EdjWorkerCertificationAudit;
 import com.edj.customer.domain.vo.WorkerCertificationAuditPageVO;
+import com.edj.customer.enums.EdjAuditStatus;
 import com.edj.customer.enums.EdjCertificationStatus;
 import com.edj.customer.mapper.EdjWorkerCertificationAuditMapper;
 import com.edj.customer.mapper.EdjWorkerCertificationMapper;
@@ -22,6 +26,8 @@ import com.github.yulichang.base.MPJBaseServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 
 /**
  * 针对表【edj_worker_certification_audit(服务人员认证审核表)】的数据库操作Service实现
@@ -34,6 +40,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class EdjWorkerCertificationAuditServiceImpl extends MPJBaseServiceImpl<EdjWorkerCertificationAuditMapper, EdjWorkerCertificationAudit> implements EdjWorkerCertificationAuditService {
 
     private final EdjWorkerCertificationMapper workerCertificationMapper;
+
+    private final UserApi userApi;
 
     @Override
     @Transactional
@@ -89,5 +97,48 @@ public class EdjWorkerCertificationAuditServiceImpl extends MPJBaseServiceImpl<E
 
         Page<EdjWorkerCertificationAudit> workerCertificationAuditPage = baseMapper.selectPage(page, wrapper);
         return PageUtils.toPage(workerCertificationAuditPage, WorkerCertificationAuditPageVO.class);
+    }
+
+    @Override
+    @Transactional
+    // todo 异步优化
+    // todo 校验
+    public void auditCertification(Long id, CertificationAuditDTO certificationAuditDTO) {
+        // 更新审核记录
+        Long userId = SecurityUtils.getUserId();
+        String nickname = SecurityUtils.getNickname();
+
+        Integer certificationStatus = certificationAuditDTO.getCertificationStatus();
+        String rejectReason = certificationAuditDTO.getRejectReason();
+        LambdaUpdateWrapper<EdjWorkerCertificationAudit> workerCertificationAuditUpdateWrapper = new LambdaUpdateWrapper<EdjWorkerCertificationAudit>()
+                .eq(EdjWorkerCertificationAudit::getId, id)
+                .set(EdjWorkerCertificationAudit::getAuditStatus, EdjAuditStatus.REVIEWED)
+                .set(EdjWorkerCertificationAudit::getAuditId, userId)
+                .set(EdjWorkerCertificationAudit::getAuditName, nickname)
+                .set(EdjWorkerCertificationAudit::getAuditTime, LocalDateTime.now())
+                .set(EdjWorkerCertificationAudit::getCertificationStatus, certificationStatus)
+                .set(StringUtils.isNotBlank(rejectReason), EdjWorkerCertificationAudit::getRejectReason, rejectReason);
+        baseMapper.update(workerCertificationAuditUpdateWrapper);
+
+        // 更新认证信息
+
+        EdjWorkerCertificationAudit workerCertificationAudit = baseMapper.selectById(id);
+        EdjWorkerCertification workerCertification = new EdjWorkerCertification();
+        Long serveProviderId = workerCertificationAudit.getEdjServeProviderId();
+        workerCertification.setId(serveProviderId);
+        workerCertification.setCertificationStatus(certificationStatus);
+        if (EnumUtils.eq(EdjCertificationStatus.SUCCESS, certificationStatus)) {
+            String serveProviderName = workerCertificationAudit.getName();
+            workerCertification.setName(serveProviderName);
+            workerCertification.setIdCardNo(workerCertificationAudit.getIdCardNo());
+            workerCertification.setFrontImg(workerCertificationAudit.getFrontImg());
+            workerCertification.setBackImg(workerCertificationAudit.getBackImg());
+            workerCertification.setCertificationMaterial(workerCertificationAudit.getCertificationMaterial());
+            workerCertification.setCertificationTime(workerCertificationAudit.getAuditTime());
+
+            // 修改用户名
+            userApi.updateNameById(serveProviderId, serveProviderName);
+        }
+        workerCertificationMapper.updateById(workerCertification);
     }
 }
