@@ -1,7 +1,10 @@
 package com.edj.customer.service;
 
+import com.edj.common.domain.PageResult;
 import com.edj.customer.domain.dto.WorkerCertificationAuditApplyDTO;
+import com.edj.customer.domain.dto.WorkerCertificationAuditPageDTO;
 import com.edj.customer.domain.entity.EdjWorkerCertificationAudit;
+import com.edj.customer.domain.vo.WorkerCertificationAuditPageVO;
 import com.github.yulichang.base.MPJBaseService;
 
 /**
@@ -16,4 +19,9 @@ public interface EdjWorkerCertificationAuditService extends MPJBaseService<EdjWo
      * 服务人员提交认证申请
      */
     void applyCertification(WorkerCertificationAuditApplyDTO workerCertificationAuditApplyDTO);
+
+    /**
+     * 服务人员认证审核信息分页查询
+     */
+    PageResult<WorkerCertificationAuditPageVO> page(WorkerCertificationAuditPageDTO workerCertificationAuditPageDTO);
 }

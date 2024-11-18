@@ -1,16 +1,22 @@
 package com.edj.customer.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.edj.common.domain.PageResult;
 import com.edj.common.utils.BeanUtils;
 import com.edj.common.utils.EnumUtils;
 import com.edj.common.utils.ObjectUtils;
+import com.edj.common.utils.StringUtils;
 import com.edj.customer.domain.dto.WorkerCertificationAuditApplyDTO;
+import com.edj.customer.domain.dto.WorkerCertificationAuditPageDTO;
 import com.edj.customer.domain.entity.EdjWorkerCertification;
 import com.edj.customer.domain.entity.EdjWorkerCertificationAudit;
+import com.edj.customer.domain.vo.WorkerCertificationAuditPageVO;
 import com.edj.customer.enums.EdjCertificationStatus;
 import com.edj.customer.mapper.EdjWorkerCertificationAuditMapper;
 import com.edj.customer.mapper.EdjWorkerCertificationMapper;
 import com.edj.customer.service.EdjWorkerCertificationAuditService;
+import com.edj.mysql.utils.PageUtils;
 import com.edj.security.utils.SecurityUtils;
 import com.github.yulichang.base.MPJBaseServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -64,5 +70,24 @@ public class EdjWorkerCertificationAuditServiceImpl extends MPJBaseServiceImpl<E
             workerCertification.setCertificationStatus((Integer) EnumUtils.value(EdjCertificationStatus.IN_PROGRESS));
             workerCertificationMapper.updateById(workerCertification);
         }
+    }
+
+    @Override
+    public PageResult<WorkerCertificationAuditPageVO> page(WorkerCertificationAuditPageDTO workerCertificationAuditPageDTO) {
+        Page<EdjWorkerCertificationAudit> page = PageUtils.parsePageQuery(workerCertificationAuditPageDTO);
+
+        String name = workerCertificationAuditPageDTO.getName();
+        String idCardNo = workerCertificationAuditPageDTO.getIdCardNo();
+        Integer certificationStatus = workerCertificationAuditPageDTO.getCertificationStatus();
+        Integer auditStatus = workerCertificationAuditPageDTO.getAuditStatus();
+
+        LambdaQueryWrapper<EdjWorkerCertificationAudit> wrapper = new LambdaQueryWrapper<EdjWorkerCertificationAudit>()
+                .likeRight(StringUtils.isNotBlank(name), EdjWorkerCertificationAudit::getName, name)
+                .likeRight(StringUtils.isNotBlank(idCardNo), EdjWorkerCertificationAudit::getIdCardNo, idCardNo)
+                .eq(ObjectUtils.isNotNull(certificationStatus), EdjWorkerCertificationAudit::getCertificationStatus, certificationStatus)
+                .eq(ObjectUtils.isNotNull(auditStatus), EdjWorkerCertificationAudit::getAuditStatus, auditStatus);
+
+        Page<EdjWorkerCertificationAudit> workerCertificationAuditPage = baseMapper.selectPage(page, wrapper);
+        return PageUtils.toPage(workerCertificationAuditPage, WorkerCertificationAuditPageVO.class);
     }
 }

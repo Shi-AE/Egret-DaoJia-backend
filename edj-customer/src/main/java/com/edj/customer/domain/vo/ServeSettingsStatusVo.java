@@ -19,9 +19,9 @@ import lombok.NoArgsConstructor;
 @Schema(description = "服务信息设置状态")
 public class ServeSettingsStatusVo {
     /**
-     * 认证状态，0：初始态，1：认证中，2：认证成功，3认证失败
+     * 认证状态（0初始态 1认证中 2认证成功 3认证失败）
      */
-    @Schema(description = "认证状态，0：初始态，1：认证中，2：认证成功，3认证失败")
+    @Schema(description = "认证状态（0初始态 1认证中 2认证成功 3认证失败）")
     private Integer certificationStatus;
 
     /**
