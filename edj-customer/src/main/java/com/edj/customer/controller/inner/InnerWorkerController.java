@@ -30,6 +30,7 @@ import java.util.List;
  * @author A.E.
  * @date 2024/11/12
  */
+@Validated
 @RestController
 @RequestMapping("inner/worker")
 @RequiredArgsConstructor
