@@ -5,10 +5,8 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.edj.api.api.user.UserApi;
 import com.edj.common.domain.PageResult;
-import com.edj.common.utils.BeanUtils;
-import com.edj.common.utils.EnumUtils;
-import com.edj.common.utils.ObjectUtils;
-import com.edj.common.utils.StringUtils;
+import com.edj.common.expcetions.BadRequestException;
+import com.edj.common.utils.*;
 import com.edj.customer.domain.dto.CertificationAuditDTO;
 import com.edj.customer.domain.dto.WorkerCertificationAuditApplyDTO;
 import com.edj.customer.domain.dto.WorkerCertificationAuditPageDTO;
@@ -28,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * 针对表【edj_worker_certification_audit(服务人员认证审核表)】的数据库操作Service实现
@@ -101,32 +100,48 @@ public class EdjWorkerCertificationAuditServiceImpl extends MPJBaseServiceImpl<E
 
     @Override
     @Transactional
-    // todo 异步优化
-    // todo 校验
     public void auditCertification(Long id, CertificationAuditDTO certificationAuditDTO) {
-        // 更新审核记录
+        // 检查申请状态
+        EdjWorkerCertificationAudit workerCertificationAudit = baseMapper.selectById(id);
+        if (ObjectUtils.isNull(workerCertificationAudit)) {
+            throw new BadRequestException("审核信息不存在");
+        }
+
+        if (EnumUtils.eq(EdjCertificationStatus.SUCCESS, workerCertificationAudit.getCertificationStatus())) {
+            throw new BadRequestException("申请已认证成功");
+        }
+
+        // 获取审核人信息
         Long userId = SecurityUtils.getUserId();
         String nickname = SecurityUtils.getNickname();
 
+        // 获取审核结果
         Integer certificationStatus = certificationAuditDTO.getCertificationStatus();
         String rejectReason = certificationAuditDTO.getRejectReason();
-        LambdaUpdateWrapper<EdjWorkerCertificationAudit> workerCertificationAuditUpdateWrapper = new LambdaUpdateWrapper<EdjWorkerCertificationAudit>()
-                .eq(EdjWorkerCertificationAudit::getId, id)
-                .set(EdjWorkerCertificationAudit::getAuditStatus, EdjAuditStatus.REVIEWED)
-                .set(EdjWorkerCertificationAudit::getAuditId, userId)
-                .set(EdjWorkerCertificationAudit::getAuditName, nickname)
-                .set(EdjWorkerCertificationAudit::getAuditTime, LocalDateTime.now())
-                .set(EdjWorkerCertificationAudit::getCertificationStatus, certificationStatus)
-                .set(StringUtils.isNotBlank(rejectReason), EdjWorkerCertificationAudit::getRejectReason, rejectReason);
-        baseMapper.update(workerCertificationAuditUpdateWrapper);
+
+        // 更新申请记录
+        CompletableFuture<Void> future1 = AsyncUtils.runAsyncComplete(() -> {
+            LambdaUpdateWrapper<EdjWorkerCertificationAudit> workerCertificationAuditUpdateWrapper = new LambdaUpdateWrapper<EdjWorkerCertificationAudit>()
+                    .eq(EdjWorkerCertificationAudit::getId, id)
+                    .set(EdjWorkerCertificationAudit::getAuditStatus, EdjAuditStatus.REVIEWED)
+                    .set(EdjWorkerCertificationAudit::getAuditId, userId)
+                    .set(EdjWorkerCertificationAudit::getAuditName, nickname)
+                    .set(EdjWorkerCertificationAudit::getAuditTime, LocalDateTime.now())
+                    .set(EdjWorkerCertificationAudit::getCertificationStatus, certificationStatus)
+                    .set(StringUtils.isNotBlank(rejectReason), EdjWorkerCertificationAudit::getRejectReason, rejectReason);
+            baseMapper.update(workerCertificationAuditUpdateWrapper);
+        });
 
         // 更新认证信息
-        EdjWorkerCertificationAudit workerCertificationAudit = baseMapper.selectById(id);
         EdjWorkerCertification workerCertification = new EdjWorkerCertification();
         Long serveProviderId = workerCertificationAudit.getEdjServeProviderId();
         workerCertification.setId(serveProviderId);
         workerCertification.setCertificationStatus(certificationStatus);
+
+        CompletableFuture<Void> future2 = AsyncUtils.runAsyncComplete(() -> {
+        });
         if (EnumUtils.eq(EdjCertificationStatus.SUCCESS, certificationStatus)) {
+            // 认证成功，同步认证信息
             String serveProviderName = workerCertificationAudit.getName();
             workerCertification.setName(serveProviderName);
             workerCertification.setIdCardNo(workerCertificationAudit.getIdCardNo());
@@ -136,8 +151,13 @@ public class EdjWorkerCertificationAuditServiceImpl extends MPJBaseServiceImpl<E
             workerCertification.setCertificationTime(workerCertificationAudit.getAuditTime());
 
             // 修改用户名
-            userApi.updateNameById(serveProviderId, serveProviderName);
+            future2 = AsyncUtils.runAsyncComplete(() -> userApi.updateNameById(serveProviderId, serveProviderName));
         }
-        workerCertificationMapper.updateById(workerCertification);
+
+        // 更新认证信息
+        CompletableFuture<Void> future3 = AsyncUtils.runAsyncComplete(() -> workerCertificationMapper.updateById(workerCertification));
+
+        // 处理异步
+        CompletableFuture.allOf(future1, future2, future3).join();
     }
 }
