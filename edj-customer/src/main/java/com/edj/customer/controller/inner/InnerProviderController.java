@@ -1,7 +1,8 @@
 package com.edj.customer.controller.inner;
 
 import cn.hutool.core.lang.Snowflake;
-import com.edj.api.api.customer.WorkerApi;
+import com.edj.api.api.customer.ProviderApi;
+import com.edj.common.utils.AsyncUtils;
 import com.edj.common.utils.IdUtils;
 import com.edj.customer.domain.entity.EdjServeProvider;
 import com.edj.customer.domain.entity.EdjServeProviderSettings;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * 内部接口 - 服务人员/机构相关接口
@@ -35,7 +37,7 @@ import java.util.List;
 @RequestMapping("inner/worker")
 @RequiredArgsConstructor
 @Tag(name = "内部接口 - 服务人员/机构相关接口")
-public class InnerWorkerController implements WorkerApi {
+public class InnerProviderController implements ProviderApi {
 
     private final EdjServeProviderMapper serveProviderMapper;
 
@@ -53,24 +55,26 @@ public class InnerWorkerController implements WorkerApi {
     @Operation(summary = "注册额外信息")
     @Transactional
     public void add(@RequestParam @Schema(description = "用户id") @Positive @NotNull Long userId) {
-        serveProviderMapper.insert(EdjServeProvider
+        CompletableFuture<Void> future1 = AsyncUtils.runAsyncComplete(() -> serveProviderMapper.insert(EdjServeProvider
                 .builder()
                 .id(userId)
                 .code(IdUtils.toCode(snowflake.nextId()))
                 .build()
-        );
+        ));
 
-        serveProviderSettingsMapper.insert(EdjServeProviderSettings
+        CompletableFuture<Void> future2 = AsyncUtils.runAsyncComplete(() -> serveProviderSettingsMapper.insert(EdjServeProviderSettings
                 .builder()
                 .id(userId)
                 .build()
-        );
+        ));
 
-        serveProviderSyncMapper.insert(EdjServeProviderSync
+        CompletableFuture<Void> future3 = AsyncUtils.runAsyncComplete(() -> serveProviderSyncMapper.insert(EdjServeProviderSync
                 .builder()
                 .id(userId)
                 .serveItemIdList(List.of())
                 .build()
-        );
+        ));
+
+        CompletableFuture.allOf(future1, future2, future3).join();
     }
 }

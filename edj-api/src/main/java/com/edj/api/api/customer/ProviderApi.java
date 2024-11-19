@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestParam;
  * @author A.E.
  * @date 2024/11/12
  */
-@FeignClient(contextId = "WorkerApi", name = "edj-customer", path = "inner/worker")
-public interface WorkerApi {
+@FeignClient(contextId = "ProviderApi", name = "edj-customer", path = "inner/worker")
+public interface ProviderApi {
 
     /**
      * 注册额外信息

@@ -2,7 +2,7 @@ package com.edj.user.service.impl;
 
 import cn.hutool.core.lang.Snowflake;
 import cn.hutool.http.useragent.UserAgent;
-import com.edj.api.api.customer.WorkerApi;
+import com.edj.api.api.customer.ProviderApi;
 import com.edj.api.api.publics.SmsCodeApi;
 import com.edj.api.api.publics.WechatApi;
 import com.edj.api.api.publics.dto.OpenIdDTO;
@@ -39,6 +39,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import static com.edj.common.constants.AuthorizationConstants.RedisKey.ACCESS_TOKEN_KEY;
 import static com.edj.common.constants.AuthorizationConstants.RedisKey.REFRESH_TOKEN_KEY;
@@ -63,7 +64,7 @@ public class LoginServiceImpl implements LoginService {
 
     private final SmsCodeApi smsCodeApi;
 
-    private final WorkerApi workerApi;
+    private final ProviderApi providerApi;
 
     private final EdjUserService userService;
 
@@ -255,20 +256,24 @@ public class LoginServiceImpl implements LoginService {
 
         Long id = user.getId();
 
-        // 创建额外信息
-        workerApi.add(id);
-
         // 添加服务端用户权限
         if (ObjectUtils.isEmpty(id)) {
             log.error("服务端手机号用户注册失败: {}", user);
             throw new ServerErrorException("用户注册失败");
         }
-        userRoleService.save(EdjUserRole
+
+        CompletableFuture<Void> future1 = AsyncUtils.runAsyncComplete(() -> userRoleService.save(EdjUserRole
                 .builder()
                 .edjUserId(id)
                 .edjRoleId((Long) EnumUtils.value(EdjSysRole.WORKER))
                 .build()
-        );
+        ));
+
+        // 创建额外信息
+        CompletableFuture<Void> future2 = AsyncUtils.runAsyncComplete(() -> providerApi.add(id));
+
+        CompletableFuture.allOf(future1, future2).join();
+
         return username;
     }
 }
