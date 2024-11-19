@@ -121,7 +121,6 @@ public class EdjWorkerCertificationAuditServiceImpl extends MPJBaseServiceImpl<E
         baseMapper.update(workerCertificationAuditUpdateWrapper);
 
         // 更新认证信息
-
         EdjWorkerCertificationAudit workerCertificationAudit = baseMapper.selectById(id);
         EdjWorkerCertification workerCertification = new EdjWorkerCertification();
         Long serveProviderId = workerCertificationAudit.getEdjServeProviderId();

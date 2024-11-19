@@ -78,7 +78,7 @@ public class WorkerCertificationAuditPageVO {
      * 审核人姓名
      */
     @Schema(description = "审核人姓名")
-    private String auditorName;
+    private String auditName;
 
     /**
      * 审核时间
