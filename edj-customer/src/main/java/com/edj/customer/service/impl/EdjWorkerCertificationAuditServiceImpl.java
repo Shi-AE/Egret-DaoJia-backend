@@ -12,6 +12,7 @@ import com.edj.customer.domain.dto.WorkerCertificationAuditApplyDTO;
 import com.edj.customer.domain.dto.WorkerCertificationAuditPageDTO;
 import com.edj.customer.domain.entity.EdjWorkerCertification;
 import com.edj.customer.domain.entity.EdjWorkerCertificationAudit;
+import com.edj.customer.domain.vo.RejectReasonVO;
 import com.edj.customer.domain.vo.WorkerCertificationAuditPageVO;
 import com.edj.customer.enums.EdjAuditStatus;
 import com.edj.customer.enums.EdjCertificationStatus;
@@ -159,5 +160,23 @@ public class EdjWorkerCertificationAuditServiceImpl extends MPJBaseServiceImpl<E
 
         // 处理异步
         CompletableFuture.allOf(future1, future2, future3).join();
+    }
+
+    @Override
+    public RejectReasonVO getLastRejectReason() {
+
+        Long userId = SecurityUtils.getUserId();
+
+        LambdaQueryWrapper<EdjWorkerCertificationAudit> wrapper = new LambdaQueryWrapper<EdjWorkerCertificationAudit>()
+                .select(EdjWorkerCertificationAudit::getRejectReason)
+                .eq(EdjWorkerCertificationAudit::getEdjServeProviderId, userId)
+                .orderByDesc(EdjWorkerCertificationAudit::getId)
+                .last("limit 1");
+
+        EdjWorkerCertificationAudit workerCertificationAudit = baseMapper.selectOne(wrapper);
+        if (ObjectUtils.isNull(workerCertificationAudit)) {
+            return null;
+        }
+        return new RejectReasonVO(workerCertificationAudit.getRejectReason());
     }
 }

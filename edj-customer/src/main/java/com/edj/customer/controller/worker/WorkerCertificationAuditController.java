@@ -1,15 +1,13 @@
 package com.edj.customer.controller.worker;
 
 import com.edj.customer.domain.dto.WorkerCertificationAuditApplyDTO;
+import com.edj.customer.domain.vo.RejectReasonVO;
 import com.edj.customer.service.EdjWorkerCertificationAuditService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * 服务端 - 服务人员认证审核相关接口
@@ -33,5 +31,14 @@ public class WorkerCertificationAuditController {
     @Operation(summary = "服务人员提交认证申请")
     public void auditCertification(@RequestBody @Validated WorkerCertificationAuditApplyDTO workerCertificationAuditApplyDTO) {
         workerCertificationAuditService.applyCertification(workerCertificationAuditApplyDTO);
+    }
+
+    /**
+     * 查询最新的驳回原因
+     */
+    @GetMapping("reject/reason")
+    @Operation(summary = "查询最新的驳回原因")
+    public RejectReasonVO queryCurrentUserLastRejectReason() {
+        return workerCertificationAuditService.getLastRejectReason();
     }
 }

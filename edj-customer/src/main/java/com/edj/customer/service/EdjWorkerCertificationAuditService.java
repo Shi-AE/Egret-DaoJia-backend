@@ -5,6 +5,7 @@ import com.edj.customer.domain.dto.CertificationAuditDTO;
 import com.edj.customer.domain.dto.WorkerCertificationAuditApplyDTO;
 import com.edj.customer.domain.dto.WorkerCertificationAuditPageDTO;
 import com.edj.customer.domain.entity.EdjWorkerCertificationAudit;
+import com.edj.customer.domain.vo.RejectReasonVO;
 import com.edj.customer.domain.vo.WorkerCertificationAuditPageVO;
 import com.github.yulichang.base.MPJBaseService;
 
@@ -30,4 +31,9 @@ public interface EdjWorkerCertificationAuditService extends MPJBaseService<EdjWo
      * 审核服务人员认证信息
      */
     void auditCertification(Long id, CertificationAuditDTO certificationAuditDTO);
+
+    /**
+     * 查询最新的驳回原因
+     */
+    RejectReasonVO getLastRejectReason();
 }
