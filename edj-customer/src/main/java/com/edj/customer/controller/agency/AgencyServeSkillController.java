@@ -17,7 +17,7 @@ import java.util.List;
  * 机构端 - 服务技能相关接口
  *
  * @author A.E.
- * @date 2024/11/13
+ * @date 2024/11/20
  */
 @Validated
 @RestController

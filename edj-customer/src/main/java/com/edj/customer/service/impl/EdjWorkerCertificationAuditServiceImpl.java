@@ -47,6 +47,7 @@ public class EdjWorkerCertificationAuditServiceImpl extends MPJBaseServiceImpl<E
     @Transactional
     public void applyCertification(WorkerCertificationAuditApplyDTO workerCertificationAuditApplyDTO) {
 
+        // 获取用户id
         Long userId = SecurityUtils.getUserId();
 
         // 新增审核
@@ -165,6 +166,7 @@ public class EdjWorkerCertificationAuditServiceImpl extends MPJBaseServiceImpl<E
     @Override
     public RejectReasonVO getLastRejectReason() {
 
+        // 获取用户id
         Long userId = SecurityUtils.getUserId();
 
         LambdaQueryWrapper<EdjWorkerCertificationAudit> wrapper = new LambdaQueryWrapper<EdjWorkerCertificationAudit>()

@@ -3,7 +3,6 @@ package com.edj.customer.domain.dto;
 import com.edj.mvc.annotation.citizen.id.CitizenId;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -32,7 +31,7 @@ public class WorkerCertificationAuditApplyDTO {
     /**
      * 身份证号
      */
-    @NotNull
+    @NotBlank
     @CitizenId
     @Schema(description = "身份证号")
     private String idCardNo;
