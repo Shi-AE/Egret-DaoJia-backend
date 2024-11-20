@@ -128,7 +128,7 @@ public class EdjServeSkillServiceImpl extends MPJBaseServiceImpl<EdjServeSkillMa
     public List<ServeSkillCategoryVO> category() {
 
         // 1.1 获取全量已启用服务目录
-        CompletableFuture<List<ServeSkillCategoryVO>> task11 = AsyncUtils.supplyAsyncComplete(() -> {
+        CompletableFuture<List<ServeSkillCategoryVO>> task11 = AsyncUtils.supplyAsync(() -> {
             List<ServeTypeCategoryDTO> activeServeItemCategory = serveItemApi.getActiveServeItemCategory();
             // 复制属性
             return BeanUtils.copyToList(
@@ -141,7 +141,7 @@ public class EdjServeSkillServiceImpl extends MPJBaseServiceImpl<EdjServeSkillMa
 
         // 1.2 查询用户技能
         Long userId = SecurityUtils.getUserId();
-        CompletableFuture<List<EdjServeSkill>> task12 = AsyncUtils.supplyAsyncComplete(() -> {
+        CompletableFuture<List<EdjServeSkill>> task12 = AsyncUtils.supplyAsync(() -> {
             LambdaQueryWrapper<EdjServeSkill> wrapper = new LambdaQueryWrapper<EdjServeSkill>()
                     .select(EdjServeSkill::getEdjServeTypeId, EdjServeSkill::getEdjServeItemId)
                     .eq(EdjServeSkill::getServeProviderId, userId);
@@ -149,7 +149,7 @@ public class EdjServeSkillServiceImpl extends MPJBaseServiceImpl<EdjServeSkillMa
         });
 
         // 2.1 统计服务类型下服务项数量
-        CompletableFuture<Map<Long, Long>> task21 = AsyncUtils.thenApplyAsyncComplete(task12,
+        CompletableFuture<Map<Long, Long>> task21 = AsyncUtils.thenApplyAsync(task12,
                 serveSkillList -> serveSkillList
                         .stream()
                         .collect(Collectors.groupingBy(
@@ -159,7 +159,7 @@ public class EdjServeSkillServiceImpl extends MPJBaseServiceImpl<EdjServeSkillMa
         );
 
         // 2.2 集合服务项
-        CompletableFuture<Set<Long>> task22 = AsyncUtils.thenApplyAsyncComplete(task12,
+        CompletableFuture<Set<Long>> task22 = AsyncUtils.thenApplyAsync(task12,
                 serveSkillList -> serveSkillList
                         .stream()
                         .map(EdjServeSkill::getEdjServeItemId)

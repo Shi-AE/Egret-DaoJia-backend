@@ -2,11 +2,9 @@ package com.edj.common.utils;
 
 import cn.hutool.core.collection.ListUtil;
 import cn.hutool.db.sql.SqlUtil;
-import cn.hutool.extra.spring.SpringUtil;
 import com.edj.common.domain.dto.TransactionResourceDTO;
 import com.edj.common.expcetions.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.jdbc.support.JdbcTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
@@ -14,6 +12,8 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
+import static com.edj.common.utils.AsyncUtils.TRANSACTION_MANAGER;
 
 /**
  * @author A.E.
@@ -26,12 +26,6 @@ public class SqlUtils extends SqlUtil {
      * 批处理默认大小
      */
     public static final int BATCH_SIZE = 2;
-
-    private static final JdbcTransactionManager transactionManager;
-
-    static {
-        transactionManager = SpringUtil.getBean(JdbcTransactionManager.class);
-    }
 
     /**
      * 仅执行批处理
@@ -52,7 +46,7 @@ public class SqlUtils extends SqlUtil {
             // 主线程开启事务
             DefaultTransactionDefinition def = new DefaultTransactionDefinition();
             def.setTimeout(30);
-            TransactionStatus status = transactionManager.getTransaction(def);
+            TransactionStatus status = TRANSACTION_MANAGER.getTransaction(def);
 
             // 获取主线程事务资源
             TransactionResourceDTO transactionResourceDTO = TransactionResourceDTO.copyTransactionResource();
@@ -76,13 +70,13 @@ public class SqlUtils extends SqlUtil {
             } catch (Exception e) {
                 // 执行失败，回滚事务
                 log.debug("执行失败，回滚事务");
-                transactionManager.rollback(status);
+                TRANSACTION_MANAGER.rollback(status);
                 log.debug("事务回滚完成");
                 throw new BadRequestException(e.getMessage());
             }
             // 执行成功，提交事务
             log.debug("执行成功，提交事务");
-            transactionManager.commit(status);
+            TRANSACTION_MANAGER.commit(status);
             log.debug("事务提交成功");
         } else {
             split.parallelStream().forEach(action);

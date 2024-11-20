@@ -55,20 +55,20 @@ public class InnerProviderController implements ProviderApi {
     @Operation(summary = "注册额外信息")
     @Transactional
     public void add(@RequestParam @Schema(description = "用户id") @Positive @NotNull Long userId) {
-        CompletableFuture<Void> future1 = AsyncUtils.runAsyncComplete(() -> serveProviderMapper.insert(EdjServeProvider
+        CompletableFuture<Void> future1 = AsyncUtils.runAsyncTransaction(() -> serveProviderMapper.insert(EdjServeProvider
                 .builder()
                 .id(userId)
                 .code(IdUtils.toCode(snowflake.nextId()))
                 .build()
         ));
 
-        CompletableFuture<Void> future2 = AsyncUtils.runAsyncComplete(() -> serveProviderSettingsMapper.insert(EdjServeProviderSettings
+        CompletableFuture<Void> future2 = AsyncUtils.runAsyncTransaction(() -> serveProviderSettingsMapper.insert(EdjServeProviderSettings
                 .builder()
                 .id(userId)
                 .build()
         ));
 
-        CompletableFuture<Void> future3 = AsyncUtils.runAsyncComplete(() -> serveProviderSyncMapper.insert(EdjServeProviderSync
+        CompletableFuture<Void> future3 = AsyncUtils.runAsyncTransaction(() -> serveProviderSyncMapper.insert(EdjServeProviderSync
                 .builder()
                 .id(userId)
                 .serveItemIdList(List.of())

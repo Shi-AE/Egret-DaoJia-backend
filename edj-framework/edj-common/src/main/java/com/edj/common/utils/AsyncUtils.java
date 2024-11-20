@@ -1,7 +1,13 @@
 package com.edj.common.utils;
 
+import cn.hutool.extra.spring.SpringUtil;
+import com.edj.common.domain.dto.TransactionResourceDTO;
+import com.edj.common.expcetions.BadRequestException;
 import com.edj.common.expcetions.ServerErrorException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.jdbc.support.JdbcTransactionManager;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -44,7 +50,20 @@ public class AsyncUtils {
      */
     public static final int CAPACITY = 1000;
 
+    /**
+     * 线程池
+     */
     public static final ThreadPoolExecutor ASYNC_POOL;
+
+    /**
+     * 事务管理器
+     */
+    public static final JdbcTransactionManager TRANSACTION_MANAGER;
+
+    // 加载事务管理器
+    static {
+        TRANSACTION_MANAGER = SpringUtil.getBean(JdbcTransactionManager.class);
+    }
 
     /**
      * 任务队列拒绝策略
@@ -108,6 +127,7 @@ public class AsyncUtils {
         }
     }
 
+    // 加载线程池
     static {
         ASYNC_POOL = new ThreadPoolExecutor(
                 CORE_POOL_SIZE,
@@ -138,7 +158,46 @@ public class AsyncUtils {
 
     /**
      * 异步执行一个没有返回值的任务
+     * 使用事务进行管理
+     */
+    public static CompletableFuture<Void> runAsyncTransaction(Runnable runnable) {
+        // 主线程开启事务
+        DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+        def.setTimeout(30);
+        TransactionStatus status = TRANSACTION_MANAGER.getTransaction(def);
+        // 获取主线程事务资源
+        TransactionResourceDTO transactionResourceDTO = TransactionResourceDTO.copyTransactionResource();
+        return runAsync(() -> {
+            // 子线程绑定事务资源
+            transactionResourceDTO.autoWiredTransactionResource();
+            try {
+                // 执行
+                runnable.run();
+            } finally {
+                // 子线程解除事务资源
+                transactionResourceDTO.removeTransactionResource();
+            }
+        }).whenComplete((result, throwable) -> {
+            if (throwable != null) {
+                // 执行失败，回滚事务
+                log.debug("执行失败，回滚事务");
+                TRANSACTION_MANAGER.rollback(status);
+                log.debug("事务回滚完成");
+                exceptionHandle(Thread.currentThread(), throwable);
+                throw new BadRequestException(throwable.getMessage());
+            } else {
+                // 执行成功，提交事务
+                log.debug("执行成功，提交事务");
+                TRANSACTION_MANAGER.commit(status);
+                log.debug("事务提交成功");
+            }
+        });
+    }
+
+    /**
+     * 异步执行一个没有返回值的任务
      * 默认异常处理
+     * 用于无需关注异常的任务
      */
     public static CompletableFuture<Void> runAsyncComplete(Runnable runnable) {
         return runAsync(runnable).whenComplete((result, throwable) -> {

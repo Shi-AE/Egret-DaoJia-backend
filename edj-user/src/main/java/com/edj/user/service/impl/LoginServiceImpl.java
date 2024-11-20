@@ -39,7 +39,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 import static com.edj.common.constants.AuthorizationConstants.RedisKey.ACCESS_TOKEN_KEY;
 import static com.edj.common.constants.AuthorizationConstants.RedisKey.REFRESH_TOKEN_KEY;
@@ -262,17 +261,16 @@ public class LoginServiceImpl implements LoginService {
             throw new ServerErrorException("用户注册失败");
         }
 
-        CompletableFuture<Void> future1 = AsyncUtils.runAsyncComplete(() -> userRoleService.save(EdjUserRole
+        userRoleService.save(EdjUserRole
                 .builder()
                 .edjUserId(id)
                 .edjRoleId((Long) EnumUtils.value(EdjSysRole.WORKER))
                 .build()
-        ));
+        );
 
         // 创建额外信息
-        CompletableFuture<Void> future2 = AsyncUtils.runAsyncComplete(() -> providerApi.add(id));
-
-        CompletableFuture.allOf(future1, future2).join();
+        // 由于远程调用添加存在事务，必须保证调用后不存在可能出现异常的代码
+        providerApi.add(id);
 
         return username;
     }

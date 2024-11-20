@@ -6,7 +6,6 @@ import com.edj.api.api.publics.SmsCodeApi;
 import com.edj.api.api.publics.dto.SmsCodeDTO;
 import com.edj.common.expcetions.BadRequestException;
 import com.edj.common.expcetions.ServerErrorException;
-import com.edj.common.utils.AsyncUtils;
 import com.edj.common.utils.EnumUtils;
 import com.edj.common.utils.IdUtils;
 import com.edj.common.utils.ObjectUtils;
@@ -22,8 +21,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.concurrent.CompletableFuture;
 
 /**
  * 注册服务实现
@@ -80,16 +77,15 @@ public class RegisterServiceImpl implements RegisterService {
             throw new ServerErrorException("用户注册失败");
         }
 
-        CompletableFuture<Void> future1 = AsyncUtils.runAsyncComplete(() -> userRoleMapper.insert(EdjUserRole
+        userRoleMapper.insert(EdjUserRole
                 .builder()
                 .edjUserId(id)
                 .edjRoleId((Long) EnumUtils.value(EdjSysRole.INSTITUTION))
                 .build()
-        ));
+        );
 
         // 创建额外信息
-        CompletableFuture<Void> future2 = AsyncUtils.runAsyncComplete(() -> providerApi.add(id));
-
-        CompletableFuture.allOf(future1, future2).join();
+        // 由于远程调用添加存在事务，必须保证调用后不存在可能出现异常的代码
+        providerApi.add(id);
     }
 }

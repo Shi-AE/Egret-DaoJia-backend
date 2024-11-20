@@ -121,7 +121,7 @@ public class EdjWorkerCertificationAuditServiceImpl extends MPJBaseServiceImpl<E
         String rejectReason = certificationAuditDTO.getRejectReason();
 
         // 更新申请记录
-        CompletableFuture<Void> future1 = AsyncUtils.runAsyncComplete(() -> {
+        CompletableFuture<Void> future1 = AsyncUtils.runAsyncTransaction(() -> {
             LambdaUpdateWrapper<EdjWorkerCertificationAudit> workerCertificationAuditUpdateWrapper = new LambdaUpdateWrapper<EdjWorkerCertificationAudit>()
                     .eq(EdjWorkerCertificationAudit::getId, id)
                     .set(EdjWorkerCertificationAudit::getAuditStatus, EdjAuditStatus.REVIEWED)
@@ -139,7 +139,7 @@ public class EdjWorkerCertificationAuditServiceImpl extends MPJBaseServiceImpl<E
         workerCertification.setId(serveProviderId);
         workerCertification.setCertificationStatus(certificationStatus);
 
-        CompletableFuture<Void> future2 = AsyncUtils.runAsyncComplete(() -> {
+        CompletableFuture<Void> future2 = AsyncUtils.runAsync(() -> {
         });
         if (EnumUtils.eq(EdjCertificationStatus.SUCCESS, certificationStatus)) {
             // 认证成功，同步认证信息
@@ -152,11 +152,11 @@ public class EdjWorkerCertificationAuditServiceImpl extends MPJBaseServiceImpl<E
             workerCertification.setCertificationTime(workerCertificationAudit.getAuditTime());
 
             // 修改用户名
-            future2 = AsyncUtils.runAsyncComplete(() -> userApi.updateNameById(serveProviderId, serveProviderName));
+            future2 = AsyncUtils.runAsyncTransaction(() -> userApi.updateNameById(serveProviderId, serveProviderName));
         }
 
         // 更新认证信息
-        CompletableFuture<Void> future3 = AsyncUtils.runAsyncComplete(() -> workerCertificationMapper.updateById(workerCertification));
+        CompletableFuture<Void> future3 = AsyncUtils.runAsyncTransaction(() -> workerCertificationMapper.updateById(workerCertification));
 
         // 处理异步
         CompletableFuture.allOf(future1, future2, future3).join();

@@ -137,14 +137,14 @@ public class EdjServeProviderSettingsServiceImpl extends MPJBaseServiceImpl<EdjS
         // 获取用户id
         Long userId = SecurityUtils.getUserId();
 
-        CompletableFuture<EdjServeProviderSettings> task1 = AsyncUtils.supplyAsyncComplete(() -> {
+        CompletableFuture<EdjServeProviderSettings> task1 = AsyncUtils.supplyAsync(() -> {
             LambdaQueryWrapper<EdjServeProviderSettings> settingsLambdaQueryWrapper = new LambdaQueryWrapper<EdjServeProviderSettings>()
                     .select(EdjServeProviderSettings::getCanPickUp, EdjServeProviderSettings::getHaveSkill, EdjServeProviderSettings::getIntentionScope)
                     .eq(EdjServeProviderSettings::getId, userId);
             return baseMapper.selectOne(settingsLambdaQueryWrapper);
         });
 
-        CompletableFuture<EdjWorkerCertification> task2 = AsyncUtils.supplyAsyncComplete(() -> {
+        CompletableFuture<EdjWorkerCertification> task2 = AsyncUtils.supplyAsync(() -> {
             LambdaQueryWrapper<EdjWorkerCertification> certificationLambdaQueryWrapper = new LambdaQueryWrapper<EdjWorkerCertification>()
                     .select(EdjWorkerCertification::getCertificationStatus)
                     .eq(EdjWorkerCertification::getId, userId);
@@ -188,7 +188,7 @@ public class EdjServeProviderSettingsServiceImpl extends MPJBaseServiceImpl<EdjS
         ) {
             settingStatus = EdjSettingStatus.COMPLETED;
 
-            CompletableFuture<Void> update1 = AsyncUtils.runAsyncComplete(() -> {
+            CompletableFuture<Void> update1 = AsyncUtils.runAsyncTransaction(() -> {
                 // 设置到用户状态
                 serveProviderMapper.updateById(EdjServeProvider
                         .builder()
@@ -198,7 +198,7 @@ public class EdjServeProviderSettingsServiceImpl extends MPJBaseServiceImpl<EdjS
                 );
             });
 
-            CompletableFuture<Void> update2 = AsyncUtils.runAsyncComplete(() -> {
+            CompletableFuture<Void> update2 = AsyncUtils.runAsyncTransaction(() -> {
                 // 同步表
                 serveProviderSyncMapper.updateById(EdjServeProviderSync
                         .builder()
