@@ -32,11 +32,9 @@ public class EdjUserDetailsServiceImpl implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
         // 根据用户名查找用户详细信息
-        AuthorizationUserDTO authorizationUserDTO = new AuthorizationUserDTO();
-
         // 根据用户名查找用户基础信息
         EdjUser user = userService.selectByUsername(username);
-        BeanUtils.copyProperties(user, authorizationUserDTO);
+        AuthorizationUserDTO authorizationUserDTO = BeanUtils.toBean(user, AuthorizationUserDTO.class);
 
         // 根据id查询用户权限
         Long id = user.getId();
