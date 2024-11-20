@@ -19,7 +19,7 @@ import com.edj.user.domain.dto.WechatLoginDTO;
 import com.edj.user.domain.entity.EdjUser;
 import com.edj.user.domain.entity.EdjUserRole;
 import com.edj.user.domain.vo.UserTokenVO;
-import com.edj.user.enums.EdjSysRole;
+import com.edj.security.enums.EdjSysRole;
 import com.edj.user.service.EdjUserRoleService;
 import com.edj.user.service.EdjUserService;
 import com.edj.user.service.LoginService;

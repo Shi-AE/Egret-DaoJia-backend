@@ -4,21 +4,16 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.edj.common.expcetions.BadRequestException;
 import com.edj.common.utils.*;
 import com.edj.customer.domain.dto.ServeScopeSetDTO;
-import com.edj.customer.domain.entity.EdjServeProvider;
-import com.edj.customer.domain.entity.EdjServeProviderSettings;
-import com.edj.customer.domain.entity.EdjServeProviderSync;
-import com.edj.customer.domain.entity.EdjWorkerCertification;
+import com.edj.customer.domain.entity.*;
 import com.edj.customer.domain.vo.ServeProviderSettingsVO;
 import com.edj.customer.domain.vo.ServeSettingsStatusVo;
 import com.edj.customer.enums.EdjCertificationStatus;
 import com.edj.customer.enums.EdjServeProviderSettingsCanPickUp;
 import com.edj.customer.enums.EdjServeProviderSettingsHaveSkill;
 import com.edj.customer.enums.EdjSettingStatus;
-import com.edj.customer.mapper.EdjServeProviderMapper;
-import com.edj.customer.mapper.EdjServeProviderSettingsMapper;
-import com.edj.customer.mapper.EdjServeProviderSyncMapper;
-import com.edj.customer.mapper.EdjWorkerCertificationMapper;
+import com.edj.customer.mapper.*;
 import com.edj.customer.service.EdjServeProviderSettingsService;
+import com.edj.security.enums.EdjSysRole;
 import com.edj.security.utils.SecurityUtils;
 import com.github.yulichang.base.MPJBaseServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -46,6 +42,8 @@ public class EdjServeProviderSettingsServiceImpl extends MPJBaseServiceImpl<EdjS
     private final EdjServeProviderSyncMapper serveProviderSyncMapper;
 
     private final EdjWorkerCertificationMapper workerCertificationMapper;
+
+    private final EdjAgencyCertificationMapper agencyCertificationMapper;
 
     @Override
     @Transactional
@@ -144,11 +142,23 @@ public class EdjServeProviderSettingsServiceImpl extends MPJBaseServiceImpl<EdjS
             return baseMapper.selectOne(settingsLambdaQueryWrapper);
         });
 
-        CompletableFuture<EdjWorkerCertification> task2 = AsyncUtils.supplyAsync(() -> {
-            LambdaQueryWrapper<EdjWorkerCertification> certificationLambdaQueryWrapper = new LambdaQueryWrapper<EdjWorkerCertification>()
-                    .select(EdjWorkerCertification::getCertificationStatus)
-                    .eq(EdjWorkerCertification::getId, userId);
-            return workerCertificationMapper.selectOne(certificationLambdaQueryWrapper);
+        // 获取角色
+        Set<Long> roles = SecurityUtils.getRoles();
+
+        CompletableFuture<Integer> task2 = AsyncUtils.supplyAsync(() -> {
+            if (roles.contains((Long) EnumUtils.value(EdjSysRole.WORKER))) {
+                LambdaQueryWrapper<EdjWorkerCertification> certificationLambdaQueryWrapper = new LambdaQueryWrapper<EdjWorkerCertification>()
+                        .select(EdjWorkerCertification::getCertificationStatus)
+                        .eq(EdjWorkerCertification::getId, userId);
+                EdjWorkerCertification certification = workerCertificationMapper.selectOne(certificationLambdaQueryWrapper);
+                return ObjectUtils.defaultIfNull(certification, EdjWorkerCertification::getCertificationStatus, 0);
+            } else {
+                LambdaQueryWrapper<EdjAgencyCertification> certificationLambdaQueryWrapper = new LambdaQueryWrapper<EdjAgencyCertification>()
+                        .select(EdjAgencyCertification::getCertificationStatus)
+                        .eq(EdjAgencyCertification::getId, userId);
+                EdjAgencyCertification certification = agencyCertificationMapper.selectOne(certificationLambdaQueryWrapper);
+                return ObjectUtils.defaultIfNull(certification, EdjAgencyCertification::getCertificationStatus, 0);
+            }
         });
 
         EdjServeProviderSettings serveProviderSettings = task1.join();
@@ -173,10 +183,8 @@ public class EdjServeProviderSettingsServiceImpl extends MPJBaseServiceImpl<EdjS
         boolean serveScopeHasSet = StringUtils.isNotBlank(serveProviderSettings.getIntentionScope());
         serveSettingsStatusVo.setServeScopeHasSet(serveScopeHasSet);
 
-        EdjWorkerCertification edjWorkerCertification = task2.join();
-
         // 检查认证状态
-        Integer certificationStatus = ObjectUtils.defaultIfNull(edjWorkerCertification, EdjWorkerCertification::getCertificationStatus, 0);
+        Integer certificationStatus = task2.join();
         serveSettingsStatusVo.setCertificationStatus(certificationStatus);
 
         // 检查是否全部设置完成

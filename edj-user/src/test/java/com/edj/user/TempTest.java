@@ -3,7 +3,7 @@ package com.edj.user;
 import cn.hutool.core.lang.Pair;
 import com.edj.user.domain.entity.EdjAuthority;
 import com.edj.user.domain.entity.EdjRoleAuthority;
-import com.edj.user.enums.EdjSysRole;
+import com.edj.security.enums.EdjSysRole;
 import com.edj.user.mapper.EdjAuthorityMapper;
 import com.edj.user.mapper.EdjRoleAuthorityMapper;
 import org.junit.jupiter.api.Test;

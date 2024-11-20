@@ -1,4 +1,4 @@
-package com.edj.user.enums;
+package com.edj.security.enums;
 
 
 import com.baomidou.mybatisplus.annotation.EnumValue;

@@ -12,7 +12,7 @@ import com.edj.common.utils.ObjectUtils;
 import com.edj.user.domain.dto.InstitutionRegisterDTO;
 import com.edj.user.domain.entity.EdjUser;
 import com.edj.user.domain.entity.EdjUserRole;
-import com.edj.user.enums.EdjSysRole;
+import com.edj.security.enums.EdjSysRole;
 import com.edj.user.mapper.EdjUserMapper;
 import com.edj.user.mapper.EdjUserRoleMapper;
 import com.edj.user.service.RegisterService;
