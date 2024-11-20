@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Set;
 
 @Data
 @Builder
@@ -87,6 +88,11 @@ public class AuthorizationUserDTO implements UserDetails {
      * 登录平台
      */
     private String browser;
+
+    /**
+     * 角色
+     */
+    private Set<Long> roles;
 
     /**
      * 权限

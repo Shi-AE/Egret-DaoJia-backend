@@ -49,6 +49,7 @@ public class EdjUserDetailsServiceImpl implements UserDetailsService {
             return authorizationUserDTO;
         }
         log.debug("查询角色 roleIdList: {}", roleIdList);
+        authorizationUserDTO.setRoles(new HashSet<>(roleIdList));
 
         // 查询权限
         List<String> authorityNameList = roleAuthorityService.selectAuthorityByRoleIdList(roleIdList);

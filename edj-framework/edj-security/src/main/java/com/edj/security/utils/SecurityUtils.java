@@ -5,6 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * 安全服务工具类
  *
@@ -47,6 +50,28 @@ public class SecurityUtils {
             return null;
         }
         return loginUser.getNickname();
+    }
+
+    /**
+     * 获取用户角色
+     */
+    public static Set<Long> getRoles() {
+        AuthorizationUserDTO loginUser = getLoginUser();
+        if (loginUser == null) {
+            return new HashSet<>();
+        }
+        Set<Long> roles = loginUser.getRoles();
+        if (roles == null) {
+            return new HashSet<>();
+        }
+        return roles;
+    }
+
+    /**
+     * 判断是否有角色
+     */
+    public static boolean hasRole(Long roleId) {
+        return getRoles().contains(roleId);
     }
 
     /**
