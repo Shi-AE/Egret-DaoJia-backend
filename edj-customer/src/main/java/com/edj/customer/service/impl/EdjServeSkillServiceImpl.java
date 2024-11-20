@@ -138,7 +138,6 @@ public class EdjServeSkillServiceImpl extends MPJBaseServiceImpl<EdjServeSkillMa
             );
         });
 
-
         // 1.2 查询用户技能
         Long userId = SecurityUtils.getUserId();
         CompletableFuture<List<EdjServeSkill>> task12 = AsyncUtils.supplyAsync(() -> {
