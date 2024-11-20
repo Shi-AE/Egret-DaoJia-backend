@@ -58,7 +58,7 @@ public class TempTest {
         roleAuthorityMapper.insert(EdjRoleAuthority
                 .builder()
                 .edjAuthorityId(10769316840742912L)
-                .edjRoleId(EdjSysRole.WORKER.getValue())
+                .edjRoleId(EdjSysRole.INSTITUTION.getValue())
                 .build()
         );
     }
