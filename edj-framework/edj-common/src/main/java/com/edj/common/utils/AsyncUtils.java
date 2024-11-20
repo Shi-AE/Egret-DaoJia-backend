@@ -218,6 +218,7 @@ public class AsyncUtils {
     /**
      * 异步执行一个带有返回值的任务
      * 默认异常处理
+     * 用于无需关注异常的任务
      */
     public static <U> CompletableFuture<U> supplyAsyncComplete(Supplier<U> supplier) {
         return supplyAsync(supplier).whenComplete((result, throwable) -> {
@@ -238,6 +239,7 @@ public class AsyncUtils {
     /**
      * 异步执行一个带有返回值的任务
      * 默认异常处理
+     * 用于无需关注异常的任务
      */
     public static <T, U> CompletableFuture<U> thenApplyAsyncComplete(CompletableFuture<T> apply, Function<T, U> function) {
         return thenApplyAsync(apply, function).whenComplete((result, throwable) -> {
