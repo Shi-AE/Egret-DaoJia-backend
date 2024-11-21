@@ -110,8 +110,8 @@ public class EdjAgencyCertificationAuditServiceImpl extends MPJBaseServiceImpl<E
         Integer certificationStatus = agencyCertificationAuditPageDTO.getCertificationStatus();
 
         LambdaQueryWrapper<EdjAgencyCertificationAudit> wrapper = new LambdaQueryWrapper<EdjAgencyCertificationAudit>()
-                .likeLeft(StringUtils.isNotBlank(name), EdjAgencyCertificationAudit::getName, name)
-                .likeLeft(StringUtils.isNotBlank(legalPersonName), EdjAgencyCertificationAudit::getLegalPersonName, legalPersonName)
+                .likeRight(StringUtils.isNotBlank(name), EdjAgencyCertificationAudit::getName, name)
+                .likeRight(StringUtils.isNotBlank(legalPersonName), EdjAgencyCertificationAudit::getLegalPersonName, legalPersonName)
                 .eq(ObjectUtils.isNotNull(auditStatus), EdjAgencyCertificationAudit::getAuditStatus, auditStatus)
                 .eq(ObjectUtils.isNotNull(certificationStatus), EdjAgencyCertificationAudit::getCertificationStatus, certificationStatus);
 
