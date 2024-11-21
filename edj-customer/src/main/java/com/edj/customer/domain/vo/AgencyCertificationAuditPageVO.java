@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Schema(description = "服务人员申请认证信息")
-public class WorkerCertificationAuditPageVO {
+public class AgencyCertificationAuditPageVO {
     /**
      * 主键
      */
@@ -27,40 +27,40 @@ public class WorkerCertificationAuditPageVO {
     private Long id;
 
     /**
-     * 服务人员id
+     * 机构id
      */
-    @Schema(description = "服务人员id")
+    @Schema(description = "机构id")
     private Long serveProviderId;
 
     /**
      * 姓名
      */
-    @Schema(description = "姓名")
+    @Schema(description = "企业名称")
     private String name;
 
     /**
-     * 身份证号
+     * 统一社会信用代码
      */
-    @Schema(description = "身份证号")
-    private String idCardNo;
+    @Schema(description = "统一社会信用代码")
+    private String idNumber;
 
     /**
-     * 身份证正面
+     * 法人姓名
      */
-    @Schema(description = "身份证正面")
-    private String frontImg;
+    @Schema(description = "法人姓名")
+    private String legalPersonName;
 
     /**
-     * 身份证反面
+     * 法人身份证号
      */
-    @Schema(description = "身份证反面")
-    private String backImg;
+    @Schema(description = "法人身份证号")
+    private String legalPersonIdCardNo;
 
     /**
-     * 证明资料
+     * 营业执照
      */
-    @Schema(description = "证明资料")
-    private String certificationMaterial;
+    @Schema(description = "营业执照")
+    private String businessLicense;
 
     /**
      * 审核状态（0未审核 1已审核）

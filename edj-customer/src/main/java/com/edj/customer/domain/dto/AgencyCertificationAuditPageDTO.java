@@ -20,19 +20,19 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString(callSuper = true)
-@Schema(description = "服务人员认证申请分页查询")
-public class WorkerCertificationAuditPageDTO extends PageQueryDTO {
+@Schema(description = "机构认证申请分页查询")
+public class AgencyCertificationAuditPageDTO extends PageQueryDTO {
     /**
      * 姓名
      */
-    @Schema(description = "姓名")
+    @Schema(description = "企业名称")
     private String name;
 
     /**
-     * 身份证号
+     * 法定代表人姓名
      */
-    @Schema(description = "身份证号")
-    private String idCardNo;
+    @Schema(description = "法定代表人姓名")
+    private String legalPersonName;
 
     /**
      * 审核状态（0未审核 1已审核）

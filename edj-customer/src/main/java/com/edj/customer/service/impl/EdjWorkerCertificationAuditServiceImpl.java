@@ -137,30 +137,29 @@ public class EdjWorkerCertificationAuditServiceImpl extends MPJBaseServiceImpl<E
         // 更新认证信息
         EdjWorkerCertification workerCertification = new EdjWorkerCertification();
         Long serveProviderId = workerCertificationAudit.getEdjServeProviderId();
+        String serveProviderName = workerCertificationAudit.getName();
         workerCertification.setId(serveProviderId);
         workerCertification.setCertificationStatus(certificationStatus);
 
-        CompletableFuture<Void> future2 = AsyncUtils.runAsync(() -> {
-        });
         if (EnumUtils.eq(EdjCertificationStatus.SUCCESS, certificationStatus)) {
             // 认证成功，同步认证信息
-            String serveProviderName = workerCertificationAudit.getName();
             workerCertification.setName(serveProviderName);
             workerCertification.setIdCardNo(workerCertificationAudit.getIdCardNo());
             workerCertification.setFrontImg(workerCertificationAudit.getFrontImg());
             workerCertification.setBackImg(workerCertificationAudit.getBackImg());
             workerCertification.setCertificationMaterial(workerCertificationAudit.getCertificationMaterial());
             workerCertification.setCertificationTime(workerCertificationAudit.getAuditTime());
-
-            // 修改用户名
-            future2 = AsyncUtils.runAsyncTransaction(() -> userApi.updateNameById(serveProviderId, serveProviderName));
         }
 
         // 更新认证信息
-        CompletableFuture<Void> future3 = AsyncUtils.runAsyncTransaction(() -> workerCertificationMapper.updateById(workerCertification));
+        CompletableFuture<Void> future2 = AsyncUtils.runAsyncTransaction(() -> workerCertificationMapper.updateById(workerCertification));
 
         // 处理异步
-        CompletableFuture.allOf(future1, future2, future3).join();
+        CompletableFuture.allOf(future1, future2).join();
+
+        // 修改用户名
+        // 由于远程调用更新存在事务，必须保证调用后不存在可能出现异常的代码
+        userApi.updateNameById(serveProviderId, serveProviderName);
     }
 
     @Override

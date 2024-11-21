@@ -1,22 +1,33 @@
 package com.edj.customer.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.edj.common.utils.BeanUtils;
-import com.edj.common.utils.EnumUtils;
-import com.edj.common.utils.ObjectUtils;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.edj.api.api.user.UserApi;
+import com.edj.common.domain.PageResult;
+import com.edj.common.expcetions.BadRequestException;
+import com.edj.common.utils.*;
 import com.edj.customer.domain.dto.AgencyCertificationAuditApplyDTO;
+import com.edj.customer.domain.dto.AgencyCertificationAuditPageDTO;
+import com.edj.customer.domain.dto.CertificationAuditDTO;
 import com.edj.customer.domain.entity.EdjAgencyCertification;
 import com.edj.customer.domain.entity.EdjAgencyCertificationAudit;
+import com.edj.customer.domain.vo.AgencyCertificationAuditPageVO;
 import com.edj.customer.domain.vo.RejectReasonVO;
+import com.edj.customer.enums.EdjAuditStatus;
 import com.edj.customer.enums.EdjCertificationStatus;
 import com.edj.customer.mapper.EdjAgencyCertificationAuditMapper;
 import com.edj.customer.mapper.EdjAgencyCertificationMapper;
 import com.edj.customer.service.EdjAgencyCertificationAuditService;
+import com.edj.mysql.utils.PageUtils;
 import com.edj.security.utils.SecurityUtils;
 import com.github.yulichang.base.MPJBaseServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * 针对表【edj_agency_certification_audit(机构认证审核表)】的数据库操作Service实现
@@ -28,7 +39,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class EdjAgencyCertificationAuditServiceImpl extends MPJBaseServiceImpl<EdjAgencyCertificationAuditMapper, EdjAgencyCertificationAudit> implements EdjAgencyCertificationAuditService {
 
-    private final EdjAgencyCertificationAuditMapper agencyCertificationAuditMapper;
+    private final UserApi userApi;
 
     private final EdjAgencyCertificationMapper agencyCertificationMapper;
 
@@ -87,5 +98,85 @@ public class EdjAgencyCertificationAuditServiceImpl extends MPJBaseServiceImpl<E
             return null;
         }
         return new RejectReasonVO(agencyCertificationAudit.getRejectReason());
+    }
+
+    @Override
+    public PageResult<AgencyCertificationAuditPageVO> page(AgencyCertificationAuditPageDTO agencyCertificationAuditPageDTO) {
+        Page<EdjAgencyCertificationAudit> page = PageUtils.parsePageQuery(agencyCertificationAuditPageDTO);
+
+        String name = agencyCertificationAuditPageDTO.getName();
+        String legalPersonName = agencyCertificationAuditPageDTO.getLegalPersonName();
+        Integer auditStatus = agencyCertificationAuditPageDTO.getAuditStatus();
+        Integer certificationStatus = agencyCertificationAuditPageDTO.getCertificationStatus();
+
+        LambdaQueryWrapper<EdjAgencyCertificationAudit> wrapper = new LambdaQueryWrapper<EdjAgencyCertificationAudit>()
+                .likeLeft(StringUtils.isNotBlank(name), EdjAgencyCertificationAudit::getName, name)
+                .likeLeft(StringUtils.isNotBlank(legalPersonName), EdjAgencyCertificationAudit::getLegalPersonName, legalPersonName)
+                .eq(ObjectUtils.isNotNull(auditStatus), EdjAgencyCertificationAudit::getAuditStatus, auditStatus)
+                .eq(ObjectUtils.isNotNull(certificationStatus), EdjAgencyCertificationAudit::getCertificationStatus, certificationStatus);
+
+        Page<EdjAgencyCertificationAudit> agencyCertificationAuditPage = baseMapper.selectPage(page, wrapper);
+        return PageUtils.toPage(agencyCertificationAuditPage, AgencyCertificationAuditPageVO.class);
+    }
+
+    @Override
+    public void auditCertification(Long id, CertificationAuditDTO certificationAuditDTO) {
+        // 检查申请状态
+        EdjAgencyCertificationAudit agencyCertificationAudit = baseMapper.selectById(id);
+        if (ObjectUtils.isNull(agencyCertificationAudit)) {
+            throw new BadRequestException("审核信息不存在");
+        }
+
+        if (EnumUtils.eq(EdjCertificationStatus.SUCCESS, agencyCertificationAudit.getCertificationStatus())) {
+            throw new BadRequestException("申请已认证成功");
+        }
+
+        // 获取审核人信息
+        Long userId = SecurityUtils.getUserId();
+        String nickname = SecurityUtils.getNickname();
+
+        // 获取审核结果
+        Integer certificationStatus = certificationAuditDTO.getCertificationStatus();
+        String rejectReason = certificationAuditDTO.getRejectReason();
+
+        // 更新申请记录
+        CompletableFuture<Void> future1 = AsyncUtils.runAsyncTransaction(() -> {
+            LambdaUpdateWrapper<EdjAgencyCertificationAudit> workerCertificationAuditUpdateWrapper = new LambdaUpdateWrapper<EdjAgencyCertificationAudit>()
+                    .eq(EdjAgencyCertificationAudit::getId, id)
+                    .set(EdjAgencyCertificationAudit::getAuditStatus, EdjAuditStatus.REVIEWED)
+                    .set(EdjAgencyCertificationAudit::getAuditId, userId)
+                    .set(EdjAgencyCertificationAudit::getAuditName, nickname)
+                    .set(EdjAgencyCertificationAudit::getAuditTime, LocalDateTime.now())
+                    .set(EdjAgencyCertificationAudit::getCertificationStatus, certificationStatus)
+                    .set(StringUtils.isNotBlank(rejectReason), EdjAgencyCertificationAudit::getRejectReason, rejectReason);
+            baseMapper.update(workerCertificationAuditUpdateWrapper);
+        });
+
+        // 更新认证信息
+        EdjAgencyCertification agencyCertification = new EdjAgencyCertification();
+        Long serveProviderId = agencyCertificationAudit.getEdjServeProviderId();
+        String serveProviderName = agencyCertificationAudit.getName();
+        agencyCertification.setId(serveProviderId);
+        agencyCertification.setCertificationStatus(certificationStatus);
+
+        if (EnumUtils.eq(EdjCertificationStatus.SUCCESS, certificationStatus)) {
+            // 认证成功，同步认证信息
+            agencyCertification.setName(serveProviderName);
+            agencyCertification.setIdNumber(agencyCertificationAudit.getIdNumber());
+            agencyCertification.setLegalPersonName(agencyCertificationAudit.getLegalPersonName());
+            agencyCertification.setLegalPersonIdCardNo(agencyCertificationAudit.getLegalPersonIdCardNo());
+            agencyCertification.setBusinessLicense(agencyCertificationAudit.getBusinessLicense());
+            agencyCertification.setCertificationTime(agencyCertificationAudit.getAuditTime());
+        }
+
+        // 更新认证信息
+        CompletableFuture<Void> future2 = AsyncUtils.runAsyncTransaction(() -> agencyCertificationMapper.updateById(agencyCertification));
+
+        // 处理异步
+        CompletableFuture.allOf(future1, future2).join();
+
+        // 修改用户名
+        // 由于远程调用更新存在事务，必须保证调用后不存在可能出现异常的代码
+        userApi.updateNameById(serveProviderId, serveProviderName);
     }
 }
