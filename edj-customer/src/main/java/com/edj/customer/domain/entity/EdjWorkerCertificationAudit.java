@@ -5,7 +5,7 @@ import com.edj.common.domain.entity.EjdBaseEntity;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 /**
  * 服务人员认证审核表
@@ -74,7 +74,7 @@ public class EdjWorkerCertificationAudit extends EjdBaseEntity {
     /**
      * 审核时间
      */
-    private Date auditTime;
+    private LocalDateTime auditTime;
 
     /**
      * 认证状态（0初始态 1认证中 2认证成功 3认证失败）

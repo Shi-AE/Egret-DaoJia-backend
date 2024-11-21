@@ -121,6 +121,9 @@ public class EdjWorkerCertificationAuditServiceImpl extends MPJBaseServiceImpl<E
         Integer certificationStatus = certificationAuditDTO.getCertificationStatus();
         String rejectReason = certificationAuditDTO.getRejectReason();
 
+        // 获取当前时刻
+        LocalDateTime now = LocalDateTime.now();
+
         // 更新申请记录
         CompletableFuture<Void> future1 = AsyncUtils.runAsyncTransaction(() -> {
             LambdaUpdateWrapper<EdjWorkerCertificationAudit> workerCertificationAuditUpdateWrapper = new LambdaUpdateWrapper<EdjWorkerCertificationAudit>()
@@ -128,7 +131,7 @@ public class EdjWorkerCertificationAuditServiceImpl extends MPJBaseServiceImpl<E
                     .set(EdjWorkerCertificationAudit::getAuditStatus, EdjAuditStatus.REVIEWED)
                     .set(EdjWorkerCertificationAudit::getAuditId, userId)
                     .set(EdjWorkerCertificationAudit::getAuditName, nickname)
-                    .set(EdjWorkerCertificationAudit::getAuditTime, LocalDateTime.now())
+                    .set(EdjWorkerCertificationAudit::getAuditTime, now)
                     .set(EdjWorkerCertificationAudit::getCertificationStatus, certificationStatus)
                     .set(StringUtils.isNotBlank(rejectReason), EdjWorkerCertificationAudit::getRejectReason, rejectReason);
             baseMapper.update(workerCertificationAuditUpdateWrapper);
@@ -148,7 +151,7 @@ public class EdjWorkerCertificationAuditServiceImpl extends MPJBaseServiceImpl<E
             workerCertification.setFrontImg(workerCertificationAudit.getFrontImg());
             workerCertification.setBackImg(workerCertificationAudit.getBackImg());
             workerCertification.setCertificationMaterial(workerCertificationAudit.getCertificationMaterial());
-            workerCertification.setCertificationTime(workerCertificationAudit.getAuditTime());
+            workerCertification.setCertificationTime(now);
         }
 
         // 更新认证信息

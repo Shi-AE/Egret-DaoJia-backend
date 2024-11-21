@@ -139,6 +139,9 @@ public class EdjAgencyCertificationAuditServiceImpl extends MPJBaseServiceImpl<E
         Integer certificationStatus = certificationAuditDTO.getCertificationStatus();
         String rejectReason = certificationAuditDTO.getRejectReason();
 
+        // 获取当前时刻
+        LocalDateTime now = LocalDateTime.now();
+
         // 更新申请记录
         CompletableFuture<Void> future1 = AsyncUtils.runAsyncTransaction(() -> {
             LambdaUpdateWrapper<EdjAgencyCertificationAudit> workerCertificationAuditUpdateWrapper = new LambdaUpdateWrapper<EdjAgencyCertificationAudit>()
@@ -146,7 +149,7 @@ public class EdjAgencyCertificationAuditServiceImpl extends MPJBaseServiceImpl<E
                     .set(EdjAgencyCertificationAudit::getAuditStatus, EdjAuditStatus.REVIEWED)
                     .set(EdjAgencyCertificationAudit::getAuditId, userId)
                     .set(EdjAgencyCertificationAudit::getAuditName, nickname)
-                    .set(EdjAgencyCertificationAudit::getAuditTime, LocalDateTime.now())
+                    .set(EdjAgencyCertificationAudit::getAuditTime, now)
                     .set(EdjAgencyCertificationAudit::getCertificationStatus, certificationStatus)
                     .set(StringUtils.isNotBlank(rejectReason), EdjAgencyCertificationAudit::getRejectReason, rejectReason);
             baseMapper.update(workerCertificationAuditUpdateWrapper);
@@ -166,7 +169,7 @@ public class EdjAgencyCertificationAuditServiceImpl extends MPJBaseServiceImpl<E
             agencyCertification.setLegalPersonName(agencyCertificationAudit.getLegalPersonName());
             agencyCertification.setLegalPersonIdCardNo(agencyCertificationAudit.getLegalPersonIdCardNo());
             agencyCertification.setBusinessLicense(agencyCertificationAudit.getBusinessLicense());
-            agencyCertification.setCertificationTime(agencyCertificationAudit.getAuditTime());
+            agencyCertification.setCertificationTime(now);
         }
 
         // 更新认证信息

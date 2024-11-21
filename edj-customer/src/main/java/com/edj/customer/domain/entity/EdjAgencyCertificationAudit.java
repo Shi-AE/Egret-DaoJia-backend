@@ -4,7 +4,7 @@ import com.edj.common.domain.entity.EjdBaseEntity;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 /**
  * 机构认证审核表
@@ -72,7 +72,7 @@ public class EdjAgencyCertificationAudit extends EjdBaseEntity {
     /**
      * 审核时间
      */
-    private Date auditTime;
+    private LocalDateTime auditTime;
 
     /**
      * 驳回原因

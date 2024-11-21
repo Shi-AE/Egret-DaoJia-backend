@@ -4,7 +4,7 @@ import com.edj.common.domain.entity.EjdBaseEntity;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 /**
  * 服务人员认证信息表
@@ -57,5 +57,5 @@ public class EdjWorkerCertification extends EjdBaseEntity {
     /**
      * 认证时间
      */
-    private Date certificationTime;
+    private LocalDateTime certificationTime;
 }
