@@ -120,6 +120,7 @@ public class EdjAgencyCertificationAuditServiceImpl extends MPJBaseServiceImpl<E
     }
 
     @Override
+    @Transactional
     public void auditCertification(Long id, CertificationAuditDTO certificationAuditDTO) {
         // 检查申请状态
         EdjAgencyCertificationAudit agencyCertificationAudit = baseMapper.selectById(id);

@@ -102,6 +102,7 @@ public class EdjServeProviderSettingsServiceImpl extends MPJBaseServiceImpl<EdjS
     }
 
     @Override
+    @Transactional
     public ServeProviderSettingsVO getServeScope() {
         Long userId = SecurityUtils.getUserId();
         EdjServeProviderSettings serveProviderSettings = baseMapper.selectById(userId);
@@ -131,6 +132,7 @@ public class EdjServeProviderSettingsServiceImpl extends MPJBaseServiceImpl<EdjS
     }
 
     @Override
+    @Transactional
     public ServeSettingsStatusVo getSettingStatus() {
         // 获取用户id
         Long userId = SecurityUtils.getUserId();
