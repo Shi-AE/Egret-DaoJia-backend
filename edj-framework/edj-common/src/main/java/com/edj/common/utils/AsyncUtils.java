@@ -3,7 +3,7 @@ package com.edj.common.utils;
 import cn.hutool.extra.spring.SpringUtil;
 import com.edj.common.expcetions.ServerErrorException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.jdbc.support.JdbcTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
@@ -59,11 +59,11 @@ public class AsyncUtils {
     /**
      * 事务管理器
      */
-    public static final JdbcTransactionManager TRANSACTION_MANAGER;
+    public static final PlatformTransactionManager TRANSACTION_MANAGER;
 
     // 加载事务管理器
     static {
-        TRANSACTION_MANAGER = SpringUtil.getBean(JdbcTransactionManager.class);
+        TRANSACTION_MANAGER = SpringUtil.getBean(PlatformTransactionManager.class);
     }
 
     /**
@@ -186,9 +186,7 @@ public class AsyncUtils {
                     }
 
                     // 开启事务
-                    DefaultTransactionDefinition transactionDefinition = new DefaultTransactionDefinition();
-                    transactionDefinition.setTimeout(30);
-                    TransactionStatus status = TRANSACTION_MANAGER.getTransaction(transactionDefinition);
+                    TransactionStatus status = TRANSACTION_MANAGER.getTransaction(new DefaultTransactionDefinition());
 
                     // 执行任务
                     try {
