@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * 内部接口 - 服务人员/机构相关接口
@@ -55,26 +54,26 @@ public class InnerProviderController implements ProviderApi {
     @Operation(summary = "注册额外信息")
     @Transactional
     public void add(@RequestParam @Schema(description = "用户id") @Positive @NotNull Long userId) {
-        CompletableFuture<Void> future1 = AsyncUtils.runAsyncTransaction(() -> serveProviderMapper.insert(EdjServeProvider
+        Runnable task1 = () -> serveProviderMapper.insert(EdjServeProvider
                 .builder()
                 .id(userId)
                 .code(IdUtils.toCode(snowflake.nextId()))
                 .build()
-        ));
+        );
 
-        CompletableFuture<Void> future2 = AsyncUtils.runAsyncTransaction(() -> serveProviderSettingsMapper.insert(EdjServeProviderSettings
+        Runnable task2 = () -> serveProviderSettingsMapper.insert(EdjServeProviderSettings
                 .builder()
                 .id(userId)
                 .build()
-        ));
+        );
 
-        CompletableFuture<Void> future3 = AsyncUtils.runAsyncTransaction(() -> serveProviderSyncMapper.insert(EdjServeProviderSync
+        Runnable task3 = () -> serveProviderSyncMapper.insert(EdjServeProviderSync
                 .builder()
                 .id(userId)
                 .serveItemIdList(List.of())
                 .build()
-        ));
+        );
 
-        CompletableFuture.allOf(future1, future2, future3).join();
+        AsyncUtils.runAsyncTransaction(List.of(task1, task2, task3));
     }
 }

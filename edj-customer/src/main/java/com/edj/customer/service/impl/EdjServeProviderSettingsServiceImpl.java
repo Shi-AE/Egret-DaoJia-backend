@@ -198,7 +198,7 @@ public class EdjServeProviderSettingsServiceImpl extends MPJBaseServiceImpl<EdjS
         ) {
             settingStatus = EdjSettingStatus.COMPLETED;
 
-            CompletableFuture<Void> update1 = AsyncUtils.runAsyncTransaction(() -> {
+            Runnable updateTask1 = () -> {
                 // 设置到用户状态
                 serveProviderMapper.updateById(EdjServeProvider
                         .builder()
@@ -206,9 +206,9 @@ public class EdjServeProviderSettingsServiceImpl extends MPJBaseServiceImpl<EdjS
                         .settingsStatus((Integer) EnumUtils.value(EdjSettingStatus.COMPLETED))
                         .build()
                 );
-            });
+            };
 
-            CompletableFuture<Void> update2 = AsyncUtils.runAsyncTransaction(() -> {
+            Runnable updateTask2 = () -> {
                 // 同步表
                 serveProviderSyncMapper.updateById(EdjServeProviderSync
                         .builder()
@@ -216,9 +216,9 @@ public class EdjServeProviderSettingsServiceImpl extends MPJBaseServiceImpl<EdjS
                         .settingStatus((Integer) EnumUtils.value(EdjSettingStatus.COMPLETED))
                         .build()
                 );
-            });
+            };
 
-            CompletableFuture.allOf(update1, update2).join();
+            AsyncUtils.runAsyncTransaction(List.of(updateTask1, updateTask2));
         }
 
         serveSettingsStatusVo.setSettingsStatus((Integer) EnumUtils.value(settingStatus));

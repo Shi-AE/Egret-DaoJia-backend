@@ -27,7 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.concurrent.CompletableFuture;
+import java.util.List;
 
 /**
  * 针对表【edj_agency_certification_audit(机构认证审核表)】的数据库操作Service实现
@@ -144,7 +144,7 @@ public class EdjAgencyCertificationAuditServiceImpl extends MPJBaseServiceImpl<E
         LocalDateTime now = LocalDateTime.now();
 
         // 更新申请记录
-        CompletableFuture<Void> future1 = AsyncUtils.runAsyncTransaction(() -> {
+        Runnable task1 = () -> {
             LambdaUpdateWrapper<EdjAgencyCertificationAudit> workerCertificationAuditUpdateWrapper = new LambdaUpdateWrapper<EdjAgencyCertificationAudit>()
                     .eq(EdjAgencyCertificationAudit::getId, id)
                     .set(EdjAgencyCertificationAudit::getAuditStatus, EdjAuditStatus.REVIEWED)
@@ -154,7 +154,7 @@ public class EdjAgencyCertificationAuditServiceImpl extends MPJBaseServiceImpl<E
                     .set(EdjAgencyCertificationAudit::getCertificationStatus, certificationStatus)
                     .set(StringUtils.isNotBlank(rejectReason), EdjAgencyCertificationAudit::getRejectReason, rejectReason);
             baseMapper.update(workerCertificationAuditUpdateWrapper);
-        });
+        };
 
         // 更新认证信息
         EdjAgencyCertification agencyCertification = new EdjAgencyCertification();
@@ -174,10 +174,10 @@ public class EdjAgencyCertificationAuditServiceImpl extends MPJBaseServiceImpl<E
         }
 
         // 更新认证信息
-        CompletableFuture<Void> future2 = AsyncUtils.runAsyncTransaction(() -> agencyCertificationMapper.updateById(agencyCertification));
+        Runnable task2 = () -> agencyCertificationMapper.updateById(agencyCertification);
 
         // 处理异步
-        CompletableFuture.allOf(future1, future2).join();
+        AsyncUtils.runAsyncTransaction(List.of(task1, task2));
 
         // 修改用户名
         // 由于远程调用更新存在事务，必须保证调用后不存在可能出现异常的代码

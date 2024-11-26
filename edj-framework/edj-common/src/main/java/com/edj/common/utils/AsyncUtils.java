@@ -1,15 +1,16 @@
 package com.edj.common.utils;
 
 import cn.hutool.extra.spring.SpringUtil;
-import com.edj.common.domain.dto.TransactionResourceDTO;
-import com.edj.common.expcetions.BadRequestException;
 import com.edj.common.expcetions.ServerErrorException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.support.JdbcTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -157,41 +158,82 @@ public class AsyncUtils {
     }
 
     /**
-     * 异步执行一个没有返回值的任务
+     * 异步执行多个并行的没有返回值的任务
      * 使用事务进行管理
      */
-    public static CompletableFuture<Void> runAsyncTransaction(Runnable runnable) {
-        // 主线程开启事务
-        DefaultTransactionDefinition def = new DefaultTransactionDefinition();
-        def.setTimeout(30);
-        TransactionStatus status = TRANSACTION_MANAGER.getTransaction(def);
-        // 获取主线程事务资源
-        TransactionResourceDTO transactionResourceDTO = TransactionResourceDTO.copyTransactionResource();
-        return runAsync(() -> {
-            // 子线程绑定事务资源
-            transactionResourceDTO.autoWiredTransactionResource();
-            try {
-                // 执行
-                runnable.run();
-            } finally {
-                // 子线程解除事务资源
-                transactionResourceDTO.removeTransactionResource();
-            }
-        }).whenComplete((result, throwable) -> {
-            if (throwable != null) {
-                // 执行失败，回滚事务
-                log.debug("执行失败，回滚事务");
-                TRANSACTION_MANAGER.rollback(status);
-                log.debug("事务回滚完成");
-                exceptionHandle(Thread.currentThread(), throwable);
-                throw new BadRequestException(throwable.getMessage());
-            } else {
-                // 执行成功，提交事务
-                log.debug("执行成功，提交事务");
-                TRANSACTION_MANAGER.commit(status);
-                log.debug("事务提交成功");
-            }
-        });
+    public static void runAsyncTransaction(List<Runnable> runnableList) {
+        if (CollUtils.isEmpty(runnableList)) {
+            return;
+        }
+
+        // 任务数
+        final int taskCount = runnableList.size();
+        // 创建等量闭锁
+        final CountDownLatch countDownLatch = new CountDownLatch(taskCount);
+        // 任务失败标志
+        final AtomicBoolean wrong = new AtomicBoolean(false);
+        // 记录任务执行异常
+        final List<Exception> exceptionList = new ArrayList<>();
+
+        // 执行任务
+        List<CompletableFuture<Void>> futureList = runnableList
+                .stream()
+                .map(runnable -> CompletableFuture.runAsync(() -> {
+                    // 检验是否可执行任务
+                    if (wrong.get()) {
+                        countDownLatch.countDown();
+                        return;
+                    }
+
+                    // 开启事务
+                    DefaultTransactionDefinition transactionDefinition = new DefaultTransactionDefinition();
+                    transactionDefinition.setTimeout(30);
+                    TransactionStatus status = TRANSACTION_MANAGER.getTransaction(transactionDefinition);
+
+                    // 执行任务
+                    try {
+                        if (!wrong.get()) {
+                            runnable.run();
+                        }
+                    } catch (Exception e) {
+                        wrong.set(true);
+                        exceptionList.add(e);
+                    } finally {
+                        countDownLatch.countDown();
+                    }
+
+                    // 等待任务全部结束
+                    try {
+                        boolean success = countDownLatch.await(30, TimeUnit.SECONDS);
+                        if (!success) {
+                            wrong.set(true);
+                        }
+                    } catch (InterruptedException e) {
+                        log.error("多线程任务执行中断错误: {}", e.getMessage(), e);
+                        wrong.set(true);
+                    }
+
+                    // 事务管理
+                    if (wrong.get()) {
+                        // 失败回滚
+                        log.debug("多线程事务失败回滚");
+                        TRANSACTION_MANAGER.rollback(status);
+                    } else {
+                        // 成功提交
+                        log.debug("多线程事务成功提交");
+                        TRANSACTION_MANAGER.commit(status);
+                    }
+
+                }, ASYNC_POOL))
+                .toList();
+        // 聚合等待任务
+        CompletableFuture.allOf(futureList.toArray(new CompletableFuture[0])).join();
+
+        // 抛出异常
+        if (CollUtils.isNotEmpty(exceptionList)) {
+            log.error("多线程任务执行报错: {}", exceptionList);
+            throw new RuntimeException(exceptionList.getFirst());
+        }
     }
 
     /**
