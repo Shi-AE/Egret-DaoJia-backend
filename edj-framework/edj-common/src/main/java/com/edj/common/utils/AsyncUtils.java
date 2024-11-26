@@ -1,6 +1,7 @@
 package com.edj.common.utils;
 
 import cn.hutool.extra.spring.SpringUtil;
+import com.edj.common.constants.ConnectSemaphore;
 import com.edj.common.expcetions.ServerErrorException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -168,6 +169,10 @@ public class AsyncUtils {
 
         // 任务数
         final int taskCount = runnableList.size();
+
+        // 请求数据库连接许可
+        ConnectSemaphore.acquire(taskCount);
+
         // 创建等量闭锁
         final CountDownLatch countDownLatch = new CountDownLatch(taskCount);
         // 任务失败标志
@@ -226,6 +231,9 @@ public class AsyncUtils {
                 .toList();
         // 聚合等待任务
         CompletableFuture.allOf(futureList.toArray(new CompletableFuture[0])).join();
+
+        // 释放连接信号量
+        ConnectSemaphore.release(taskCount);
 
         // 抛出异常
         if (CollUtils.isNotEmpty(exceptionList)) {
