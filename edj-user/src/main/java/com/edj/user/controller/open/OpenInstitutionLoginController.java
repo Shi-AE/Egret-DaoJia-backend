@@ -2,9 +2,11 @@ package com.edj.user.controller.open;
 
 import com.edj.user.domain.dto.InstitutionRegisterDTO;
 import com.edj.user.domain.dto.PhoneLoginDTO;
+import com.edj.user.domain.dto.PhoneResetPasswordDTO;
 import com.edj.user.domain.vo.UserTokenVO;
 import com.edj.user.service.LoginService;
 import com.edj.user.service.RegisterService;
+import com.edj.user.service.ResetPasswordService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,7 +32,9 @@ public class OpenInstitutionLoginController {
 
     private final LoginService loginService;
 
-    private final RegisterService registerInstitution;
+    private final RegisterService registerService;
+
+    private final ResetPasswordService resetPasswordService;
 
     /**
      * 机构端用户登录
@@ -49,6 +53,15 @@ public class OpenInstitutionLoginController {
     @Operation(summary = "机构端用户注册")
     @PreAuthorize("isAnonymous()")
     public void register(@Validated @RequestBody InstitutionRegisterDTO institutionRegisterDTO) {
-        registerInstitution.institutionRegister(institutionRegisterDTO);
+        registerService.institutionRegister(institutionRegisterDTO);
+    }
+
+    /**
+     * 机构重置登录密码
+     */
+    @PostMapping("reset/password")
+    @Operation(summary = "机构重置登录密码")
+    public void resetPassword(@Validated @RequestBody PhoneResetPasswordDTO phoneResetPasswordDTO) {
+        resetPasswordService.resetPasswordForPhone(phoneResetPasswordDTO);
     }
 }

@@ -63,5 +63,6 @@ gateway:
       - /edj-user/open/worker/login
       - /edj-user/open/institution/login
       - /edj-user/open/institution/register
+      - /edj-user/open/institution/reset/password
       # 验证码
       - /edj-publics/sms/code/send
