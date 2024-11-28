@@ -19,9 +19,12 @@ import com.edj.foundations.service.ConsumerHomeService;
 import com.edj.foundations.service.EdjServeItemService;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+
+import static com.edj.cache.constants.CacheConstants.CacheName.REGION_CACHE;
 
 /**
  * 用户端首页服务实现
@@ -40,6 +43,7 @@ public class ConsumerHomeServiceImpl implements ConsumerHomeService {
     private final EdjServeItemService serveItemService;
 
     @Override
+    @Cacheable(cacheNames = REGION_CACHE, key = "'ActiveRegion'")
     public List<RegionSimpleVO> getActiveRegionList() {
 
         MPJLambdaWrapper<EdjRegion> wrapper = new MPJLambdaWrapper<EdjRegion>()

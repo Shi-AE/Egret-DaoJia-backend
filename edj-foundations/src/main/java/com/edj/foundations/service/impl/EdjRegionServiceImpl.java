@@ -15,7 +15,6 @@ import com.edj.foundations.domain.dto.RegionUpdateDTO;
 import com.edj.foundations.domain.entity.EdjCity;
 import com.edj.foundations.domain.entity.EdjRegion;
 import com.edj.foundations.domain.entity.EdjServe;
-import com.edj.foundations.domain.vo.RegionSimpleVO;
 import com.edj.foundations.domain.vo.RegionVO;
 import com.edj.foundations.enums.EdjCityType;
 import com.edj.foundations.enums.EdjRegionActiveStatus;
@@ -27,12 +26,13 @@ import com.edj.foundations.service.EdjConfigRegionService;
 import com.edj.foundations.service.EdjRegionService;
 import com.edj.mysql.utils.PageUtils;
 import com.github.yulichang.base.MPJBaseServiceImpl;
-import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import static com.edj.cache.constants.CacheConstants.CacheName.REGION_CACHE;
 
 /**
  * 针对表【edj_region(区域表)】的数据库操作Service实现
@@ -138,6 +138,9 @@ public class EdjRegionServiceImpl extends MPJBaseServiceImpl<EdjRegionMapper, Ed
 
     @Override
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(cacheNames = REGION_CACHE, key = "'ActiveRegion'", beforeInvocation = true)
+    })
     public void active(Long id) {
         // 检查区域
         LambdaQueryWrapper<EdjRegion> checkWrapper = new LambdaQueryWrapper<EdjRegion>()
@@ -177,6 +180,9 @@ public class EdjRegionServiceImpl extends MPJBaseServiceImpl<EdjRegionMapper, Ed
 
     @Override
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(cacheNames = REGION_CACHE, key = "'ActiveRegion'", beforeInvocation = true)
+    })
     public void deactivate(Long id) {
         // 检查区域
         LambdaQueryWrapper<EdjRegion> checkWrapper = new LambdaQueryWrapper<EdjRegion>()

@@ -15,6 +15,8 @@ public class CacheConstants {
         public static final String EDJ_CACHE = "EDJ_CACHE";
 
         public static final String CITY_CACHE = EDJ_CACHE + ":CITY";
+
+        public static final String REGION_CACHE = EDJ_CACHE + ":REGION";
     }
 
     public static final class CacheManager {
