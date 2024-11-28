@@ -6,6 +6,7 @@ import com.edj.customer.service.EdjAgencyCertificationAuditService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,7 +30,8 @@ public class AgencyCertificationAuditController {
      */
     @PostMapping
     @Operation(summary = "机构端提交认证申请")
-    public void auditCertification(@RequestBody @Validated AgencyCertificationAuditApplyDTO agencyCertificationAuditApplyDTO) {
+    @PreAuthorize("hasAuthority('agency:certification:apply')")
+    public void apply(@RequestBody @Validated AgencyCertificationAuditApplyDTO agencyCertificationAuditApplyDTO) {
         agencyCertificationAuditService.applyCertification(agencyCertificationAuditApplyDTO);
     }
 
@@ -38,6 +40,7 @@ public class AgencyCertificationAuditController {
      */
     @GetMapping("reject/reason")
     @Operation(summary = "机构端查询最新的驳回原因")
+    @PreAuthorize("hasAuthority('agency:certification:reason')")
     public RejectReasonVO queryCurrentUserLastRejectReason() {
         return agencyCertificationAuditService.getLastRejectReason();
     }

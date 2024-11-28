@@ -8,6 +8,7 @@ import com.edj.customer.service.EdjServeProviderSettingsService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,6 +32,7 @@ public class AgencyServeProviderSettingsController {
      */
     @PutMapping("pick/up")
     @Operation(summary = "接单设置")
+    @PreAuthorize("hasAuthority('agency:serveSettings:setPickUp')")
     public void setPickUp(@RequestBody ServePickUpDTO servePickUpDTO) {
         serveProviderSettingsService.setPickUp(servePickUpDTO.getCanPickUp());
     }
@@ -40,6 +42,7 @@ public class AgencyServeProviderSettingsController {
      */
     @PutMapping("scope")
     @Operation(summary = "服务范围设置")
+    @PreAuthorize("hasAuthority('agency:serveSettings:setServeScope')")
     public void setServeScope(@RequestBody @Validated ServeScopeSetDTO serveScopeSetDTO) {
         serveProviderSettingsService.setServeScope(serveScopeSetDTO);
     }
@@ -49,6 +52,7 @@ public class AgencyServeProviderSettingsController {
      */
     @GetMapping
     @Operation(summary = "获取服务范围设置")
+    @PreAuthorize("hasAuthority('agency:serveSettings:getServeScope')")
     public ServeProviderSettingsVO getServeScope() {
         return serveProviderSettingsService.getServeScope();
     }
@@ -58,6 +62,7 @@ public class AgencyServeProviderSettingsController {
      */
     @GetMapping("status")
     @Operation(summary = "获取所有设置状态")
+    @PreAuthorize("hasAuthority('agency:serveSettings:getStatus')")
     public ServeSettingsStatusVo getStatus() {
         return serveProviderSettingsService.getSettingStatus();
     }

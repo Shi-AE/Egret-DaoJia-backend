@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,6 +34,7 @@ public class AgencyServeSkillController {
      */
     @PostMapping("batch")
     @Operation(summary = "批量新增或修改服务技能")
+    @PreAuthorize("hasAuthority('agency:serveSkill:batchUpsert')")
     public void batchUpsert(
             @RequestBody
             @Validated
@@ -47,6 +49,7 @@ public class AgencyServeSkillController {
      */
     @GetMapping("category")
     @Operation(summary = "查询服务技能目录")
+    @PreAuthorize("hasAuthority('agency:serveSkill:category')")
     public List<ServeSkillCategoryVO> category() {
         return serveSkillService.category();
     }

@@ -8,6 +8,7 @@ import com.edj.customer.service.EdjWorkerCertificationAuditService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,6 +32,7 @@ public class OperationWorkerCertificationAuditController {
      */
     @PostMapping("page")
     @Operation(summary = "服务人员认证审核信息分页查询")
+    @PreAuthorize("hasAuthority('foundations:workerCertification:page')")
     public PageResult<WorkerCertificationAuditPageVO> page(@RequestBody @Validated WorkerCertificationAuditPageDTO workerCertificationAuditPageDTO) {
         return workerCertificationAuditService.page(workerCertificationAuditPageDTO);
     }
@@ -40,6 +42,7 @@ public class OperationWorkerCertificationAuditController {
      */
     @PutMapping("audit/{id}")
     @Operation(summary = "审核服务人员认证信息")
+    @PreAuthorize("hasAuthority('foundations:workerCertification:audit')")
     public void auditCertification(@PathVariable("id") Long id, @ModelAttribute CertificationAuditDTO certificationAuditDTO) {
         workerCertificationAuditService.auditCertification(id, certificationAuditDTO);
     }

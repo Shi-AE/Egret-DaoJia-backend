@@ -9,6 +9,7 @@ import com.edj.security.utils.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,7 +33,8 @@ public class WorkerBankAccountController {
      */
     @PostMapping
     @Operation(summary = "新增或更新银行账号信息")
-    public void queryByServeProviderId(@Validated @RequestBody BankAccountUpsertDTO bankAccountUpsertDTO) {
+    @PreAuthorize("hasAuthority('worker:bankAccount:upsert')")
+    public void upsert(@Validated @RequestBody BankAccountUpsertDTO bankAccountUpsertDTO) {
         bankAccountService.upsert(bankAccountUpsertDTO);
     }
 
@@ -41,7 +43,8 @@ public class WorkerBankAccountController {
      */
     @GetMapping
     @Operation(summary = "获取当前用银行账号信息")
-    public BankAccountVO queryCurrentUserBankAccount() {
+    @PreAuthorize("hasAuthority('worker:bankAccount:get')")
+    public BankAccountVO get() {
         EdjBankAccount bankAccount = bankAccountService.getById(SecurityUtils.getUserId());
         return BeanUtil.toBean(bankAccount, BankAccountVO.class);
     }

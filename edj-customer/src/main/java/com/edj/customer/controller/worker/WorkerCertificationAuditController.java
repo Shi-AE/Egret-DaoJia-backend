@@ -6,6 +6,7 @@ import com.edj.customer.service.EdjWorkerCertificationAuditService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,7 +30,8 @@ public class WorkerCertificationAuditController {
      */
     @PostMapping
     @Operation(summary = "服务人员提交认证申请")
-    public void auditCertification(@RequestBody @Validated WorkerCertificationAuditApplyDTO workerCertificationAuditApplyDTO) {
+    @PreAuthorize("hasAuthority('worker:certification:apply')")
+    public void apply(@RequestBody @Validated WorkerCertificationAuditApplyDTO workerCertificationAuditApplyDTO) {
         workerCertificationAuditService.applyCertification(workerCertificationAuditApplyDTO);
     }
 
@@ -38,6 +40,7 @@ public class WorkerCertificationAuditController {
      */
     @GetMapping("reject/reason")
     @Operation(summary = "查询最新的驳回原因")
+    @PreAuthorize("hasAuthority('worker:certification:reason')")
     public RejectReasonVO queryCurrentUserLastRejectReason() {
         return workerCertificationAuditService.getLastRejectReason();
     }
