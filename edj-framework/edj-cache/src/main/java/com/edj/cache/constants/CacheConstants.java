@@ -14,9 +14,20 @@ public class CacheConstants {
          */
         public static final String EDJ_CACHE = "EDJ_CACHE";
 
+        /**
+         * 城市相关缓存
+         */
         public static final String CITY_CACHE = EDJ_CACHE + ":CITY";
 
+        /**
+         * 区域相关缓存
+         */
         public static final String REGION_CACHE = EDJ_CACHE + ":REGION";
+
+        /**
+         * 首页服务列表缓存
+         */
+        public static final String HOME_CATEGORY_CACHE = EDJ_CACHE + ":HOME:CATEGORY";
     }
 
     public static final class CacheManager {

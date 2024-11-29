@@ -27,6 +27,7 @@ import com.edj.mysql.utils.PageUtils;
 import com.github.yulichang.base.MPJBaseServiceImpl;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +36,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static com.edj.cache.constants.CacheConstants.CacheName.HOME_CATEGORY_CACHE;
 
 /**
  * 针对表【edj_serve(服务表)】的数据库操作Service实现
@@ -52,6 +55,7 @@ public class EdjServeServiceImpl extends MPJBaseServiceImpl<EdjServeMapper, EdjS
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = HOME_CATEGORY_CACHE, key = "#serveAddDTOList.getFirst().edjRegionId")
     public void add(List<ServeAddDTO> serveAddDTOList) {
         // 检查提交的重复项
         boolean duplicate = serveAddDTOList.stream()
@@ -178,10 +182,11 @@ public class EdjServeServiceImpl extends MPJBaseServiceImpl<EdjServeMapper, EdjS
 
     @Override
     @Transactional
-    public void onSale(Long id) {
+    @CacheEvict(cacheNames = HOME_CATEGORY_CACHE, key = "#result")
+    public Long onSale(Long id) {
         // 检查服务
         LambdaQueryWrapper<EdjServe> checkServer = new LambdaQueryWrapper<EdjServe>()
-                .select(EdjServe::getSaleStatus, EdjServe::getEdjServeItemId)
+                .select(EdjServe::getSaleStatus, EdjServe::getEdjServeItemId, EdjServe::getEdjRegionId)
                 .eq(EdjServe::getId, id);
         EdjServe serve = baseMapper.selectOne(checkServer);
 
@@ -219,13 +224,17 @@ public class EdjServeServiceImpl extends MPJBaseServiceImpl<EdjServeMapper, EdjS
                 .set(EdjServe::getSaleStatus, EdjServeSaleStatus.PUBLISHED)
                 .eq(EdjServe::getId, id);
         baseMapper.update(new EdjServe(), updateWrapper);
+
+        // 删除首页服务列表缓存 区域id key
+        return serve.getEdjRegionId();
     }
 
     @Override
-    public void offSale(Long id) {
+    @CacheEvict(cacheNames = HOME_CATEGORY_CACHE, key = "#result")
+    public Long offSale(Long id) {
         // 检查服务
         LambdaQueryWrapper<EdjServe> checkServer = new LambdaQueryWrapper<EdjServe>()
-                .select(EdjServe::getSaleStatus)
+                .select(EdjServe::getSaleStatus, EdjServe::getEdjRegionId)
                 .eq(EdjServe::getId, id);
         EdjServe serve = baseMapper.selectOne(checkServer);
 
@@ -245,6 +254,9 @@ public class EdjServeServiceImpl extends MPJBaseServiceImpl<EdjServeMapper, EdjS
                 .set(EdjServe::getSaleStatus, EdjServeSaleStatus.UNPUBLISHED)
                 .eq(EdjServe::getId, id);
         baseMapper.update(new EdjServe(), updateWrapper);
+
+        // 删除首页服务列表缓存 区域id key
+        return serve.getEdjRegionId();
     }
 
     @Override

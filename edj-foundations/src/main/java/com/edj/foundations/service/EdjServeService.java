@@ -41,13 +41,17 @@ public interface EdjServeService extends MPJBaseService<EdjServe> {
 
     /**
      * 区域服务上架
+     *
+     * @return 删除首页服务列表缓存 区域id key
      */
-    void onSale(Long id);
+    Long onSale(Long id);
 
     /**
      * 区域服务下架
+     *
+     * @return 删除首页服务列表缓存 区域id key
      */
-    void offSale(Long id);
+    Long offSale(Long id);
 
     /**
      * 区域服务删除

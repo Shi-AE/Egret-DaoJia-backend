@@ -20,11 +20,14 @@ import com.edj.foundations.service.EdjServeItemService;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static com.edj.cache.constants.CacheConstants.CacheManager.THIRTY_MINUTES;
 import static com.edj.cache.constants.CacheConstants.CacheName.REGION_CACHE;
+import static com.edj.cache.constants.CacheConstants.CacheName.HOME_CATEGORY_CACHE;
 
 /**
  * 用户端首页服务实现
@@ -57,6 +60,12 @@ public class ConsumerHomeServiceImpl implements ConsumerHomeService {
     }
 
     @Override
+    @Caching(cacheable = {
+            // 非空结果永久保存
+            @Cacheable(cacheNames = HOME_CATEGORY_CACHE, key = "#regionId", unless = "#result.isEmpty()"),
+            // 空结果缓存30分钟
+            @Cacheable(cacheNames = HOME_CATEGORY_CACHE, key = "#regionId", unless = "!#result.isEmpty()", cacheManager = THIRTY_MINUTES)
+    })
     public List<ServeCategoryVO> getServeIconCategoryByRegionIdCache(Long regionId) {
 
         // 检查区域启用
