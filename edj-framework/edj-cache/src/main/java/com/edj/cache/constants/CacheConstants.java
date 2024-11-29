@@ -22,7 +22,7 @@ public class CacheConstants {
         /**
          * 已开通服务区域列表缓存
          */
-        public static final String ACTIVE_REGION_CACHE = EDJ_CACHE + ":ACTIVE:REGION";
+        public static final String ACTIVE_REGION_CACHE = EDJ_CACHE + ":ACTIVE_REGION";
 
         /**
          * 首页服务列表缓存
