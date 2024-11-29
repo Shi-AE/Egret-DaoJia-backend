@@ -15,14 +15,14 @@ public class CacheConstants {
         public static final String EDJ_CACHE = "EDJ_CACHE";
 
         /**
-         * 城市相关缓存
+         * 城市列表缓存
          */
         public static final String CITY_CACHE = EDJ_CACHE + ":CITY";
 
         /**
-         * 区域相关缓存
+         * 已开通服务区域列表缓存
          */
-        public static final String REGION_CACHE = EDJ_CACHE + ":REGION";
+        public static final String ACTIVE_REGION_CACHE = EDJ_CACHE + ":ACTIVE:REGION";
 
         /**
          * 首页服务列表缓存

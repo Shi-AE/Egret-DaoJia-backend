@@ -32,7 +32,7 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.edj.cache.constants.CacheConstants.CacheName.REGION_CACHE;
+import static com.edj.cache.constants.CacheConstants.CacheName.ACTIVE_REGION_CACHE;
 
 /**
  * 针对表【edj_region(区域表)】的数据库操作Service实现
@@ -139,7 +139,7 @@ public class EdjRegionServiceImpl extends MPJBaseServiceImpl<EdjRegionMapper, Ed
     @Override
     @Transactional
     @Caching(evict = {
-            @CacheEvict(cacheNames = REGION_CACHE, key = "'ActiveRegion'", beforeInvocation = true)
+            @CacheEvict(cacheNames = ACTIVE_REGION_CACHE, key = "'ActiveRegion'", beforeInvocation = true)
     })
     public void active(Long id) {
         // 检查区域
@@ -181,7 +181,7 @@ public class EdjRegionServiceImpl extends MPJBaseServiceImpl<EdjRegionMapper, Ed
     @Override
     @Transactional
     @Caching(evict = {
-            @CacheEvict(cacheNames = REGION_CACHE, key = "'ActiveRegion'", beforeInvocation = true)
+            @CacheEvict(cacheNames = ACTIVE_REGION_CACHE, key = "'ActiveRegion'", beforeInvocation = true)
     })
     public void deactivate(Long id) {
         // 检查区域

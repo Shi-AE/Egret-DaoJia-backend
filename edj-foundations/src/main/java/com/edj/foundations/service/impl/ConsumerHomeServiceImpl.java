@@ -26,7 +26,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 import static com.edj.cache.constants.CacheConstants.CacheManager.THIRTY_MINUTES;
-import static com.edj.cache.constants.CacheConstants.CacheName.REGION_CACHE;
+import static com.edj.cache.constants.CacheConstants.CacheName.ACTIVE_REGION_CACHE;
 import static com.edj.cache.constants.CacheConstants.CacheName.HOME_CATEGORY_CACHE;
 
 /**
@@ -46,7 +46,7 @@ public class ConsumerHomeServiceImpl implements ConsumerHomeService {
     private final EdjServeItemService serveItemService;
 
     @Override
-    @Cacheable(cacheNames = REGION_CACHE, key = "'ActiveRegion'")
+    @Cacheable(cacheNames = ACTIVE_REGION_CACHE, key = "'ActiveRegion'")
     public List<RegionSimpleVO> getActiveRegionList() {
 
         MPJLambdaWrapper<EdjRegion> wrapper = new MPJLambdaWrapper<EdjRegion>()

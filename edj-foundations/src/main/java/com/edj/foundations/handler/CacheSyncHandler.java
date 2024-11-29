@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
-import static com.edj.cache.constants.CacheConstants.CacheName.REGION_CACHE;
+import static com.edj.cache.constants.CacheConstants.CacheName.ACTIVE_REGION_CACHE;
 
 @Slf4j
 @Component
@@ -26,7 +26,7 @@ public class CacheSyncHandler {
     public void activeRegionCacheSync() {
         log.info(">>>>>>>> 开始进行缓存同步，更新已开通服务区域列表");
         //1.清理缓存
-        String key = REGION_CACHE + ":ActiveRegion";
+        String key = ACTIVE_REGION_CACHE + ":ActiveRegion";
         redisTemplate.delete(key);
 
         //2.刷新缓存
