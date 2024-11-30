@@ -28,6 +28,7 @@ import com.github.yulichang.base.MPJBaseServiceImpl;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +39,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.edj.cache.constants.CacheConstants.CacheName.HOME_CATEGORY_CACHE;
+import static com.edj.cache.constants.CacheConstants.CacheName.HOME_SERVE_TYPE_CACHE;
 
 /**
  * 针对表【edj_serve(服务表)】的数据库操作Service实现
@@ -55,7 +57,10 @@ public class EdjServeServiceImpl extends MPJBaseServiceImpl<EdjServeMapper, EdjS
 
     @Override
     @Transactional
-    @CacheEvict(cacheNames = HOME_CATEGORY_CACHE, key = "#serveAddDTOList.getFirst().edjRegionId")
+    @Caching(evict = {
+            @CacheEvict(cacheNames = HOME_CATEGORY_CACHE, key = "#serveAddDTOList.getFirst().edjRegionId"),
+            @CacheEvict(cacheNames = HOME_SERVE_TYPE_CACHE, key = "#serveAddDTOList.getFirst().edjRegionId")
+    })
     public void add(List<ServeAddDTO> serveAddDTOList) {
         // 检查提交的重复项
         boolean duplicate = serveAddDTOList.stream()
@@ -182,7 +187,10 @@ public class EdjServeServiceImpl extends MPJBaseServiceImpl<EdjServeMapper, EdjS
 
     @Override
     @Transactional
-    @CacheEvict(cacheNames = HOME_CATEGORY_CACHE, key = "#result")
+    @Caching(evict = {
+            @CacheEvict(cacheNames = HOME_CATEGORY_CACHE, key = "#result"),
+            @CacheEvict(cacheNames = HOME_SERVE_TYPE_CACHE, key = "#result")
+    })
     public Long onSale(Long id) {
         // 检查服务
         LambdaQueryWrapper<EdjServe> checkServer = new LambdaQueryWrapper<EdjServe>()
@@ -230,7 +238,10 @@ public class EdjServeServiceImpl extends MPJBaseServiceImpl<EdjServeMapper, EdjS
     }
 
     @Override
-    @CacheEvict(cacheNames = HOME_CATEGORY_CACHE, key = "#result")
+    @Caching(evict = {
+            @CacheEvict(cacheNames = HOME_CATEGORY_CACHE, key = "#result"),
+            @CacheEvict(cacheNames = HOME_SERVE_TYPE_CACHE, key = "#result")
+    })
     public Long offSale(Long id) {
         // 检查服务
         LambdaQueryWrapper<EdjServe> checkServer = new LambdaQueryWrapper<EdjServe>()

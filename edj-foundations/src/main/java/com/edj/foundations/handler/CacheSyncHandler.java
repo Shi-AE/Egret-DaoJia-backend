@@ -16,8 +16,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Set;
 
-import static com.edj.cache.constants.CacheConstants.CacheName.ACTIVE_REGION_CACHE;
-import static com.edj.cache.constants.CacheConstants.CacheName.HOME_CATEGORY_CACHE;
+import static com.edj.cache.constants.CacheConstants.CacheName.*;
 
 @Slf4j
 @Component
@@ -74,5 +73,35 @@ public class CacheSyncHandler {
                 .forEach(id -> AsyncUtils.runAsync(() -> consumerHomeService.getServeIconCategoryByRegionIdCache(id)));
 
         log.info(">>>>>>>>更新首页服务列表缓存完成");
+    }
+
+    /**
+     * 定时更新首页服务类型列表缓存
+     * 每日凌晨1点执行
+     */
+    @XxlJob("HomeServeTypeCache")
+    public void homeServeTypeCacheSync() {
+        log.info(">>>>>>>> 开始进行缓存同步，更新首页服务类型列表缓存");
+        // 删除所有区域缓存
+        Set<String> keys = redisTemplate.keys(HOME_SERVE_TYPE_CACHE.concat("*"));
+        if (CollUtils.isEmpty(keys)) {
+            return;
+        }
+        redisTemplate.delete(keys);
+
+        // 获取所有已启用区域
+        LambdaQueryWrapper<EdjRegion> wrapper = new LambdaQueryWrapper<EdjRegion>()
+                .select(EdjRegion::getId)
+                .eq(EdjRegion::getActiveStatus, EdjRegionActiveStatus.ENABLED);
+        List<EdjRegion> regionList = regionMapper.selectList(wrapper);
+        if (CollUtils.isEmpty(regionList)) {
+            return;
+        }
+
+        // 执行查询获取缓存
+        regionList.stream().map(EdjRegion::getId)
+                .forEach(id -> AsyncUtils.runAsync(() -> consumerHomeService.serveTypeListByRegionId(id)));
+
+        log.info(">>>>>>>>更新首页服务类型列表缓存完成");
     }
 }

@@ -23,8 +23,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 import static com.edj.cache.constants.CacheConstants.CacheManager.THIRTY_MINUTES;
-import static com.edj.cache.constants.CacheConstants.CacheName.ACTIVE_REGION_CACHE;
-import static com.edj.cache.constants.CacheConstants.CacheName.HOME_CATEGORY_CACHE;
+import static com.edj.cache.constants.CacheConstants.CacheName.*;
 
 /**
  * 用户端首页服务实现
@@ -155,6 +154,12 @@ public class ConsumerHomeServiceImpl implements ConsumerHomeService {
     }
 
     @Override
+    @Caching(cacheable = {
+            // 非空结果永久保存
+            @Cacheable(cacheNames = HOME_SERVE_TYPE_CACHE, key = "#regionId", unless = "#result.isEmpty()"),
+            // 空结果缓存30分钟
+            @Cacheable(cacheNames = HOME_SERVE_TYPE_CACHE, key = "#regionId", unless = "!#result.isEmpty()", cacheManager = THIRTY_MINUTES)
+    })
     public List<ServeTypeSimpleVo> serveTypeListByRegionId(Long regionId) {
 
         MPJLambdaWrapper<EdjServe> wrapper = new MPJLambdaWrapper<EdjServe>()
@@ -165,8 +170,8 @@ public class ConsumerHomeServiceImpl implements ConsumerHomeService {
                 .innerJoin(EdjServeItem.class, EdjServeItem::getId, EdjServe::getEdjServeItemId)
                 .innerJoin(EdjServeType.class, EdjServeType::getId, EdjServeItem::getEdjServeTypeId)
                 .eq(EdjServe::getEdjRegionId, regionId)
-                .eq(EdjServe::getEdjRegionId, regionId)
                 .eq(EdjServe::getSaleStatus, EdjServeSaleStatus.PUBLISHED)
+                .groupBy(EdjServeType::getId)
                 .orderByAsc(EdjServeType::getSortNum)
                 .orderByDesc(EdjServeType::getId);
 
