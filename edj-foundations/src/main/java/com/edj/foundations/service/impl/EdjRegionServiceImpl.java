@@ -181,7 +181,8 @@ public class EdjRegionServiceImpl extends MPJBaseServiceImpl<EdjRegionMapper, Ed
     @Caching(evict = {
             @CacheEvict(cacheNames = ACTIVE_REGION_CACHE, key = "'ActiveRegion'", beforeInvocation = true),
             @CacheEvict(cacheNames = HOME_CATEGORY_CACHE, key = "#id", beforeInvocation = true),
-            @CacheEvict(cacheNames = HOME_SERVE_TYPE_CACHE, key = "#id", beforeInvocation = true)
+            @CacheEvict(cacheNames = HOME_SERVE_TYPE_CACHE, key = "#id", beforeInvocation = true),
+            @CacheEvict(cacheNames = HOME_HOT_SERVE_CACHE, key = "#id", beforeInvocation = true)
     })
     public void deactivate(Long id) {
         // 检查区域

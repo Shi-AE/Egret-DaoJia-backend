@@ -108,6 +108,12 @@ public class ConsumerHomeServiceImpl implements ConsumerHomeService {
     }
 
     @Override
+    @Caching(cacheable = {
+            // 非空结果永久保存
+            @Cacheable(cacheNames = HOME_HOT_SERVE_CACHE, key = "#regionId", unless = "#result.isEmpty()"),
+            // 空结果缓存30分钟
+            @Cacheable(cacheNames = HOME_HOT_SERVE_CACHE, key = "#regionId", unless = "!#result.isEmpty()", cacheManager = THIRTY_MINUTES)
+    })
     public List<ServeAggregationSimpleVO> getHotByRegionId(Long regionId) {
 
         // 检查区域启用

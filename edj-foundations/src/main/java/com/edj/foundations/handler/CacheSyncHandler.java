@@ -104,4 +104,34 @@ public class CacheSyncHandler {
 
         log.info(">>>>>>>>更新首页服务类型列表缓存完成");
     }
+
+    /**
+     * 定时更新首页区域热门服务缓存
+     * 每日凌晨1点执行
+     */
+    @XxlJob("HomeHotServeCache")
+    public void homeHotServeCacheSync() {
+        log.info(">>>>>>>> 开始进行缓存同步，更新首页区域热门服务缓存");
+        // 删除所有区域缓存
+        Set<String> keys = redisTemplate.keys(HOME_HOT_SERVE_CACHE.concat("*"));
+        if (CollUtils.isEmpty(keys)) {
+            return;
+        }
+        redisTemplate.delete(keys);
+
+        // 获取所有已启用区域
+        LambdaQueryWrapper<EdjRegion> wrapper = new LambdaQueryWrapper<EdjRegion>()
+                .select(EdjRegion::getId)
+                .eq(EdjRegion::getActiveStatus, EdjRegionActiveStatus.ENABLED);
+        List<EdjRegion> regionList = regionMapper.selectList(wrapper);
+        if (CollUtils.isEmpty(regionList)) {
+            return;
+        }
+
+        // 执行查询获取缓存
+        regionList.stream().map(EdjRegion::getId)
+                .forEach(id -> AsyncUtils.runAsync(() -> consumerHomeService.getHotByRegionId(id)));
+
+        log.info(">>>>>>>>更新首页区域热门服务缓存完成");
+    }
 }

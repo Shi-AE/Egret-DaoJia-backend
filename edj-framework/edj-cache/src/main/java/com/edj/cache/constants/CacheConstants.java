@@ -33,6 +33,11 @@ public class CacheConstants {
          * 首页服务类型列表缓存
          */
         public static final String HOME_SERVE_TYPE_CACHE = EDJ_CACHE + ":HOME:SERVE_TYPE";
+
+        /**
+         * 首页区域热门服务缓存
+         */
+        public static final String HOME_HOT_SERVE_CACHE = EDJ_CACHE + ":HOME:HOT_SERVE";
     }
 
     public static final class CacheManager {

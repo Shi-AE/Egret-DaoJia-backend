@@ -38,8 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.edj.cache.constants.CacheConstants.CacheName.HOME_CATEGORY_CACHE;
-import static com.edj.cache.constants.CacheConstants.CacheName.HOME_SERVE_TYPE_CACHE;
+import static com.edj.cache.constants.CacheConstants.CacheName.*;
 
 /**
  * 针对表【edj_serve(服务表)】的数据库操作Service实现
@@ -167,14 +166,14 @@ public class EdjServeServiceImpl extends MPJBaseServiceImpl<EdjServeMapper, EdjS
 
     @Override
     @Transactional
-    public void changeHotStatus(Long id, EdjServeIsHot edjServeIsHot) {
+    @CacheEvict(cacheNames = HOME_HOT_SERVE_CACHE, key = "#result")
+    public Long changeHotStatus(Long id, EdjServeIsHot edjServeIsHot) {
 
         LambdaQueryWrapper<EdjServe> check = new LambdaQueryWrapper<EdjServe>()
-                .select(EdjServe::getIsHot)
-                .eq(EdjServe::getId, id)
-                .eq(EdjServe::getIsHot, edjServeIsHot);
-        boolean exists = baseMapper.exists(check);
-        if (exists) {
+                .select(EdjServe::getIsHot, EdjServe::getEdjRegionId)
+                .eq(EdjServe::getId, id);
+        EdjServe serve = baseMapper.selectOne(check);
+        if (ObjectUtils.isNull(serve) || EnumUtils.eq(edjServeIsHot, serve.getIsHot())) {
             throw new BadRequestException("状态已设置");
         }
 
@@ -183,13 +182,16 @@ public class EdjServeServiceImpl extends MPJBaseServiceImpl<EdjServeMapper, EdjS
                 .set(EdjServe::getIsHot, edjServeIsHot)
                 .set(EdjServe::getHotTime, LocalDateTime.now());
         baseMapper.update(new EdjServe(), wrapper);
+
+        return serve.getEdjRegionId();
     }
 
     @Override
     @Transactional
     @Caching(evict = {
             @CacheEvict(cacheNames = HOME_CATEGORY_CACHE, key = "#result"),
-            @CacheEvict(cacheNames = HOME_SERVE_TYPE_CACHE, key = "#result")
+            @CacheEvict(cacheNames = HOME_SERVE_TYPE_CACHE, key = "#result"),
+            @CacheEvict(cacheNames = HOME_HOT_SERVE_CACHE, key = "#result")
     })
     public Long onSale(Long id) {
         // 检查服务
@@ -240,7 +242,8 @@ public class EdjServeServiceImpl extends MPJBaseServiceImpl<EdjServeMapper, EdjS
     @Override
     @Caching(evict = {
             @CacheEvict(cacheNames = HOME_CATEGORY_CACHE, key = "#result"),
-            @CacheEvict(cacheNames = HOME_SERVE_TYPE_CACHE, key = "#result")
+            @CacheEvict(cacheNames = HOME_SERVE_TYPE_CACHE, key = "#result"),
+            @CacheEvict(cacheNames = HOME_HOT_SERVE_CACHE, key = "#result")
     })
     public Long offSale(Long id) {
         // 检查服务

@@ -36,20 +36,22 @@ public interface EdjServeService extends MPJBaseService<EdjServe> {
 
     /**
      * 区域服务设置是否热门状态
+     *
+     * @return 删除缓存 区域id key
      */
-    void changeHotStatus(Long id, EdjServeIsHot edjServeIsHot);
+    Long changeHotStatus(Long id, EdjServeIsHot edjServeIsHot);
 
     /**
      * 区域服务上架
      *
-     * @return 删除首页服务列表缓存 区域id key
+     * @return 删除缓存 区域id key
      */
     Long onSale(Long id);
 
     /**
      * 区域服务下架
      *
-     * @return 删除首页服务列表缓存 区域id key
+     * @return 删除缓存 区域id key
      */
     Long offSale(Long id);
 
