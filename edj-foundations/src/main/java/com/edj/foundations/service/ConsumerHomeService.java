@@ -4,6 +4,7 @@ import com.edj.api.api.foundations.dto.ServeTypeCategoryDTO;
 import com.edj.foundations.domain.vo.RegionSimpleVO;
 import com.edj.foundations.domain.vo.ServeAggregationSimpleVO;
 import com.edj.foundations.domain.vo.ServeCategoryVO;
+import com.edj.foundations.domain.vo.ServeTypeSimpleVo;
 
 import java.util.List;
 
@@ -34,4 +35,9 @@ public interface ConsumerHomeService {
      * 查询启用状态的服务项目录
      */
     List<ServeTypeCategoryDTO> getActiveServeItemCategory();
+
+    /**
+     * 根据区域id查询已开通的服务类型
+     */
+    List<ServeTypeSimpleVo> serveTypeListByRegionId(Long regionId);
 }

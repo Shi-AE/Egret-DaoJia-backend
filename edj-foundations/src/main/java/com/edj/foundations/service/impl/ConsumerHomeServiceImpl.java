@@ -5,10 +5,7 @@ import com.edj.api.api.foundations.dto.ServeItemCategoryDTO;
 import com.edj.api.api.foundations.dto.ServeTypeCategoryDTO;
 import com.edj.common.utils.CollUtils;
 import com.edj.foundations.domain.entity.*;
-import com.edj.foundations.domain.vo.RegionSimpleVO;
-import com.edj.foundations.domain.vo.ServeAggregationSimpleVO;
-import com.edj.foundations.domain.vo.ServeCategoryVO;
-import com.edj.foundations.domain.vo.ServeIconVO;
+import com.edj.foundations.domain.vo.*;
 import com.edj.foundations.enums.EdjRegionActiveStatus;
 import com.edj.foundations.enums.EdjServeIsHot;
 import com.edj.foundations.enums.EdjServeItemActiveStatus;
@@ -155,5 +152,24 @@ public class ConsumerHomeServiceImpl implements ConsumerHomeService {
                 .orderByAsc(EdjServeItem::getSortNum)
                 .orderByAsc(EdjServeItem::getId);
         return serveItemService.selectJoinList(ServeTypeCategoryDTO.class, wrapper);
+    }
+
+    @Override
+    public List<ServeTypeSimpleVo> serveTypeListByRegionId(Long regionId) {
+
+        MPJLambdaWrapper<EdjServe> wrapper = new MPJLambdaWrapper<EdjServe>()
+                .selectAs(EdjServeType::getId, ServeTypeSimpleVo::getServeTypeId)
+                .selectAs(EdjServeType::getName, ServeTypeSimpleVo::getServeTypeName)
+                .selectAs(EdjServeType::getImg, ServeTypeSimpleVo::getServeTypeImg)
+                .selectAs(EdjServeType::getSortNum, ServeTypeSimpleVo::getServeTypeSortNum)
+                .innerJoin(EdjServeItem.class, EdjServeItem::getId, EdjServe::getEdjServeItemId)
+                .innerJoin(EdjServeType.class, EdjServeType::getId, EdjServeItem::getEdjServeTypeId)
+                .eq(EdjServe::getEdjRegionId, regionId)
+                .eq(EdjServe::getEdjRegionId, regionId)
+                .eq(EdjServe::getSaleStatus, EdjServeSaleStatus.PUBLISHED)
+                .orderByAsc(EdjServeType::getSortNum)
+                .orderByDesc(EdjServeType::getId);
+
+        return serveMapper.selectJoinList(ServeTypeSimpleVo.class, wrapper);
     }
 }

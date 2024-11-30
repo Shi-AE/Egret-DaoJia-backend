@@ -25,8 +25,7 @@ public class TempTest {
     void addAuthority() {
         // 设置权限条目
         List.of(
-                        Pair.of("批量新增或修改服务技能", "agency:serveSkill:batchUpsert"),
-                        Pair.of("查询服务技能目录", "agency:serveSkill:category")
+                        Pair.of("查询已开通的服务类型", "consumer:serveType:get")
                 )
                 .parallelStream()
                 .unordered()
@@ -35,7 +34,7 @@ public class TempTest {
                     EdjAuthority edjAuthority = EdjAuthority
                             .builder()
                             // 设置父id
-                            .parentId(16878711639121920L)
+                            .parentId(17787553004658688L)
                             .name(authority.getKey())
                             .permission(authority.getValue())
                             .build();
@@ -44,7 +43,7 @@ public class TempTest {
                     // 设置对应角色
                     List.of(
                                     EdjSysRole.ADMIN.getValue(),
-                                    EdjSysRole.INSTITUTION.getValue()
+                                    EdjSysRole.CONSUMER.getValue()
                             )
                             .parallelStream()
                             .unordered()
