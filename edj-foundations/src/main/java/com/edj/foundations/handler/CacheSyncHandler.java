@@ -31,7 +31,7 @@ public class CacheSyncHandler {
 
     /**
      * 定时更新已开通服务区域列表缓存
-     * 每日凌晨1点执行
+     * 每日凌晨执行
      */
     @XxlJob(value = "ActiveRegionCacheSync")
     public void activeRegionCacheSync() {
@@ -47,7 +47,7 @@ public class CacheSyncHandler {
 
     /**
      * 定时更新首页服务列表缓存
-     * 每日凌晨1点执行
+     * 每日凌晨执行
      */
     @XxlJob("HomeCategoryCacheSync")
     public void homeCategoryCacheSync() {
@@ -77,7 +77,7 @@ public class CacheSyncHandler {
 
     /**
      * 定时更新首页服务类型列表缓存
-     * 每日凌晨1点执行
+     * 每日凌晨执行
      */
     @XxlJob("HomeServeTypeCache")
     public void homeServeTypeCacheSync() {
@@ -107,7 +107,7 @@ public class CacheSyncHandler {
 
     /**
      * 定时更新首页区域热门服务缓存
-     * 每日凌晨1点执行
+     * 每日凌晨执行
      */
     @XxlJob("HomeHotServeCache")
     public void homeHotServeCacheSync() {
