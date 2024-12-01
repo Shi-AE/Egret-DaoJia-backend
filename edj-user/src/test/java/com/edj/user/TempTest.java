@@ -25,7 +25,7 @@ public class TempTest {
     void addAuthority() {
         // 设置权限条目
         List.of(
-                        Pair.of("查询已开通的服务类型", "consumer:serveType:get")
+                        Pair.of("查询服务详情", "consumer:serve:detail")
                 )
                 .parallelStream()
                 .unordered()
@@ -34,7 +34,7 @@ public class TempTest {
                     EdjAuthority edjAuthority = EdjAuthority
                             .builder()
                             // 设置父id
-                            .parentId(17787553004658688L)
+                            .parentId(10767315721527296L)
                             .name(authority.getKey())
                             .permission(authority.getValue())
                             .build();

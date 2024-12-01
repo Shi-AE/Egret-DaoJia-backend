@@ -57,6 +57,7 @@ public class ConsumerServeController {
      */
     @GetMapping("{id}")
     @Operation(summary = "查询服务详情")
+    @PreAuthorize("hasAuthority('consumer:serve:detail')")
     public ServeDetailVo detail(
             @Schema(description = "服务id")
             @PathVariable
