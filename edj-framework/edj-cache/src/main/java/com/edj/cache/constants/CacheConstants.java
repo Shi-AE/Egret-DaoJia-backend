@@ -38,23 +38,34 @@ public class CacheConstants {
          * 首页区域热门服务缓存
          */
         public static final String HOME_HOT_SERVE_CACHE = EDJ_CACHE + ":HOME:HOT_SERVE";
+
+        /**
+         * 服务项缓存
+         */
+        public static final String SEVER_ITEM_CACHE = EDJ_CACHE + ":SEVER_ITEM";
+
+        /**
+         * 服务缓存
+         */
+        public static final String SERVE_CACHE = EDJ_CACHE + ":SERVE";
     }
 
     public static final class CacheManager {
+
         /**
          * 缓存时间永久
          */
         public static final String FOREVER = "cacheManagerForever";
 
         /**
-         * 缓存时间永久
-         */
-        public static final String THIRTY_MINUTES = "cacheManager30Minutes";
-
-        /**
          * 缓存时间1天
          */
         public static final String ONE_DAY = "cacheManagerOneDay";
+
+        /**
+         * 缓存时间30分钟
+         */
+        public static final String THIRTY_MINUTES = "cacheManager30Minutes";
     }
 
     public static final class Ttl {

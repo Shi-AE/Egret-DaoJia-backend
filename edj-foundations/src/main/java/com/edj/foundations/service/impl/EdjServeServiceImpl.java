@@ -15,6 +15,8 @@ import com.edj.foundations.domain.entity.EdjRegion;
 import com.edj.foundations.domain.entity.EdjServe;
 import com.edj.foundations.domain.entity.EdjServeItem;
 import com.edj.foundations.domain.entity.EdjServeType;
+import com.edj.foundations.domain.vo.ServeDetailVo;
+import com.edj.foundations.domain.vo.ServeItemVO;
 import com.edj.foundations.domain.vo.ServeVO;
 import com.edj.foundations.enums.EdjServeIsHot;
 import com.edj.foundations.enums.EdjServeItemActiveStatus;
@@ -22,13 +24,16 @@ import com.edj.foundations.enums.EdjServeSaleStatus;
 import com.edj.foundations.mapper.EdjRegionMapper;
 import com.edj.foundations.mapper.EdjServeItemMapper;
 import com.edj.foundations.mapper.EdjServeMapper;
+import com.edj.foundations.service.EdjServeItemService;
 import com.edj.foundations.service.EdjServeService;
 import com.edj.mysql.utils.PageUtils;
 import com.github.yulichang.base.MPJBaseServiceImpl;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +43,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.edj.cache.constants.CacheConstants.CacheManager.ONE_DAY;
+import static com.edj.cache.constants.CacheConstants.CacheManager.THIRTY_MINUTES;
 import static com.edj.cache.constants.CacheConstants.CacheName.*;
 
 /**
@@ -51,6 +58,10 @@ import static com.edj.cache.constants.CacheConstants.CacheName.*;
 public class EdjServeServiceImpl extends MPJBaseServiceImpl<EdjServeMapper, EdjServe> implements EdjServeService {
 
     private final EdjServeItemMapper serveItemMapper;
+
+    private final EdjServeItemService serveItemService;
+
+    private final ApplicationContext applicationContext;
 
     private final EdjRegionMapper regionMapper;
 
@@ -154,6 +165,7 @@ public class EdjServeServiceImpl extends MPJBaseServiceImpl<EdjServeMapper, EdjS
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = SERVE_CACHE, key = "#id", beforeInvocation = true)
     public void update(Long id, BigDecimal price) {
         LambdaUpdateWrapper<EdjServe> wrapper = new LambdaUpdateWrapper<EdjServe>()
                 .eq(EdjServe::getId, id)
@@ -166,7 +178,10 @@ public class EdjServeServiceImpl extends MPJBaseServiceImpl<EdjServeMapper, EdjS
 
     @Override
     @Transactional
-    @CacheEvict(cacheNames = HOME_HOT_SERVE_CACHE, key = "#result")
+    @Caching(evict = {
+            @CacheEvict(cacheNames = HOME_HOT_SERVE_CACHE, key = "#result"),
+            @CacheEvict(cacheNames = SERVE_CACHE, key = "#id", beforeInvocation = true)
+    })
     public Long changeHotStatus(Long id, EdjServeIsHot edjServeIsHot) {
 
         LambdaQueryWrapper<EdjServe> check = new LambdaQueryWrapper<EdjServe>()
@@ -191,7 +206,8 @@ public class EdjServeServiceImpl extends MPJBaseServiceImpl<EdjServeMapper, EdjS
     @Caching(evict = {
             @CacheEvict(cacheNames = HOME_CATEGORY_CACHE, key = "#result"),
             @CacheEvict(cacheNames = HOME_SERVE_TYPE_CACHE, key = "#result"),
-            @CacheEvict(cacheNames = HOME_HOT_SERVE_CACHE, key = "#result")
+            @CacheEvict(cacheNames = HOME_HOT_SERVE_CACHE, key = "#result"),
+            @CacheEvict(cacheNames = SERVE_CACHE, key = "#id", beforeInvocation = true)
     })
     public Long onSale(Long id) {
         // 检查服务
@@ -243,7 +259,8 @@ public class EdjServeServiceImpl extends MPJBaseServiceImpl<EdjServeMapper, EdjS
     @Caching(evict = {
             @CacheEvict(cacheNames = HOME_CATEGORY_CACHE, key = "#result"),
             @CacheEvict(cacheNames = HOME_SERVE_TYPE_CACHE, key = "#result"),
-            @CacheEvict(cacheNames = HOME_HOT_SERVE_CACHE, key = "#result")
+            @CacheEvict(cacheNames = HOME_HOT_SERVE_CACHE, key = "#result"),
+            @CacheEvict(cacheNames = SERVE_CACHE, key = "#id", beforeInvocation = true)
     })
     public Long offSale(Long id) {
         // 检查服务
@@ -275,6 +292,7 @@ public class EdjServeServiceImpl extends MPJBaseServiceImpl<EdjServeMapper, EdjS
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = SERVE_CACHE, key = "#id", beforeInvocation = true)
     public void deleteById(Long id) {
         // 检查服务
         LambdaQueryWrapper<EdjServe> checkServer = new LambdaQueryWrapper<EdjServe>()
@@ -294,5 +312,41 @@ public class EdjServeServiceImpl extends MPJBaseServiceImpl<EdjServeMapper, EdjS
         }
 
         baseMapper.deleteById(id);
+    }
+
+    @Override
+    @Caching(cacheable = {
+            // 非空缓存一天
+            @Cacheable(cacheNames = SERVE_CACHE, key = "#id", unless = "#result == null", cacheManager = ONE_DAY),
+            // 空结果缓存30分钟
+            @Cacheable(cacheNames = SERVE_CACHE, key = "#id", unless = "#result != null", cacheManager = THIRTY_MINUTES)
+    })
+    public ServeVO selectById(Long id) {
+        EdjServe serve = baseMapper.selectById(id);
+        return BeanUtils.toBean(serve, ServeVO.class);
+    }
+
+    @Override
+    public ServeDetailVo findDetailById(Long id) {
+        // 查询服务
+        ServeVO serve = applicationContext.getBean(EdjServeService.class).selectById(id);
+        if (ObjectUtils.isNull(serve)) {
+            return null;
+        }
+
+        // 查询服务项
+        Long edjServeItemId = serve.getEdjServeItemId();
+        ServeItemVO serveItemVO = serveItemService.selectById(edjServeItemId);
+        if (ObjectUtils.isNull(serveItemVO)) {
+            serveItemVO = new ServeItemVO();
+        }
+
+        ServeDetailVo serveDetailVo = BeanUtils.toBean(serve, ServeDetailVo.class);
+        serveDetailVo.setServeItemName(serveItemVO.getName());
+        serveDetailVo.setDetailImg(serveItemVO.getDetailImg());
+        serveDetailVo.setServeItemImg(serveItemVO.getImg());
+        serveDetailVo.setUnit(serveItemVO.getUnit());
+
+        return serveDetailVo;
     }
 }

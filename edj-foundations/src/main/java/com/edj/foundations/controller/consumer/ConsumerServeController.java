@@ -2,17 +2,17 @@ package com.edj.foundations.controller.consumer;
 
 import com.edj.foundations.domain.vo.ServeAggregationSimpleVO;
 import com.edj.foundations.domain.vo.ServeCategoryVO;
+import com.edj.foundations.domain.vo.ServeDetailVo;
 import com.edj.foundations.service.ConsumerHomeService;
+import com.edj.foundations.service.EdjServeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -29,6 +29,8 @@ import java.util.List;
 public class ConsumerServeController {
 
     private final ConsumerHomeService consumerHomeService;
+
+    private final EdjServeService serveService;
 
     /**
      * 获取首页服务列表
@@ -48,5 +50,20 @@ public class ConsumerServeController {
     @PreAuthorize("hasAuthority('consumer:serve:hot')")
     public List<ServeAggregationSimpleVO> hot(@RequestParam @Positive @Schema(description = "区域id") Long regionId) {
         return consumerHomeService.getHotByRegionId(regionId);
+    }
+
+    /**
+     * 查询服务详情
+     */
+    @GetMapping("{id}")
+    @Operation(summary = "查询服务详情")
+    public ServeDetailVo detail(
+            @Schema(description = "服务id")
+            @PathVariable
+            @NotNull
+            @Positive
+            Long id
+    ) {
+        return serveService.findDetailById(id);
     }
 }

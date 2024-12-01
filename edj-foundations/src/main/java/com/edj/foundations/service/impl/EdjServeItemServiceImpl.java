@@ -26,8 +26,15 @@ import com.edj.mysql.utils.PageUtils;
 import com.github.yulichang.base.MPJBaseServiceImpl;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import static com.edj.cache.constants.CacheConstants.CacheManager.ONE_DAY;
+import static com.edj.cache.constants.CacheConstants.CacheManager.THIRTY_MINUTES;
+import static com.edj.cache.constants.CacheConstants.CacheName.SEVER_ITEM_CACHE;
 
 /**
  * 针对表【edj_serve_item(服务项表)】的数据库操作Service实现
@@ -78,6 +85,7 @@ public class EdjServeItemServiceImpl extends MPJBaseServiceImpl<EdjServeItemMapp
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = SEVER_ITEM_CACHE, key = "#serveItemUpdateDTO.id", beforeInvocation = true)
     public void update(ServeItemUpdateDTO serveItemUpdateDTO) {
         // 检查名称重复
         String name = serveItemUpdateDTO.getName();
@@ -109,6 +117,7 @@ public class EdjServeItemServiceImpl extends MPJBaseServiceImpl<EdjServeItemMapp
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = SEVER_ITEM_CACHE, key = "#id", beforeInvocation = true)
     public void activate(Long id) {
         // 查询服务项状态
         LambdaQueryWrapper<EdjServeItem> serveItemLambdaQueryWrapper = new LambdaQueryWrapper<EdjServeItem>()
@@ -159,6 +168,7 @@ public class EdjServeItemServiceImpl extends MPJBaseServiceImpl<EdjServeItemMapp
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = SEVER_ITEM_CACHE, key = "#id", beforeInvocation = true)
     public void deactivate(Long id) {
         // 查询服务项状态
         LambdaQueryWrapper<EdjServeItem> serveItemLambdaQueryWrapper = new LambdaQueryWrapper<EdjServeItem>()
@@ -195,6 +205,7 @@ public class EdjServeItemServiceImpl extends MPJBaseServiceImpl<EdjServeItemMapp
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = SEVER_ITEM_CACHE, key = "#id", beforeInvocation = true)
     public void delete(Long id) {
         // 查询服务项状态
         EdjServeItem serveItem = baseMapper.selectById(id);
@@ -235,6 +246,12 @@ public class EdjServeItemServiceImpl extends MPJBaseServiceImpl<EdjServeItemMapp
     }
 
     @Override
+    @Caching(cacheable = {
+            // 非空缓存一天
+            @Cacheable(cacheNames = SEVER_ITEM_CACHE, key = "#id", unless = "#result == null", cacheManager = ONE_DAY),
+            // 空结果缓存30分钟
+            @Cacheable(cacheNames = SEVER_ITEM_CACHE, key = "#id", unless = "#result != null", cacheManager = THIRTY_MINUTES)
+    })
     public ServeItemVO selectById(Long id) {
         MPJLambdaWrapper<EdjServeItem> queryWrapper = new MPJLambdaWrapper<EdjServeItem>()
                 .selectAll(EdjServeItem.class)

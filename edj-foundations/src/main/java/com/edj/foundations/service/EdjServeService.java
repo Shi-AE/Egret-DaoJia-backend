@@ -4,6 +4,7 @@ import com.edj.common.domain.PageResult;
 import com.edj.foundations.domain.dto.ServeAddDTO;
 import com.edj.foundations.domain.dto.ServePageDTO;
 import com.edj.foundations.domain.entity.EdjServe;
+import com.edj.foundations.domain.vo.ServeDetailVo;
 import com.edj.foundations.domain.vo.ServeVO;
 import com.edj.foundations.enums.EdjServeIsHot;
 import com.github.yulichang.base.MPJBaseService;
@@ -59,4 +60,14 @@ public interface EdjServeService extends MPJBaseService<EdjServe> {
      * 区域服务删除
      */
     void deleteById(Long id);
+
+    /**
+     * 根据id查询服务信息
+     */
+    ServeVO selectById(Long id);
+
+    /**
+     * 根据id查询服务详情
+     */
+    ServeDetailVo findDetailById(Long id);
 }

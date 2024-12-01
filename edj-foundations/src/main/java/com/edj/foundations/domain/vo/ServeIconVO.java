@@ -6,6 +6,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * 首页服务项图标
+ *
+ * @author A.E.
+ * @date 2024/10/15
+ */
 @Data
 @Builder
 @NoArgsConstructor
