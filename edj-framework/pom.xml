@@ -24,6 +24,7 @@
         <module>../edj-api</module>
         <module>../edj-customer</module>
         <module>edj-xxl-job</module>
+        <module>edj-rabbitmq</module>
     </modules>
 
     <properties>
@@ -261,6 +262,11 @@
             <dependency>
                 <groupId>com.edj</groupId>
                 <artifactId>edj-xxl-job</artifactId>
+                <version>${edj.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.edj</groupId>
+                <artifactId>edj-rabbitmq</artifactId>
                 <version>${edj.version}</version>
             </dependency>
         </dependencies>

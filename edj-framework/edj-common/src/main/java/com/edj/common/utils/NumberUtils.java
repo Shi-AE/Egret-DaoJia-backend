@@ -33,10 +33,6 @@ public class NumberUtils extends NumberUtil {
 
     /**
      * 如果是空值，返回默认数据；如果有值直接返回
-     *
-     * @param number
-     * @param defaultNumber
-     * @return
      */
     public static double null2Default(Double number, double defaultNumber) {
         return number == null ? defaultNumber : number;

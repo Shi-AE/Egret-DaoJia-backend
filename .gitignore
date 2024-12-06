@@ -33,3 +33,4 @@ replay_pid*
 **/target/
 /edj-api-script/临时测试数据.json
 /security/
+/es/

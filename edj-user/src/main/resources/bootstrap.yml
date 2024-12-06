@@ -39,3 +39,8 @@ snowflake:
 
 feign:
   enable: true
+
+rabbitmq:
+  enable: true
+  error:
+    routingKey: error.routing-key

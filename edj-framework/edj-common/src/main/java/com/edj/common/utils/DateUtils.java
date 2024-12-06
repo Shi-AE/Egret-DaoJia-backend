@@ -152,8 +152,8 @@ public class DateUtils extends LocalDateTimeUtil {
     /**
      * 获取当前时间s
      */
-    public static int getCurrentTime() {
-        return (int) (System.currentTimeMillis() / 1000);
+    public static long getCurrentTime() {
+        return System.currentTimeMillis() / 1000;
     }
 
     public static int getDay() {
