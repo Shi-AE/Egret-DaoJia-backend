@@ -15,6 +15,12 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
+/**
+ * mq 消息处理器
+ *
+ * @author A.E.
+ * @date 2024/12/7
+ */
 @Slf4j
 public class RabbitMqResender {
 

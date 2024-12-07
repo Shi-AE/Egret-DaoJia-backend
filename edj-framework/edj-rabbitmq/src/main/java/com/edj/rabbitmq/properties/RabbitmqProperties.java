@@ -8,6 +8,12 @@ import org.springframework.context.annotation.Configuration;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * rabbitmq配置文件
+ *
+ * @author A.E.
+ * @date 2024/12/7
+ */
 @Data
 @Configuration
 @ConfigurationProperties(prefix = "rabbitmq")

@@ -29,6 +29,12 @@ import org.springframework.context.annotation.Primary;
 
 import java.nio.charset.Charset;
 
+/**
+ * mq 配置
+ *
+ * @author A.E.
+ * @date 2024/12/7
+ */
 @Slf4j
 @Configuration
 @RequiredArgsConstructor

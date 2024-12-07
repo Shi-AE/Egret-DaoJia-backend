@@ -7,6 +7,12 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.retry.MessageRecoverer;
 
+/**
+ * mq 消息重发器
+ *
+ * @author A.E.
+ * @date 2024/12/7
+ */
 public class ErrorMessageRecoverer implements MessageRecoverer {
     private final RabbitClient rabbitClient;
     private final RabbitmqProperties rabbitmqProperties;

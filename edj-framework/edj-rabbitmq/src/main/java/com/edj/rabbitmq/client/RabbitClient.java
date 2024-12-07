@@ -22,6 +22,12 @@ import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
+/**
+ * mq 客户端
+ *
+ * @author A.E.
+ * @date 2024/12/7
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
