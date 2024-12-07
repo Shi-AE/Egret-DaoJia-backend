@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
+import java.util.Objects;
 
 /**
  * 分页数据消息体
@@ -102,14 +102,18 @@ public class PageResult<T> {
      * List{@link List}封装为分页数据对象
      *
      * @param list  item数据
-     * @param pages 页尺寸,可不传,数据不为空时默认为1
+     * @param pageSize 页尺寸
      * @param total 总条数
      * @return 目标分页数据对象
      */
-    public static <T> PageResult<T> of(List<T> list, Integer pages, Long total) {
+    public static <T> PageResult<T> of(List<T> list, Integer pageSize, Long total) {
+
+        Objects.requireNonNull(pageSize);
+        Objects.requireNonNull(total);
+
         PageResult<T> pageResult = PageResult.<T>builder()
-                .pages(Optional.ofNullable(pages).orElse(0))
-                .total(Optional.ofNullable(total).orElse(0L))
+                .pages((int) Math.ceil((double) total / pageSize))
+                .total(total)
                 .build();
 
 

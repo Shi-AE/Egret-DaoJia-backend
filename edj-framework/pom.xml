@@ -26,6 +26,7 @@
         <module>edj-xxl-job</module>
         <module>edj-rabbitmq</module>
         <module>edj-canal</module>
+        <module>edj-es</module>
     </modules>
 
     <properties>
@@ -60,6 +61,7 @@
         <fastjson.version>2.0.53</fastjson.version>
         <xxl-job.version>2.4.2</xxl-job.version>
         <canal.version>1.1.7</canal.version>
+        <es.version>7.17.26</es.version>
     </properties>
 
     <parent>
@@ -225,6 +227,18 @@
                 <groupId>com.alibaba.otter</groupId>
                 <artifactId>canal.protocol</artifactId>
                 <version>${canal.version}</version>
+            </dependency>
+
+            <!--es-->
+            <dependency>
+                <groupId>org.elasticsearch.client</groupId>
+                <artifactId>elasticsearch-rest-high-level-client</artifactId>
+                <version>${es.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>co.elastic.clients</groupId>
+                <artifactId>elasticsearch-java</artifactId>
+                <version>${es.version}</version>
             </dependency>
 
             <!--系统模块-->
