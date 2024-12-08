@@ -6,6 +6,12 @@ import com.edj.es.core.operations.IndexOperations;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+/**
+ * es 操作模板实现
+ *
+ * @author A.E.
+ * @date 2024/12/8
+ */
 @Component
 @RequiredArgsConstructor
 public class ElasticSearchTemplateImpl implements ElasticSearchTemplate {

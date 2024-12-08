@@ -22,6 +22,12 @@ import org.springframework.context.annotation.Configuration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * es 配置类
+ *
+ * @author A.E.
+ * @date 2024/12/8
+ */
 @Configuration
 @EnableConfigurationProperties(EsProperties.class)
 public class EsConfiguration {
