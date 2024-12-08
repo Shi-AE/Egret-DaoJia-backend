@@ -297,6 +297,16 @@
                 <artifactId>edj-rabbitmq</artifactId>
                 <version>${edj.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.edj.canal</groupId>
+                <artifactId>edj-canal</artifactId>
+                <version>${edj.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.edj.es</groupId>
+                <artifactId>edj-es</artifactId>
+                <version>${edj.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <repositories>
