@@ -24,7 +24,7 @@ public abstract class AbstractCanalRabbitMqMsgListener<T> implements CanalDataHa
     /**
      * 消息前置处理
      */
-    public void parseMsg(Message message) throws Exception {
+    public void parseMsg(Message message) {
         try {
             // 1.数据格式转换
             CanalMqInfo canalMqInfo = JsonUtils.toBean(new String(message.getBody()), CanalMqInfo.class);
@@ -41,7 +41,7 @@ public abstract class AbstractCanalRabbitMqMsgListener<T> implements CanalDataHa
             }
         } catch (Exception e) {
             //出现错误延迟1秒重试
-            Thread.sleep(1000);
+            ThreadUtils.sleep(1000);
             throw new RuntimeException(e);
         }
     }
