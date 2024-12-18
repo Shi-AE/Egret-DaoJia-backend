@@ -4,7 +4,9 @@ import com.edj.canal.constants.OperateType;
 import com.edj.canal.core.CanalDataHandler;
 import com.edj.canal.domain.CanalBaseDTO;
 import com.edj.canal.domain.CanalMqInfo;
+import com.edj.common.expcetions.ServerErrorException;
 import com.edj.common.utils.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Message;
 
 import java.lang.reflect.ParameterizedType;
@@ -19,10 +21,11 @@ import java.util.Map;
  * @author A.E.
  * @date 2024/12/7
  */
+@Slf4j
 public abstract class AbstractCanalRabbitMqMsgListener<T> implements CanalDataHandler<T> {
 
     /**
-     * 消息前置处理
+     * 消息解析
      */
     public void parseMsg(Message message) {
         try {
@@ -40,9 +43,10 @@ public abstract class AbstractCanalRabbitMqMsgListener<T> implements CanalDataHa
                 singleHandle(canalMqInfo);
             }
         } catch (Exception e) {
+            log.error(e.getMessage(), e);
             //出现错误延迟1秒重试
             ThreadUtils.sleep(1000);
-            throw new RuntimeException(e);
+            throw new ServerErrorException();
         }
     }
 
@@ -67,8 +71,8 @@ public abstract class AbstractCanalRabbitMqMsgListener<T> implements CanalDataHa
             batchSave(ts);
         } else {
             Long id = canalBaseDTO.getId();
-            List<Long> ids = Collections.singletonList(id);
-            batchDelete(ids);
+            List<Long> idList = Collections.singletonList(id);
+            batchDelete(idList);
         }
     }
 
@@ -129,5 +133,5 @@ public abstract class AbstractCanalRabbitMqMsgListener<T> implements CanalDataHa
 
     public abstract void batchSave(List<T> data);
 
-    public abstract void batchDelete(List<Long> ids);
+    public abstract void batchDelete(List<Long> idList);
 }

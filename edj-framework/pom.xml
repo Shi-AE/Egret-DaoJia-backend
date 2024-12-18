@@ -240,6 +240,11 @@
                 <artifactId>elasticsearch-java</artifactId>
                 <version>${es.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.elasticsearch.client</groupId>
+                <artifactId>elasticsearch-rest-client</artifactId>
+                <version>${es.version}</version>
+            </dependency>
 
             <!--系统模块-->
             <dependency>

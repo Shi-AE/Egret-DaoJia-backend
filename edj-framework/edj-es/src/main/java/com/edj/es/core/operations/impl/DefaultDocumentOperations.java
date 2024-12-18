@@ -42,7 +42,7 @@ public class DefaultDocumentOperations implements DocumentOperations {
 
     private final ElasticsearchClient elasticsearchClient;
 
-    private Snowflake snowflake;
+    private final Snowflake snowflake;
 
     @Override
     public <T> Boolean insert(String index, T document) {
@@ -304,14 +304,16 @@ public class DefaultDocumentOperations implements DocumentOperations {
     }
 
     private Boolean isSuccess(BulkResponse response) {
-        log.debug("bulk response : {}", JsonUtils.toJsonStr(response));
+        log.debug("bulk response : {}", response.toString());
         if (response.errors()) {
             return false;
         }
-        return response.items().stream()
-                .filter(item -> item.status() != 200)
-                .map(item -> false)
-                .findFirst().orElse(true);
+        return response.items()
+                .stream()
+                .allMatch(item -> {
+                    int status = item.status();
+                    return status == 200 || status == 201;
+                });
     }
 
     public Boolean isSuccess(DeleteByQueryResponse deleteByQueryResponse) {

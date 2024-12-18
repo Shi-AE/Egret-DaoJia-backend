@@ -5,7 +5,9 @@ import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
 import co.elastic.clients.transport.ElasticsearchTransport;
 import co.elastic.clients.transport.rest_client.RestClientTransport;
-import com.edj.es.core.ElasticSearchTemplate;
+import com.edj.es.core.impl.ElasticSearchTemplateImpl;
+import com.edj.es.core.operations.impl.DefaultDocumentOperations;
+import com.edj.es.core.operations.impl.DefaultIndexOperations;
 import com.edj.es.properties.EsProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,10 +16,14 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.elasticsearch.client.RestClient;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -29,6 +35,7 @@ import java.time.format.DateTimeFormatter;
  * @date 2024/12/8
  */
 @Configuration
+@Import({ElasticSearchTemplateImpl.class, DefaultDocumentOperations.class, DefaultIndexOperations.class})
 @EnableConfigurationProperties(EsProperties.class)
 public class EsConfiguration {
 
@@ -46,8 +53,22 @@ public class EsConfiguration {
     }
 
     @Bean
-    public ElasticsearchClient esClient(EsProperties esProperties) {
-        RestClient restClient = RestClient.builder(new HttpHost(esProperties.getHost(), esProperties.getPort())).build();
+    public ElasticsearchClient elasticsearchClient(EsProperties esProperties) {
+        // 设置身份信息
+        BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+        credentialsProvider.setCredentials(
+                AuthScope.ANY,
+                new UsernamePasswordCredentials(
+                        esProperties.getUsername(),
+                        esProperties.getPassword()
+                )
+        );
+
+        RestClient restClient = RestClient
+                .builder(new HttpHost(esProperties.getHost(), esProperties.getPort()))
+                .setHttpClientConfigCallback(httpClientBuilder ->
+                        httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider))
+                .build();
         // Create the transport with a Jackson mapper
         // 使用自定义json序列化
         JacksonJsonpMapper jacksonJsonpMapper = new JacksonJsonpMapper(MAPPER);
@@ -55,10 +76,5 @@ public class EsConfiguration {
         ElasticsearchTransport transport = new RestClientTransport(restClient, jacksonJsonpMapper);
         // And create the API client
         return new ElasticsearchClient(transport);
-    }
-
-    @Bean
-    public ElasticSearchTemplate template(ElasticSearchTemplate elasticSearchTemplate) {
-        return elasticSearchTemplate;
     }
 }

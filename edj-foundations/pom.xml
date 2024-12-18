@@ -86,6 +86,15 @@
             <groupId>com.edj</groupId>
             <artifactId>edj-xxl-job</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>com.edj.es</groupId>
+            <artifactId>edj-es</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.edj.canal</groupId>
+            <artifactId>edj-canal</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

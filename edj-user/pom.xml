@@ -76,11 +76,6 @@
             <groupId>com.edj</groupId>
             <artifactId>edj-api</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>com.edj</groupId>
-            <artifactId>edj-rabbitmq</artifactId>
-        </dependency>
     </dependencies>
 
     <build>
