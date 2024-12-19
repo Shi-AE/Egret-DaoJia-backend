@@ -46,6 +46,7 @@ public class DefaultDocumentOperations implements DocumentOperations {
 
     @Override
     public <T> Boolean insert(String index, T document) {
+        log.debug("insert document: {}", document);
         try {
             CreateResponse createResponse = elasticsearchClient
                     .create(builder -> builder
@@ -63,6 +64,7 @@ public class DefaultDocumentOperations implements DocumentOperations {
 
     @Override
     public <T> Boolean batchInsert(String index, List<T> documentList) {
+        log.debug("batchInsert documentList: {}", documentList);
         BulkRequest.Builder br = new BulkRequest.Builder();
         for (T document : documentList) {
             br.operations(op -> op.index(idx -> idx.index(index)
@@ -80,6 +82,7 @@ public class DefaultDocumentOperations implements DocumentOperations {
 
     @Override
     public <T> Boolean batchUpsert(String index, List<T> documentList) {
+        log.debug("batchUpsert documentList: {}", documentList);
         if (CollUtils.isEmpty(documentList)) {
             return false;
         }
@@ -151,6 +154,8 @@ public class DefaultDocumentOperations implements DocumentOperations {
 
     @Override
     public <ID> Boolean batchDelete(String index, List<ID> idList) {
+        log.debug("batchDelete idList: {}", idList);
+
         BulkRequest.Builder builder = new BulkRequest.Builder();
 
         idList.forEach(id ->

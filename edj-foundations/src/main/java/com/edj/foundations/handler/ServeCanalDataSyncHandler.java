@@ -40,8 +40,8 @@ public class ServeCanalDataSyncHandler extends AbstractCanalRabbitMqMsgListener<
 
     @Override
     public void batchSave(List<EdjServeSync> data) {
-        Boolean aBoolean = elasticSearchTemplate.opsForDoc().batchInsert(IndexConstants.SERVE, data);
-        if (!aBoolean) {
+        Boolean success = elasticSearchTemplate.opsForDoc().batchInsert(IndexConstants.SERVE, data);
+        if (!success) {
             ThreadUtils.sleep(1000);
             throw new RuntimeException("同步失败");
         }
@@ -49,8 +49,8 @@ public class ServeCanalDataSyncHandler extends AbstractCanalRabbitMqMsgListener<
 
     @Override
     public void batchDelete(List<Long> idList) {
-        Boolean aBoolean = elasticSearchTemplate.opsForDoc().batchDelete(IndexConstants.SERVE, idList);
-        if (!aBoolean) {
+        Boolean success = elasticSearchTemplate.opsForDoc().batchDelete(IndexConstants.SERVE, idList);
+        if (!success) {
             ThreadUtils.sleep(1000);
             throw new RuntimeException("同步失败");
         }

@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 /**
  * 服务同步表
@@ -62,7 +62,7 @@ public class EdjServeSync {
     /**
      * 更新为热门的时间戳
      */
-    private Date hotTime;
+    private LocalDateTime hotTime;
 
     /**
      * 服务项排序字段
