@@ -171,6 +171,13 @@ public class EdjServeServiceImpl extends MPJBaseServiceImpl<EdjServeMapper, EdjS
         if (update != 1) {
             throw new BadRequestException("区域服务可能不存在");
         }
+
+        // 更新至同步表
+        serveSyncMapper.updateById(EdjServeSync
+                .builder()
+                .id(id)
+                .price(price)
+                .build());
     }
 
     @Override
@@ -189,11 +196,21 @@ public class EdjServeServiceImpl extends MPJBaseServiceImpl<EdjServeMapper, EdjS
             throw new BadRequestException("状态已设置");
         }
 
+        LocalDateTime now = LocalDateTime.now();
+
         LambdaUpdateWrapper<EdjServe> wrapper = new LambdaUpdateWrapper<EdjServe>()
                 .eq(EdjServe::getId, id)
                 .set(EdjServe::getIsHot, edjServeIsHot)
-                .set(EdjServe::getHotTime, LocalDateTime.now());
+                .set(EdjServe::getHotTime, now);
         baseMapper.update(new EdjServe(), wrapper);
+
+        // 更新至同步表
+        serveSyncMapper.updateById(EdjServeSync
+                .builder()
+                .id(id)
+                .isHot((Integer) EnumUtils.value(edjServeIsHot))
+                .hotTime(now)
+                .build());
 
         return serve.getEdjRegionId();
     }
