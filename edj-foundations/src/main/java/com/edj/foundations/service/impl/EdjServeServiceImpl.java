@@ -5,25 +5,17 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.edj.common.domain.PageResult;
 import com.edj.common.expcetions.BadRequestException;
-import com.edj.common.utils.BeanUtils;
-import com.edj.common.utils.EnumUtils;
-import com.edj.common.utils.ObjectUtils;
-import com.edj.common.utils.SqlUtils;
+import com.edj.common.utils.*;
 import com.edj.foundations.domain.dto.ServeAddDTO;
 import com.edj.foundations.domain.dto.ServePageDTO;
-import com.edj.foundations.domain.entity.EdjRegion;
-import com.edj.foundations.domain.entity.EdjServe;
-import com.edj.foundations.domain.entity.EdjServeItem;
-import com.edj.foundations.domain.entity.EdjServeType;
+import com.edj.foundations.domain.entity.*;
 import com.edj.foundations.domain.vo.ServeDetailVo;
 import com.edj.foundations.domain.vo.ServeItemVO;
 import com.edj.foundations.domain.vo.ServeVO;
 import com.edj.foundations.enums.EdjServeIsHot;
 import com.edj.foundations.enums.EdjServeItemActiveStatus;
 import com.edj.foundations.enums.EdjServeSaleStatus;
-import com.edj.foundations.mapper.EdjRegionMapper;
-import com.edj.foundations.mapper.EdjServeItemMapper;
-import com.edj.foundations.mapper.EdjServeMapper;
+import com.edj.foundations.mapper.*;
 import com.edj.foundations.service.EdjServeItemService;
 import com.edj.foundations.service.EdjServeService;
 import com.edj.mysql.utils.PageUtils;
@@ -41,6 +33,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import static com.edj.cache.constants.CacheConstants.CacheManager.ONE_DAY;
@@ -57,6 +50,8 @@ import static com.edj.cache.constants.CacheConstants.CacheName.*;
 @RequiredArgsConstructor
 public class EdjServeServiceImpl extends MPJBaseServiceImpl<EdjServeMapper, EdjServe> implements EdjServeService {
 
+    private final EdjServeTypeMapper serveTypeMapper;
+
     private final EdjServeItemMapper serveItemMapper;
 
     private final EdjServeItemService serveItemService;
@@ -64,6 +59,8 @@ public class EdjServeServiceImpl extends MPJBaseServiceImpl<EdjServeMapper, EdjS
     private final ApplicationContext applicationContext;
 
     private final EdjRegionMapper regionMapper;
+
+    private final EdjServeSyncMapper serveSyncMapper;
 
     @Override
     @Transactional
@@ -251,8 +248,55 @@ public class EdjServeServiceImpl extends MPJBaseServiceImpl<EdjServeMapper, EdjS
                 .eq(EdjServe::getId, id);
         baseMapper.update(new EdjServe(), updateWrapper);
 
+        // 同步新增至同步表
+        serveSyncAdd(id);
+
         // 删除首页服务列表缓存 区域id key
         return serve.getEdjRegionId();
+    }
+
+    private void serveSyncAdd(Long id) {
+        //服务信息
+        EdjServe serve = baseMapper.selectById(id);
+
+        //区域信息
+        CompletableFuture<EdjRegion> regionTask = AsyncUtils.supplyAsync(
+                () -> regionMapper.selectById(serve.getEdjRegionId())
+        );
+
+        //服务项信息
+        CompletableFuture<EdjServeItem> serveItemTask = AsyncUtils.supplyAsync(
+                () -> serveItemMapper.selectById(serve.getEdjServeItemId())
+        );
+
+        EdjRegion region = regionTask.join();
+        EdjServeItem serveItem = serveItemTask.join();
+
+        //服务类型
+        EdjServeType serveType = serveTypeMapper.selectById(serveItem.getEdjServeTypeId());
+
+        EdjServeSync serveSync = EdjServeSync
+                .builder()
+                .id(id)
+                .edjServeTypeId(serveType.getId())
+                .edjServeItemId(serveItem.getId())
+                .edjCityId(region.getEdjCityId())
+                .serveItemName(serveItem.getName())
+                .serveTypeName(serveType.getName())
+                .price(serve.getPrice())
+                .isHot(serve.getIsHot())
+                .hotTime(serve.getHotTime())
+                .serveItemSortNum(serveItem.getSortNum())
+                .serveTypeSortNum(serveType.getSortNum())
+                .serveTypeImg(serveType.getImg())
+                .serveTypeIcon(serveType.getIcon())
+                .unit(serveItem.getUnit())
+                .detailImg(serveItem.getDetailImg())
+                .serveItemImg(serveItem.getImg())
+                .serveItemIcon(serveItem.getIcon())
+                .build();
+
+        serveSyncMapper.insert(serveSync);
     }
 
     @Override
@@ -286,6 +330,9 @@ public class EdjServeServiceImpl extends MPJBaseServiceImpl<EdjServeMapper, EdjS
                 .eq(EdjServe::getId, id);
         baseMapper.update(new EdjServe(), updateWrapper);
 
+        // 同步删除同步表数据
+        serveSyncMapper.deleteById(id);
+
         // 删除首页服务列表缓存 区域id key
         return serve.getEdjRegionId();
     }
@@ -310,6 +357,9 @@ public class EdjServeServiceImpl extends MPJBaseServiceImpl<EdjServeMapper, EdjS
         if (EnumUtils.ne(EdjServeSaleStatus.DRAFT, saleStatus)) {
             throw new BadRequestException("草稿状态方可删除");
         }
+
+        // 同步删除同步表数据
+        serveSyncMapper.deleteById(id);
 
         baseMapper.deleteById(id);
     }
