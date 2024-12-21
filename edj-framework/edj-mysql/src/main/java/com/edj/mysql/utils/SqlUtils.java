@@ -1,12 +1,21 @@
-package com.edj.common.utils;
+package com.edj.mysql.utils;
 
 import cn.hutool.core.collection.ListUtil;
 import cn.hutool.db.sql.SqlUtil;
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
+import com.baomidou.mybatisplus.core.toolkit.LambdaUtils;
+import com.baomidou.mybatisplus.core.toolkit.StringPool;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
+import com.edj.common.utils.AsyncUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.reflection.property.PropertyNamer;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * @author A.E.
@@ -97,5 +106,32 @@ public class SqlUtils extends SqlUtil {
                 .map(observer)
                 .flatMap(List::stream)
                 .toList();
+    }
+
+    /**
+     * 检查sql语句是否有更新操作
+     *
+     * @param wrapper sql包装
+     * @return 是否有更新操作
+     */
+    public static boolean isUpdate(Wrapper<?> wrapper) {
+        return wrapper.getSqlSet() != null;
+    }
+
+    /**
+     * 获取字段字符串
+     * lambda表达式转字符串
+     */
+    @SafeVarargs
+    public static <T> String columnsToString(SFunction<T, ?>... columns) {
+        return Arrays.stream(columns)
+                .map(column ->
+                        StringUtils.camelToUnderline(
+                                PropertyNamer.methodToProperty(
+                                        LambdaUtils.extract(column).getImplMethodName()
+                                )
+                        )
+                )
+                .collect(Collectors.joining(StringPool.COMMA + StringPool.SPACE));
     }
 }

@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.edj.common.utils.DateUtils;
 import com.edj.common.utils.JsonUtils;
-import com.edj.common.utils.SqlUtils;
+import com.edj.mysql.utils.SqlUtils;
 import com.edj.rabbitmq.domain.EdjFailMsg;
 import com.edj.rabbitmq.mapper.EdjFailMsgMapper;
 import com.edj.rabbitmq.service.EdjFailMsgService;

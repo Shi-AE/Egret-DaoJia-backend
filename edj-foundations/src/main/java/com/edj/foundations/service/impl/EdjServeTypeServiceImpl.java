@@ -12,14 +12,17 @@ import com.edj.foundations.domain.dto.ServeTypeAddDTO;
 import com.edj.foundations.domain.dto.ServeTypePageDTO;
 import com.edj.foundations.domain.dto.ServeTypeUpdateDTO;
 import com.edj.foundations.domain.entity.EdjServeItem;
+import com.edj.foundations.domain.entity.EdjServeSync;
 import com.edj.foundations.domain.entity.EdjServeType;
 import com.edj.foundations.domain.vo.ServeTypeStatusGetVO;
 import com.edj.foundations.domain.vo.ServeTypeVO;
 import com.edj.foundations.enums.EdjServeTypeActiveStatus;
 import com.edj.foundations.mapper.EdjServeItemMapper;
+import com.edj.foundations.mapper.EdjServeSyncMapper;
 import com.edj.foundations.mapper.EdjServeTypeMapper;
 import com.edj.foundations.service.EdjServeTypeService;
 import com.edj.mysql.utils.PageUtils;
+import com.edj.mysql.utils.SqlUtils;
 import com.github.yulichang.base.MPJBaseServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -40,6 +43,8 @@ public class EdjServeTypeServiceImpl extends MPJBaseServiceImpl<EdjServeTypeMapp
     private final Snowflake snowflake;
 
     private final EdjServeItemMapper edjServeItemMapper;
+
+    private final EdjServeSyncMapper serveSyncMapper;
 
     @Override
     @Transactional
@@ -150,6 +155,9 @@ public class EdjServeTypeServiceImpl extends MPJBaseServiceImpl<EdjServeTypeMapp
     public void update(ServeTypeUpdateDTO serveTypeUpdateDTO) {
         String name = serveTypeUpdateDTO.getName();
         Long id = serveTypeUpdateDTO.getId();
+        String img = serveTypeUpdateDTO.getImg();
+        Integer sortNum = serveTypeUpdateDTO.getSortNum();
+        String icon = serveTypeUpdateDTO.getIcon();
 
         if (StringUtils.isNotBlank(name)) {
             // 检查服务类型名重复
@@ -167,6 +175,17 @@ public class EdjServeTypeServiceImpl extends MPJBaseServiceImpl<EdjServeTypeMapp
         int update = baseMapper.updateById(serveType);
         if (update != 1) {
             throw new BadRequestException("服务类型不存在");
+        }
+
+        // 同步更新至同步表
+        LambdaUpdateWrapper<EdjServeSync> wrapper = new LambdaUpdateWrapper<EdjServeSync>()
+                .eq(EdjServeSync::getEdjServeTypeId, id)
+                .set(StringUtils.isNotBlank(name), EdjServeSync::getServeTypeName, name)
+                .set(StringUtils.isNotBlank(img), EdjServeSync::getServeTypeImg, img)
+                .set(StringUtils.isNotBlank(icon), EdjServeSync::getServeTypeIcon, icon)
+                .set(ObjectUtils.isNotNull(sortNum), EdjServeSync::getServeTypeSortNum, sortNum);
+        if (SqlUtils.isUpdate(wrapper)) {
+            serveSyncMapper.update(new EdjServeSync(), wrapper);
         }
     }
 

@@ -13,6 +13,7 @@ import com.edj.foundations.domain.dto.ServeItemPageDTO;
 import com.edj.foundations.domain.dto.ServeItemUpdateDTO;
 import com.edj.foundations.domain.entity.EdjServe;
 import com.edj.foundations.domain.entity.EdjServeItem;
+import com.edj.foundations.domain.entity.EdjServeSync;
 import com.edj.foundations.domain.entity.EdjServeType;
 import com.edj.foundations.domain.vo.ServeItemVO;
 import com.edj.foundations.enums.EdjServeItemActiveStatus;
@@ -20,9 +21,11 @@ import com.edj.foundations.enums.EdjServeSaleStatus;
 import com.edj.foundations.enums.EdjServeTypeActiveStatus;
 import com.edj.foundations.mapper.EdjServeItemMapper;
 import com.edj.foundations.mapper.EdjServeMapper;
+import com.edj.foundations.mapper.EdjServeSyncMapper;
 import com.edj.foundations.mapper.EdjServeTypeMapper;
 import com.edj.foundations.service.EdjServeItemService;
 import com.edj.mysql.utils.PageUtils;
+import com.edj.mysql.utils.SqlUtils;
 import com.github.yulichang.base.MPJBaseServiceImpl;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import lombok.RequiredArgsConstructor;
@@ -47,6 +50,8 @@ import static com.edj.cache.constants.CacheConstants.CacheName.SEVER_ITEM_CACHE;
 public class EdjServeItemServiceImpl extends MPJBaseServiceImpl<EdjServeItemMapper, EdjServeItem> implements EdjServeItemService {
 
     private final EdjServeTypeMapper serveTypeMapper;
+
+    private final EdjServeSyncMapper serveSyncMapper;
 
     private final Snowflake snowflake;
 
@@ -90,6 +95,10 @@ public class EdjServeItemServiceImpl extends MPJBaseServiceImpl<EdjServeItemMapp
         // 检查名称重复
         String name = serveItemUpdateDTO.getName();
         Long id = serveItemUpdateDTO.getId();
+        String img = serveItemUpdateDTO.getImg();
+        String icon = serveItemUpdateDTO.getIcon();
+        Integer sortNum = serveItemUpdateDTO.getSortNum();
+        Integer unit = serveItemUpdateDTO.getUnit();
         LambdaQueryWrapper<EdjServeItem> checkWrapper = new LambdaQueryWrapper<EdjServeItem>()
                 .select(EdjServeItem::getId)
                 .eq(EdjServeItem::getName, name)
@@ -113,6 +122,18 @@ public class EdjServeItemServiceImpl extends MPJBaseServiceImpl<EdjServeItemMapp
         // 更新
         EdjServeItem serveItem = BeanUtil.toBean(serveItemUpdateDTO, EdjServeItem.class);
         baseMapper.updateById(serveItem);
+
+        // 同步更新至同步表
+        LambdaUpdateWrapper<EdjServeSync> wrapper = new LambdaUpdateWrapper<EdjServeSync>()
+                .eq(EdjServeSync::getEdjServeItemId, id)
+                .set(StringUtils.isNotBlank(name), EdjServeSync::getServeItemName, name)
+                .set(StringUtils.isNotBlank(img), EdjServeSync::getServeItemImg, img)
+                .set(StringUtils.isNotBlank(icon), EdjServeSync::getServeItemIcon, icon)
+                .set(ObjectUtils.isNotNull(sortNum), EdjServeSync::getServeItemSortNum, sortNum)
+                .set(ObjectUtils.isNotNull(unit), EdjServeSync::getUnit, unit);
+        if (SqlUtils.isUpdate(wrapper)) {
+            serveSyncMapper.update(new EdjServeSync(), wrapper);
+        }
     }
 
     @Override

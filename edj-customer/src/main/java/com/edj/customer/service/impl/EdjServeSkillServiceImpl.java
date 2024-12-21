@@ -16,6 +16,7 @@ import com.edj.customer.mapper.EdjServeProviderSettingsMapper;
 import com.edj.customer.mapper.EdjServeProviderSyncMapper;
 import com.edj.customer.mapper.EdjServeSkillMapper;
 import com.edj.customer.service.EdjServeSkillService;
+import com.edj.mysql.utils.SqlUtils;
 import com.edj.security.utils.SecurityUtils;
 import com.github.yulichang.base.MPJBaseServiceImpl;
 import lombok.AllArgsConstructor;
