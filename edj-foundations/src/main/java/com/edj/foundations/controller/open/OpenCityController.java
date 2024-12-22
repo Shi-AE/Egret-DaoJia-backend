@@ -37,4 +37,14 @@ public class OpenCityController {
     public List<ProvinceStructVO> getCity() {
         return cityService.getStruct();
     }
+
+    /**
+     * 根据城市编号获取系统id
+     */
+    @GetMapping("id")
+    @Operation(summary = "根据城市编号获取系统id")
+    @PreAuthorize("permitAll()")
+    public Integer getIdByCityCode(String CityCode) {
+        return cityService.getIdByCityCode(CityCode);
+    }
 }

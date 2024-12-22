@@ -1,6 +1,7 @@
 package com.edj.foundations.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.edj.common.utils.ObjectUtils;
 import com.edj.foundations.domain.entity.EdjCity;
 import com.edj.foundations.domain.vo.ProvinceStructVO;
 import com.edj.foundations.enums.EdjCityType;
@@ -68,5 +69,15 @@ public class EdjCityServiceImpl extends MPJBaseServiceImpl<EdjCityMapper, EdjCit
                         .build()
                 )
                 .toList();
+    }
+
+    @Override
+    public Integer getIdByCityCode(String cityCode) {
+        LambdaQueryWrapper<EdjCity> wrapper = new LambdaQueryWrapper<EdjCity>()
+                .select(EdjCity::getId)
+                .eq(EdjCity::getCityCode, cityCode);
+
+        EdjCity edjCity = baseMapper.selectOne(wrapper);
+        return ObjectUtils.defaultIfNull(edjCity.getId(), 0);
     }
 }
