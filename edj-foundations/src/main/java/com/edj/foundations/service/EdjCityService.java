@@ -18,4 +18,9 @@ public interface EdjCityService extends MPJBaseService<EdjCity> {
      * 查询城市结构列表
      */
     List<ProvinceStructVO> getStruct();
+
+    /**
+     * 根据城市编号获取系统id
+     */
+    Integer getIdByCityCode(String cityCode);
 }
