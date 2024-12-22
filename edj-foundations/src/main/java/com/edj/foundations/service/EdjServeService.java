@@ -3,8 +3,10 @@ package com.edj.foundations.service;
 import com.edj.common.domain.PageResult;
 import com.edj.foundations.domain.dto.ServeAddDTO;
 import com.edj.foundations.domain.dto.ServePageDTO;
+import com.edj.foundations.domain.dto.ServeSearchDTO;
 import com.edj.foundations.domain.entity.EdjServe;
 import com.edj.foundations.domain.vo.ServeDetailVo;
+import com.edj.foundations.domain.vo.ServeSimpleVO;
 import com.edj.foundations.domain.vo.ServeVO;
 import com.edj.foundations.enums.EdjServeIsHot;
 import com.github.yulichang.base.MPJBaseService;
@@ -70,4 +72,9 @@ public interface EdjServeService extends MPJBaseService<EdjServe> {
      * 根据id查询服务详情
      */
     ServeDetailVo findDetailById(Long id);
+
+    /**
+     * 服务搜索
+     */
+    List<ServeSimpleVO> search(ServeSearchDTO serveSearchDTO);
 }

@@ -10,14 +10,14 @@ import lombok.NoArgsConstructor;
  * 服务项简单响应
  *
  * @author A.E.
- * @date 2024/10/15
+ * @date 2024/12/22
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Schema(description = "服务项简单响应")
-public class ServeIconVO {
+public class ServeSimpleVO {
 
     /**
      * 服务id

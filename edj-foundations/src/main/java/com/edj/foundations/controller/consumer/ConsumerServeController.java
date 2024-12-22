@@ -1,8 +1,10 @@
 package com.edj.foundations.controller.consumer;
 
+import com.edj.foundations.domain.dto.ServeSearchDTO;
 import com.edj.foundations.domain.vo.ServeAggregationSimpleVO;
 import com.edj.foundations.domain.vo.ServeCategoryVO;
 import com.edj.foundations.domain.vo.ServeDetailVo;
+import com.edj.foundations.domain.vo.ServeSimpleVO;
 import com.edj.foundations.service.ConsumerHomeService;
 import com.edj.foundations.service.EdjServeService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -11,7 +13,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -66,5 +70,15 @@ public class ConsumerServeController {
             Long id
     ) {
         return serveService.findDetailById(id);
+    }
+
+    /**
+     * 服务搜索
+     */
+    @GetMapping("search")
+    @Operation(summary = "服务搜索")
+    @PreAuthorize("hasAuthority('consumer:serve:search')")
+    public List<ServeSimpleVO> search(@ParameterObject @Validated ServeSearchDTO serveSearchDTO) {
+        return serveService.search(serveSearchDTO);
     }
 }

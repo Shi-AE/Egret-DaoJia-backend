@@ -48,6 +48,7 @@ public class ConsumerHomeServiceImpl implements ConsumerHomeService {
         MPJLambdaWrapper<EdjRegion> wrapper = new MPJLambdaWrapper<EdjRegion>()
                 .select(EdjRegion::getId, EdjRegion::getName)
                 .select(EdjCity::getCityCode)
+                .selectAs(EdjCity::getId, RegionSimpleVO::getCityId)
                 .innerJoin(EdjCity.class, EdjCity::getId, EdjRegion::getEdjCityId)
                 .eq(EdjRegion::getActiveStatus, EdjRegionActiveStatus.ENABLED)
                 .orderByAsc(EdjRegion::getSortNum);

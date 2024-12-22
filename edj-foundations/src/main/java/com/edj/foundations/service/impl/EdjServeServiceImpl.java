@@ -1,19 +1,26 @@
 package com.edj.foundations.service.impl;
 
+import co.elastic.clients.elasticsearch._types.SortOptions;
+import co.elastic.clients.elasticsearch._types.SortOrder;
+import co.elastic.clients.elasticsearch.core.SearchRequest;
+import co.elastic.clients.elasticsearch.core.SearchResponse;
+import co.elastic.clients.elasticsearch.core.search.Hit;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.edj.common.constants.IndexConstants;
 import com.edj.common.domain.PageResult;
 import com.edj.common.expcetions.BadRequestException;
-import com.edj.common.utils.AsyncUtils;
-import com.edj.common.utils.BeanUtils;
-import com.edj.common.utils.EnumUtils;
-import com.edj.common.utils.ObjectUtils;
+import com.edj.common.utils.*;
+import com.edj.es.core.ElasticSearchTemplate;
+import com.edj.es.utils.SearchResponseUtils;
 import com.edj.foundations.domain.dto.ServeAddDTO;
 import com.edj.foundations.domain.dto.ServePageDTO;
+import com.edj.foundations.domain.dto.ServeSearchDTO;
 import com.edj.foundations.domain.entity.*;
 import com.edj.foundations.domain.vo.ServeDetailVo;
 import com.edj.foundations.domain.vo.ServeItemVO;
+import com.edj.foundations.domain.vo.ServeSimpleVO;
 import com.edj.foundations.domain.vo.ServeVO;
 import com.edj.foundations.enums.EdjServeIsHot;
 import com.edj.foundations.enums.EdjServeItemActiveStatus;
@@ -37,6 +44,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -65,6 +73,8 @@ public class EdjServeServiceImpl extends MPJBaseServiceImpl<EdjServeMapper, EdjS
     private final EdjRegionMapper regionMapper;
 
     private final EdjServeSyncMapper serveSyncMapper;
+
+    private final ElasticSearchTemplate elasticSearchTemplate;
 
     @Override
     @Transactional
@@ -419,5 +429,70 @@ public class EdjServeServiceImpl extends MPJBaseServiceImpl<EdjServeMapper, EdjS
         serveDetailVo.setUnit(serveItemVO.getUnit());
 
         return serveDetailVo;
+    }
+
+    @Override
+    public List<ServeSimpleVO> search(ServeSearchDTO serveSearchDTO) {
+        // 构造查询条件
+        Integer cityId = serveSearchDTO.getCityId();
+        Long serveTypeId = serveSearchDTO.getServeTypeId();
+        String keyword = serveSearchDTO.getKeyword();
+        SearchRequest searchRequest = new SearchRequest.Builder()
+                .query(query -> query.bool(bool -> {
+                    // 匹配城市
+                    bool.must(must -> must.term(term -> term
+                            .field(LambdaUtils.getUnderLineFieldName(EdjServeSync::getEdjCityId))
+                            .value(cityId)
+                    ));
+
+                    // 匹配服务类型
+                    if (ObjectUtils.isNotNull(serveTypeId)) {
+                        bool.must(must -> must.term(term -> term
+                                .field(LambdaUtils.getUnderLineFieldName(EdjServeSync::getEdjServeTypeId))
+                                .value(serveTypeId)
+                        ));
+                    }
+
+                    // 匹配关键词
+                    if (StringUtils.isNotBlank(keyword)) {
+                        String serveItemNameField = LambdaUtils.getUnderLineFieldName(EdjServeSync::getServeItemName);
+                        String serveTypeNameField = LambdaUtils.getUnderLineFieldName(EdjServeSync::getServeTypeName);
+
+                        bool.must(must -> must.multiMatch(multiMatch -> multiMatch
+                                .fields(serveItemNameField, serveTypeNameField)
+                                .query(keyword)
+                        ));
+                    }
+
+                    return bool;
+                }))
+                .sort(SortOptions.of(sortOption -> sortOption
+                        .field(field -> field
+                                .field(LambdaUtils.getUnderLineFieldName(EdjServeSync::getServeItemSortNum))
+                                .order(SortOrder.Asc)
+                        )
+                ))
+                .index(IndexConstants.SERVE)
+                .build();
+
+        SearchResponse<EdjServeSync> searchResponse = elasticSearchTemplate.opsForDoc().search(searchRequest, EdjServeSync.class);
+        if (SearchResponseUtils.isSuccess(searchResponse)) {
+            return searchResponse.hits().hits()
+                    .stream()
+                    .map(Hit::source)
+                    .filter(Objects::nonNull)
+                    .map(serveSync -> ServeSimpleVO
+                            .builder()
+                            .id(serveSync.getId())
+                            .serveItemId(serveSync.getEdjServeItemId())
+                            .serveItemName(serveSync.getServeItemName())
+                            .serveItemIcon(serveSync.getServeItemIcon())
+                            .serveItemSortNum(serveSync.getServeItemSortNum())
+                            .build()
+                    )
+                    .toList();
+        }
+
+        return List.of();
     }
 }

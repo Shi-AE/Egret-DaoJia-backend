@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 /**
- * 首页服务图标
+ * 服务类型简单响应
  *
  * @author A.E.
  * @date 2024/11/4
@@ -19,7 +19,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "首页服务图标")
+@Schema(description = "服务类型简单响应")
 public class ServeCategoryVO {
 
     /**
@@ -49,6 +49,6 @@ public class ServeCategoryVO {
     /**
      * 服务项图标列表
      */
-    @Schema(description = "服务项图标列表")
+    @Schema(description = "服务项列表")
     private List<ServeIconVO> serveIconVOList;
 }

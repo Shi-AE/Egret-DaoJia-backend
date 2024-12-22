@@ -31,6 +31,12 @@ public class RegionSimpleVO {
     private String name;
 
     /**
+     * 城市id
+     */
+    @Schema(description = "城市id")
+    private Integer cityId;
+
+    /**
      * 城市编码
      */
     @Schema(description = "城市编码")
