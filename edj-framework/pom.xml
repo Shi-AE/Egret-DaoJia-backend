@@ -27,6 +27,7 @@
         <module>edj-rabbitmq</module>
         <module>edj-canal</module>
         <module>edj-es</module>
+        <module>../edj-orders</module>
     </modules>
 
     <properties>
