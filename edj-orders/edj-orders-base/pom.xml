@@ -23,6 +23,11 @@
             <groupId>com.edj</groupId>
             <artifactId>edj-common</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>com.edj</groupId>
+            <artifactId>edj-mysql</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

@@ -313,6 +313,11 @@
                 <artifactId>edj-es</artifactId>
                 <version>${edj.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.edj</groupId>
+                <artifactId>edj-orders-base</artifactId>
+                <version>${edj.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <repositories>

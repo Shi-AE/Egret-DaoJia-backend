@@ -1,0 +1,41 @@
+#################     服务器配置     #################
+
+server:
+  port: 33550 #端口
+
+#################     spring公共配置     #################
+
+spring:
+  profiles:
+    active: dev
+  application:
+    name: edj-orders-manager
+  cloud:
+    nacos:
+      config:
+        file-extension: yaml
+        shared-configs:
+          - data-id: shared-redis.yaml
+            refresh: false
+          - data-id: shared-mysql.yaml
+            refresh: false
+          - data-id: shared-swagger.yaml
+            refresh: false
+
+#################     项目独有配置     #################
+
+mysql:
+  db-name: edj-orders
+mybatis-plus:
+  mapper-locations: mapper/orders/*.xml
+  type-aliases-package: com.edj.orders.base.mapper
+swagger:
+  title: 白鹭到家-订单管理服务
+  description: 管理订单的生命周期、订单状态、订单信息
+
+snowflake:
+  workerId: 5
+  datacenterId: 5
+
+feign:
+  enable: true
