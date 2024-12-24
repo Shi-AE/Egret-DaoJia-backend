@@ -76,9 +76,9 @@ public class AddressBookVO {
     private BigDecimal lon;
 
     /**
-     * 维度
+     * 纬度
      */
-    @Schema(description = "维度")
+    @Schema(description = "纬度")
     private BigDecimal lat;
 
     /**
