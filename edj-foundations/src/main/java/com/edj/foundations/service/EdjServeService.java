@@ -1,5 +1,6 @@
 package com.edj.foundations.service;
 
+import com.edj.api.api.foundations.dto.ServeAggregationDTO;
 import com.edj.common.domain.PageResult;
 import com.edj.foundations.domain.dto.ServeAddDTO;
 import com.edj.foundations.domain.dto.ServePageDTO;
@@ -77,4 +78,9 @@ public interface EdjServeService extends MPJBaseService<EdjServe> {
      * 服务搜索
      */
     List<ServeSimpleVO> search(ServeSearchDTO serveSearchDTO);
+
+    /**
+     * 根据id查询服务详情
+     */
+    ServeAggregationDTO findServeDetailById(Long id);
 }

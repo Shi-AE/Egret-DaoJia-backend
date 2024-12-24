@@ -8,6 +8,7 @@ import co.elastic.clients.elasticsearch.core.search.Hit;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.edj.api.api.foundations.dto.ServeAggregationDTO;
 import com.edj.common.constants.IndexConstants;
 import com.edj.common.domain.PageResult;
 import com.edj.common.expcetions.BadRequestException;
@@ -494,5 +495,29 @@ public class EdjServeServiceImpl extends MPJBaseServiceImpl<EdjServeMapper, EdjS
         }
 
         return List.of();
+    }
+
+    @Override
+    public ServeAggregationDTO findServeDetailById(Long id) {
+
+        MPJLambdaWrapper<EdjServe> wrapper = new MPJLambdaWrapper<EdjServe>()
+                .select(EdjServe::getId, EdjServe::getPrice, EdjServe::getIsHot, EdjServe::getHotTime, EdjServe::getSaleStatus, EdjServe::getHotTime)
+                .select(EdjCity::getCityCode)
+                .select(EdjServeItem::getUnit, EdjServeItem::getDetailImg)
+                .selectAs(EdjServeItem::getId, ServeAggregationDTO::getServeItemId)
+                .selectAs(EdjServeItem::getName, ServeAggregationDTO::getServeItemName)
+                .selectAs(EdjServeItem::getImg, ServeAggregationDTO::getServeItemImg)
+                .selectAs(EdjServeItem::getIcon, ServeAggregationDTO::getServeItemIcon)
+                .selectAs(EdjServeItem::getSortNum, ServeAggregationDTO::getServeItemSortNum)
+                .selectAs(EdjServeType::getId, ServeAggregationDTO::getServeTypeId)
+                .selectAs(EdjServeType::getName, ServeAggregationDTO::getServeTypeName)
+                .selectAs(EdjServeType::getImg, ServeAggregationDTO::getServeTypeImg)
+                .selectAs(EdjServeType::getIcon, ServeAggregationDTO::getServeTypeIcon)
+                .selectAs(EdjServeType::getSortNum, ServeAggregationDTO::getServeTypeSortNum)
+                .innerJoin(EdjServeItem.class, EdjServeItem::getId, EdjServe::getEdjServeItemId)
+                .innerJoin(EdjServeType.class, EdjServeType::getId, EdjServeItem::getEdjServeTypeId)
+                .innerJoin(EdjCity.class, EdjCity::getId, EdjServe::getEdjCityId)
+                .eq(EdjServe::getId, id);
+        return baseMapper.selectJoinOne(ServeAggregationDTO.class, wrapper);
     }
 }
