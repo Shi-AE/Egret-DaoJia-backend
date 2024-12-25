@@ -21,6 +21,13 @@ public class EnumUtils extends EnumUtil {
     private static final ConcurrentHashMap<Enum<?>, Object> ENUM_VALUE_CACHE = new ConcurrentHashMap<>();
 
     /**
+     * 获取值并指定返回类型
+     */
+    public static <E extends Enum<E>, T> T value(Enum<E> enumName, Class<T> clazz) {
+        return clazz.cast(value(enumName));
+    }
+
+    /**
      * 获取 @EnumValue 注解的值
      */
     public static <E extends Enum<E>> Object value(Enum<E> enumName) {
