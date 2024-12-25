@@ -25,6 +25,7 @@ public class DateUtils extends LocalDateTimeUtil {
     public static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd";
     public static final String DEFAULT_DATE_FORMAT_EN = "yyyy年MM月dd日";
     public static final String DEFAULT_DATE_FORMAT_COMPACT = "yyyyMMdd";
+    public static final String DEFAULT_DATE_FORMAT_SIMPLE_COMPACT = "yyMMdd";
     public static final String DEFAULT_DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
     public static final String DEFAULT_DATE_TIME_COMPACT = "yyyyMMddHHmmss";
     public static final String DEFAULT_DATE_TIME_MS_COMPACT = "yyyyMMddHHmmssSSS";

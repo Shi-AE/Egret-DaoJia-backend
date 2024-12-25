@@ -2,7 +2,11 @@ package com.edj.common.constants;
 
 public class CommonRedisConstants {
 
-    public static class RedisKey {
+    public static class Generator {
+        /**
+         * 订单id生成键
+         */
+        public static final String ORDERS_KEY_ID_GENERATOR = "GENERATOR:ORDERS:KEY";
     }
 
     public static class Lock {
