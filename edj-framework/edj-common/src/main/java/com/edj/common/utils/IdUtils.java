@@ -40,10 +40,10 @@ public class IdUtils extends IdUtil {
      * 雪花id转为可视编号
      */
     public static String toCode(long id) {
-        long generateDateTime = IdUtils.getGenerateDateTime(id);
-        long dataCenterId = IdUtils.getDataCenterId(id);
-        long workerId = IdUtils.getWorkerId(id);
-        long sequence = IdUtils.getSequence(id);
+        long generateDateTime = getGenerateDateTime(id);
+        long dataCenterId = getDataCenterId(id);
+        long workerId = getWorkerId(id);
+        long sequence = getSequence(id);
         return String.format("%s_%s_%02d%02d%04d",
                 EDJ,
                 DateUtils.getFormatLong(generateDateTime),
