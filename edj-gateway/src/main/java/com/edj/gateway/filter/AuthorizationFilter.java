@@ -28,6 +28,7 @@ import static com.edj.common.constants.AuthorizationConstants.RedisKey.ACCESS_TO
 import static com.edj.common.constants.AuthorizationConstants.RedisKey.REFRESH_TOKEN_KEY;
 import static com.edj.common.constants.AuthorizationConstants.Timeout.ACCESS_TIMEOUT;
 import static com.edj.common.constants.AuthorizationConstants.Timeout.REFRESH_TIMEOUT;
+import static com.edj.common.constants.CommonRedisConstants.Lock.GATEWAY_REFRESH_TOKEN;
 import static org.springframework.http.HttpHeaders.USER_AGENT;
 
 @Component
@@ -120,7 +121,7 @@ public class AuthorizationFilter implements GlobalFilter, Ordered {
             // todo 优化更新逻辑
             // 加锁更新，更新完成后统一放行
             lockHelper.syncLockAndElse(
-                    "gateway:filter:AuthorizationFilter:" + refreshToken,
+                    String.format(GATEWAY_REFRESH_TOKEN, refreshToken),
                     MEDIUM_OPERATION_WAIT_TIME,
                     // 未加锁执行逻辑，token未更新
                     () -> {
