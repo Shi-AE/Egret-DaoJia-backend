@@ -79,6 +79,7 @@ public class AmapMapServiceImpl implements MapService {
         Map<String, Object> params = new HashMap<>();
         params.put("location", location);
         params.put("key", amapProperties.getKey());
+        params.put("extensions", "base");
 
         //2.向高德发送请求，示例：https://restapi.amap.com/v3/geocode/regeo?output=xml&location=116.310003,39.991957&key=<用户的key>&radius=1000&extensions=all
         String jsonStr = HttpRequest.get(REGEO_URL).form(params).execute().body();
