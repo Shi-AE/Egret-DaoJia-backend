@@ -5,7 +5,7 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 /**
  * 订单表
@@ -113,12 +113,12 @@ public class EdjOrders extends EjdBaseEntity {
     /**
      * 服务开始时间
      */
-    private Date serveStartTime;
+    private LocalDateTime serveStartTime;
 
     /**
      * 实际服务完成时间
      */
-    private Date realServeEndTime;
+    private LocalDateTime realServeEndTime;
 
     /**
      * 经度
@@ -133,7 +133,7 @@ public class EdjOrders extends EjdBaseEntity {
     /**
      * 支付时间
      */
-    private Date payTime;
+    private LocalDateTime payTime;
 
     /**
      * 订单状态（0待支付 100派单中 200待服务 300服务中 500订单完成 600已取消 700已关闭）
@@ -153,7 +153,7 @@ public class EdjOrders extends EjdBaseEntity {
     /**
      * 评价时间
      */
-    private Date evaluationTime;
+    private LocalDateTime evaluationTime;
 
     /**
      * 评价状态（0未评价 1已评价）

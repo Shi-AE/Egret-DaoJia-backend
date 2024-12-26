@@ -4,20 +4,30 @@ import com.edj.api.api.customer.AddressBookApi;
 import com.edj.api.api.customer.dto.AddressBookVO;
 import com.edj.api.api.foundations.ServeApi;
 import com.edj.api.api.foundations.dto.ServeAggregationDTO;
+import com.edj.common.expcetions.ServerErrorException;
+import com.edj.common.utils.AsyncUtils;
 import com.edj.common.utils.DateUtils;
+import com.edj.common.utils.EnumUtils;
+import com.edj.common.utils.NumberUtils;
 import com.edj.orders.base.domain.entity.EdjOrders;
+import com.edj.orders.base.enums.EdjOrderPayStatus;
+import com.edj.orders.base.enums.EdjOrderStatus;
 import com.edj.orders.base.mapper.EdjOrdersMapper;
 import com.edj.orders.manager.domain.dto.PlaceOrderDTO;
 import com.edj.orders.manager.domain.vo.PlaceOrderVo;
 import com.edj.orders.manager.service.EdjOrdersCreateService;
+import com.edj.security.utils.SecurityUtils;
 import com.github.yulichang.base.MPJBaseServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 import static com.edj.common.constants.CommonRedisConstants.Generator.ORDERS_KEY_ID_GENERATOR;
 import static com.edj.common.utils.DateUtils.DEFAULT_DATE_FORMAT_SIMPLE_COMPACT;
@@ -50,15 +60,72 @@ public class EdjOrdersCreateServiceImpl extends MPJBaseServiceImpl<EdjOrdersMapp
     }
 
     @Override
+    @Transactional
     public PlaceOrderVo placeOrder(PlaceOrderDTO placeOrderDTO) {
         // 获取地址信息
         Long addressBookId = placeOrderDTO.getAddressBookId();
-        AddressBookVO addressBook = addressBookApi.detail(addressBookId);
-        log.debug("addressBook: {}", addressBook);
+        CompletableFuture<AddressBookVO> future1 = AsyncUtils.supplyAsync(() -> addressBookApi.detail(addressBookId));
+
         // 获取服务信息
         Long serveId = placeOrderDTO.getServeId();
-        ServeAggregationDTO serveDetail = serveApi.findServeDetailById(serveId);
+        CompletableFuture<ServeAggregationDTO> future2 = AsyncUtils.supplyAsync(() -> serveApi.findServeDetailById(serveId));
+
+        AddressBookVO addressBook = future1.join();
+        ServeAggregationDTO serveDetail = future2.join();
+        log.debug("addressBook: {}", addressBook);
         log.debug("serveDetail: {}", serveDetail);
-        return null;
+
+        EdjOrders orders = new EdjOrders();
+        // 订单id
+        Long id = generatorOrderId();
+        orders.setId(id);
+        // 下单人id
+        orders.setEdjUserId(SecurityUtils.getUserId());
+        // 基础信息
+        orders.setEdjServeTypeId(serveDetail.getServeTypeId());
+        orders.setEdjServeItemId(serveDetail.getServeItemId());
+        orders.setEdjServeId(serveDetail.getId());
+        orders.setServeTypeName(serveDetail.getServeTypeName());
+        orders.setServeItemName(serveDetail.getServeItemName());
+        orders.setServeItemImg(serveDetail.getServeItemImg());
+        orders.setUnit(serveDetail.getUnit());
+        // 价格信息
+        BigDecimal price = serveDetail.getPrice();
+        orders.setPrice(price);
+        Integer purNum = NumberUtils.null2Default(placeOrderDTO.getPurNum(), 1);
+        orders.setPurNum(purNum);
+        BigDecimal totalAmount = price.multiply(new BigDecimal(purNum));
+        orders.setTotalAmount(totalAmount);
+        BigDecimal discountAmount = BigDecimal.ZERO;
+        orders.setDiscountAmount(discountAmount);
+        BigDecimal realPayAmount = totalAmount.subtract(discountAmount);
+        orders.setRealPayAmount(realPayAmount);
+        // 用户信息
+        orders.setCityCode(serveDetail.getCityCode());
+        orders.setServeAddress(
+                addressBook.getProvince() +
+                        addressBook.getCity() +
+                        addressBook.getCounty() +
+                        addressBook.getAddress()
+        );
+        orders.setContactsPhone(addressBook.getPhone());
+        orders.setContactsName(addressBook.getName());
+        orders.setLon(addressBook.getLon());
+        orders.setLat(addressBook.getLat());
+        // 服务时间
+        LocalDateTime serveStartTime = placeOrderDTO.getServeStartTime();
+        orders.setServeStartTime(serveStartTime);
+        // 状态信息
+        orders.setOrdersStatus(EnumUtils.value(EdjOrderStatus.PENDING_PAYMENT, Integer.class));
+        orders.setPayStatus(EnumUtils.value(EdjOrderPayStatus.PENDING, Integer.class));
+        // 排序字段
+        orders.setSortBy(DateUtils.toEpochMilli(serveStartTime) + orders.getId() % 100000);
+
+        int insert = baseMapper.insert(orders);
+        if (insert != 1) {
+            throw new ServerErrorException("下单失败");
+        }
+
+        return PlaceOrderVo.builder().id(id).build();
     }
 }
