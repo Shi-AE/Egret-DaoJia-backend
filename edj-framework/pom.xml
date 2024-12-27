@@ -28,6 +28,7 @@
         <module>edj-canal</module>
         <module>edj-es</module>
         <module>../edj-orders</module>
+        <module>edj-sentinel</module>
     </modules>
 
     <properties>
@@ -316,6 +317,11 @@
             <dependency>
                 <groupId>com.edj</groupId>
                 <artifactId>edj-orders-base</artifactId>
+                <version>${edj.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.edj</groupId>
+                <artifactId>edj-sentinel</artifactId>
                 <version>${edj.version}</version>
             </dependency>
         </dependencies>

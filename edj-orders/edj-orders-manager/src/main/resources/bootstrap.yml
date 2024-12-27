@@ -21,6 +21,8 @@ spring:
             refresh: false
           - data-id: shared-swagger.yaml
             refresh: false
+          - data-id: shared-sentinel.yml
+            refresh: false
 
 #################     项目独有配置     #################
 
