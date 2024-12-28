@@ -29,6 +29,7 @@
         <module>edj-es</module>
         <module>../edj-orders</module>
         <module>edj-sentinel</module>
+        <module>../edj-trade</module>
     </modules>
 
     <properties>

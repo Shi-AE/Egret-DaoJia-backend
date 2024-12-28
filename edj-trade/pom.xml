@@ -10,7 +10,8 @@
         <relativePath>../edj-framework/pom.xml</relativePath>
     </parent>
 
-    <artifactId>edj-customer</artifactId>
+    <groupId>com.edj.trade</groupId>
+    <artifactId>edj-trade</artifactId>
 
     <properties>
         <java.version>21</java.version>
@@ -70,16 +71,6 @@
         <dependency>
             <groupId>com.edj</groupId>
             <artifactId>edj-security</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.edj</groupId>
-            <artifactId>edj-cache</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.edj</groupId>
-            <artifactId>edj-api</artifactId>
         </dependency>
     </dependencies>
 

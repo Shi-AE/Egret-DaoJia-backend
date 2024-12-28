@@ -1,0 +1,38 @@
+#################     服务器配置     #################
+
+server:
+  port: 33560 #端口
+
+#################     spring公共配置     #################
+
+spring:
+  profiles:
+    active: dev
+  application:
+    name: edj-trade
+  cloud:
+    nacos:
+      config:
+        file-extension: yaml
+        shared-configs:
+          - data-id: shared-redis.yaml
+            refresh: false
+          - data-id: shared-mysql.yaml
+            refresh: false
+          - data-id: shared-swagger.yaml
+            refresh: false
+
+#################     项目独有配置     #################
+
+mysql:
+  db-name: edj-trade
+mybatis-plus:
+  mapper-locations: mapper/trade/*.xml
+  type-aliases-package: com.edj.trade.mapper
+swagger:
+  title: 白鹭到家 - 支付服务
+  description: 记录交易、对接支付宝微信支付平台
+
+snowflake:
+  workerId: 6
+  datacenterId: 6
