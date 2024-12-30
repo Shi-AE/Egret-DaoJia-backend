@@ -91,6 +91,8 @@ public class LockHelper {
             }
         } catch (Exception e) {
             log.error("执行加锁业务逻辑错误", e);
+            throw new ServerErrorException();
+        } finally {
             unlock(readWriteLock);
         }
     }
@@ -111,6 +113,7 @@ public class LockHelper {
             execution.execute();
         } catch (Exception e) {
             log.error("同步锁任务执行异常e:", e);
+            throw new ServerErrorException();
         } finally {
             // 解锁
             unlock(lock);
