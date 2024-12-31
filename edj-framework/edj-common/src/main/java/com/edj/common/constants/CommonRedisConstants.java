@@ -14,5 +14,15 @@ public class CommonRedisConstants {
          * 网关 token 更新锁
          */
         public static final String GATEWAY_REFRESH_TOKEN = "LOCK:GATEWAY:REFRESH:TOKEN:%s";
+
+        /**
+         * 交易创建锁
+         */
+        public static final String TRADE_CREATE = "LOCK:TRADE:CREATE:%d";
+
+        /**
+         * 交易关闭锁
+         */
+        public static final String TRADE_CLOSE = "LOCK:TRADE:CLOSE:%d";
     }
 }

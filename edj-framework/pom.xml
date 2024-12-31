@@ -65,6 +65,9 @@
         <xxl-job.version>2.4.2</xxl-job.version>
         <canal.version>1.1.7</canal.version>
         <es.version>7.17.26</es.version>
+        <zxing.version>3.5.3</zxing.version>
+        <wechatpay.version>0.5.0</wechatpay.version>
+        <alipay.version>2.2.3</alipay.version>
     </properties>
 
     <parent>
@@ -247,6 +250,27 @@
                 <groupId>org.elasticsearch.client</groupId>
                 <artifactId>elasticsearch-rest-client</artifactId>
                 <version>${es.version}</version>
+            </dependency>
+
+            <!--二维码生成工具-->
+            <dependency>
+                <groupId>com.google.zxing</groupId>
+                <artifactId>core</artifactId>
+                <version>${zxing.version}</version>
+            </dependency>
+
+            <!--微信支付工具-->
+            <dependency>
+                <groupId>com.github.wechatpay-apiv3</groupId>
+                <artifactId>wechatpay-apache-httpclient</artifactId>
+                <version>${wechatpay.version}</version>
+            </dependency>
+
+            <!--阿里支付工具-->
+            <dependency>
+                <groupId>com.alipay.sdk</groupId>
+                <artifactId>alipay-easysdk</artifactId>
+                <version>${alipay.version}</version>
             </dependency>
 
             <!--系统模块-->

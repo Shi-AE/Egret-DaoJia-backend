@@ -1,20 +1,27 @@
 package com.edj.orders.manager.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.edj.api.api.customer.AddressBookApi;
 import com.edj.api.api.customer.dto.AddressBookVO;
 import com.edj.api.api.foundations.ServeApi;
 import com.edj.api.api.foundations.dto.ServeAggregationDTO;
+import com.edj.api.api.trade.NativePayApi;
+import com.edj.api.api.trade.dto.NativePayDTO;
+import com.edj.api.api.trade.enums.TradingChannel;
+import com.edj.api.api.trade.vo.NativePayVO;
+import com.edj.common.expcetions.BadRequestException;
 import com.edj.common.expcetions.ServerErrorException;
-import com.edj.common.utils.AsyncUtils;
-import com.edj.common.utils.DateUtils;
-import com.edj.common.utils.EnumUtils;
-import com.edj.common.utils.NumberUtils;
+import com.edj.common.utils.*;
 import com.edj.orders.base.domain.entity.EdjOrders;
 import com.edj.orders.base.enums.EdjOrderPayStatus;
 import com.edj.orders.base.enums.EdjOrderStatus;
 import com.edj.orders.base.mapper.EdjOrdersMapper;
+import com.edj.orders.manager.domain.dto.OrdersPayDTO;
 import com.edj.orders.manager.domain.dto.PlaceOrderDTO;
+import com.edj.orders.manager.domain.vo.OrdersPayVO;
 import com.edj.orders.manager.domain.vo.PlaceOrderVo;
+import com.edj.orders.manager.porperties.TradeProperties;
 import com.edj.orders.manager.service.EdjOrdersCreateService;
 import com.edj.security.utils.SecurityUtils;
 import com.github.yulichang.base.MPJBaseServiceImpl;
@@ -31,6 +38,7 @@ import java.util.concurrent.CompletableFuture;
 
 import static com.edj.common.constants.CommonRedisConstants.Generator.ORDERS_KEY_ID_GENERATOR;
 import static com.edj.common.utils.DateUtils.DEFAULT_DATE_FORMAT_SIMPLE_COMPACT;
+import static com.edj.orders.base.constants.OrderConstants.PRODUCT_APP_ID;
 
 /**
  * 针对表【edj_orders(订单表)】的数据库操作Service实现
@@ -43,9 +51,13 @@ import static com.edj.common.utils.DateUtils.DEFAULT_DATE_FORMAT_SIMPLE_COMPACT;
 @RequiredArgsConstructor
 public class EdjOrdersCreateServiceImpl extends MPJBaseServiceImpl<EdjOrdersMapper, EdjOrders> implements EdjOrdersCreateService {
 
+    private final TradeProperties tradeProperties;
+
     private final AddressBookApi addressBookApi;
 
     private final ServeApi serveApi;
+
+    private final NativePayApi nativePayApi;
 
     private final RedisTemplate<String, Object> redisTemplate;
 
@@ -127,5 +139,61 @@ public class EdjOrdersCreateServiceImpl extends MPJBaseServiceImpl<EdjOrdersMapp
         }
 
         return PlaceOrderVo.builder().id(id).build();
+    }
+
+    @Override
+    public OrdersPayVO pay(OrdersPayDTO ordersPayDTO) {
+        EdjOrders orders = baseMapper.selectById(ordersPayDTO.getId());
+        if (ObjectUtils.isNull(orders)) {
+            throw new BadRequestException("订单不存在");
+        }
+
+        // 订单支付状态
+        Integer payStatus = orders.getPayStatus();
+        if (EnumUtils.eq(EdjOrderPayStatus.SUCCESS, payStatus)) {
+            OrdersPayVO ordersPayResDTO = new OrdersPayVO();
+            BeanUtil.copyProperties(orders, ordersPayResDTO);
+            ordersPayResDTO.setProductOrderNo(orders.getId());
+            return ordersPayResDTO;
+        } else {
+            // 调用支付接口生成二维码
+            // 判断支付渠道
+            TradingChannel tradingChannel = ordersPayDTO.getTradingChannel();
+            Long enterpriseId = EnumUtils.eq(TradingChannel.ALI_PAY, tradingChannel) ?
+                    tradeProperties.getAliEnterpriseId() : tradeProperties.getWechatEnterpriseId();
+            if (ObjectUtils.isNull(enterpriseId)) {
+                log.error("商户号缺失");
+                throw new ServerErrorException();
+            }
+
+            // 构建支付请求参数
+            NativePayDTO nativePayDTO = NativePayDTO
+                    .builder()
+                    .productOrderNo(orders.getId())
+                    .tradingChannel(tradingChannel)
+                    .tradingAmount(orders.getRealPayAmount())
+                    .enterpriseId(enterpriseId)
+                    .productAppId(PRODUCT_APP_ID)
+                    .build();
+
+            // 判断是否切换支付渠道
+            if (ObjectUtils.isNotEmpty(orders.getTradingChannel()) &&
+                    ObjectUtils.notEqual(orders.getTradingChannel(), tradingChannel.toString())
+            ) {
+                nativePayDTO.setChangeChannel(true);
+            }
+
+            // 生成支付二维码
+            NativePayVO downLineTrading = nativePayApi.createDownLineTrading(nativePayDTO);
+
+            //将交易单信息更新到订单中
+            LambdaUpdateWrapper<EdjOrders> wrapper = new LambdaUpdateWrapper<EdjOrders>()
+                    .eq(EdjOrders::getId, orders.getId())
+                    .set(EdjOrders::getTradingOrderNo, downLineTrading.getTradingOrderNo())
+                    .set(EdjOrders::getTradingChannel, downLineTrading.getTradingChannel());
+            baseMapper.update(new EdjOrders(), wrapper);
+
+            return BeanUtil.toBean(downLineTrading, OrdersPayVO.class);
+        }
     }
 }
