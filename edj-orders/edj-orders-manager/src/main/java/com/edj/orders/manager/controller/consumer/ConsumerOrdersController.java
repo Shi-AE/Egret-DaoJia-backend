@@ -43,7 +43,7 @@ public class ConsumerOrdersController {
     @PutMapping("pay")
     @Operation(summary = "订单支付")
     @PreAuthorize("hasAuthority('consumer:orders:pay')")
-    public OrdersPayVO pay(@RequestBody OrdersPayDTO ordersPayDTO) {
+    public OrdersPayVO pay(@RequestBody @Validated OrdersPayDTO ordersPayDTO) {
         return ordersCreateService.pay(ordersPayDTO);
     }
 }

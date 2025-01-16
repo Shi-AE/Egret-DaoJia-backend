@@ -32,5 +32,6 @@ public class OrdersPayDTO {
     /**
      * 支付渠道
      */
+    @NotNull(message = "支付渠道不能为空")
     private TradingChannel tradingChannel;
 }

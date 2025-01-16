@@ -20,7 +20,7 @@
     <!--事务日志级别控制-->
     <logger name="org.springframework.jdbc" level="DEBUG"/>
     <!--数据源日志-->
-    <logger name="com.zaxxer.hikari" level="DEBUG"/>
+    <!--<logger name="com.zaxxer.hikari" level="DEBUG"/>-->
 
     <statusListener class="ch.qos.logback.core.status.NopStatusListener" />
 
