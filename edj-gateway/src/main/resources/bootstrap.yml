@@ -41,6 +41,11 @@ spring:
           predicates:
             - Path=/edj-orders-manager/**
 
+        - id: edj-trade
+          uri: lb://edj-trade
+          predicates:
+            - Path=/edj-trade/**
+
 
 # knife4j 网关聚合
 knife4j:
@@ -62,6 +67,7 @@ gateway:
       - /edj-publics/v3/api-docs
       - /edj-customer/v3/api-docs
       - /edj-orders-manager/v3/api-docs
+      - /edj-trade/v3/api-docs
       # 登录 \ 注册
       - /edj-user/open/register
       - /edj-user/open/login

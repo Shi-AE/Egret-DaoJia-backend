@@ -1,8 +1,11 @@
 package com.edj.trade.domain.entity;
 
-import com.edj.common.domain.entity.EjdBaseEntity;
-import lombok.*;
-import lombok.experimental.SuperBuilder;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 /**
  * 交易渠道表
@@ -10,13 +13,11 @@ import lombok.experimental.SuperBuilder;
  * @author A.E.
  * @date 2024/12/31
  */
-@Getter
-@Setter
-@SuperBuilder
+@Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(callSuper = true)
-public class EdjPayChannel extends EjdBaseEntity {
+public class EdjPayChannel {
     /**
      * 交易渠道id
      */
@@ -81,4 +82,14 @@ public class EdjPayChannel extends EjdBaseEntity {
      * 商户ID（系统内部识别使用）
      */
     private Long enterpriseId;
+
+    /**
+     * 创建时间
+     */
+    private LocalDateTime createTime;
+
+    /**
+     * 更新时间
+     */
+    private LocalDateTime updateTime;
 }
