@@ -24,7 +24,7 @@ public class QRCodeConfig {
     private static Image ALIPAY_LOGO;
 
     static {
-        WECHAT_LOGO = ImgUtil.read(ResourceUtil.getResource("logos/wechat.png"));
+        WECHAT_LOGO = ImgUtil.read(ResourceUtil.getResource("logos/wxpay.png"));
         ALIPAY_LOGO = ImgUtil.read(ResourceUtil.getResource("logos/alipay.png"));
     }
 

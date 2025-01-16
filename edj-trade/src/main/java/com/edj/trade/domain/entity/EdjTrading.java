@@ -1,10 +1,12 @@
 package com.edj.trade.domain.entity;
 
-import com.edj.common.domain.entity.EjdBaseEntity;
-import lombok.*;
-import lombok.experimental.SuperBuilder;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 /**
  * 交易订单表
@@ -12,13 +14,11 @@ import java.math.BigDecimal;
  * @author A.E.
  * @date 2024/12/30
  */
-@Getter
-@Setter
-@SuperBuilder
+@Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(callSuper = true)
-public class EdjTrading extends EjdBaseEntity {
+public class EdjTrading {
     /**
      * 交易订单id
      */
@@ -148,4 +148,14 @@ public class EdjTrading extends EjdBaseEntity {
      * 是否有效
      */
     private String enableFlag;
+
+    /**
+     * 创建时间
+     */
+    private LocalDateTime createTime;
+
+    /**
+     * 更新时间
+     */
+    private LocalDateTime updateTime;
 }

@@ -23,6 +23,8 @@ spring:
             refresh: false
           - data-id: shared-sentinel.yml
             refresh: false
+          - data-id: edj-orders-manager.yaml
+            refresh: false
 
 #################     项目独有配置     #################
 

@@ -42,10 +42,13 @@ public class BeforePayHandlerImpl implements BeforePayHandler {
                 tradingEntity.getTradingAmount(),
                 tradingEntity.getTradingChannel()
         );
-        // 金额大于零
+        if (!f1) {
+            throw new ServerErrorException("参数为空");
+        }
+        // 金额不能小于零
         boolean f2 = NumberUtils.isGreater(tradingEntity.getTradingAmount(), BigDecimal.ZERO);
-        if (!f1 || !f2) {
-            throw new ServerErrorException();
+        if (!f2) {
+            throw new ServerErrorException("金额错误");
         }
 
         // 查找已付款的记录

@@ -3,7 +3,7 @@ package com.edj.api.api.trade;
 import com.edj.api.api.trade.dto.NativePayDTO;
 import com.edj.api.api.trade.vo.NativePayVO;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 /**
@@ -21,6 +21,6 @@ public interface NativePayApi {
      * @param nativePayDTO 扫码支付提交参数
      * @return 扫码支付响应数据，其中包含二维码路径
      */
-    @PostMapping
+    @PutMapping
     NativePayVO createDownLineTrading(@RequestBody NativePayDTO nativePayDTO);
 }

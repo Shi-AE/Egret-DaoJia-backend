@@ -1,10 +1,12 @@
 package com.edj.trade.domain.entity;
 
-import com.edj.common.domain.entity.EjdBaseEntity;
-import lombok.*;
-import lombok.experimental.SuperBuilder;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 /**
  * 退款记录表
@@ -12,13 +14,11 @@ import java.math.BigDecimal;
  * @author A.E.
  * @date 2024/12/31
  */
-@Getter
-@Setter
-@SuperBuilder
+@Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(callSuper = true)
-public class EdjRefundRecord extends EjdBaseEntity {
+public class EdjRefundRecord {
     /**
      * 退款记录id
      */
@@ -88,4 +88,14 @@ public class EdjRefundRecord extends EjdBaseEntity {
      * 原订单金额
      */
     private BigDecimal total;
+
+    /**
+     * 创建时间
+     */
+    private LocalDateTime createTime;
+
+    /**
+     * 更新时间
+     */
+    private LocalDateTime updateTime;
 }

@@ -1,8 +1,10 @@
 package com.edj.trade.domain.entity;
 
 import com.edj.api.api.publics.dto.LocationDTO;
-import lombok.*;
-import lombok.experimental.SuperBuilder;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * AT事务模式的undo表 (AT transaction mode undo table)
@@ -10,12 +12,10 @@ import lombok.experimental.SuperBuilder;
  * @author A.E.
  * @date 2024/12/31
  */
-@Getter
-@Setter
-@SuperBuilder
+@Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(callSuper = true)
 public class EdjUndoLog {
     /**
      * 分支事务ID (branch transaction id)

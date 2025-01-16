@@ -1,6 +1,7 @@
 package com.edj.trade.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.edj.common.utils.CollUtils;
 import com.edj.trade.domain.entity.EdjTrading;
 import com.edj.trade.enums.EdjTradingState;
 import com.edj.trade.mapper.EdjTradingMapper;
@@ -19,9 +20,6 @@ import java.util.List;
 @Service
 public class EdjTradingServiceImpl extends MPJBaseServiceImpl<EdjTradingMapper, EdjTrading> implements EdjTradingService {
 
-    /**
-     * 根据订单id和支付方式查询付款中的交易单
-     */
     @Override
     public EdjTrading getDuringTrading(String productAppId, Long productOrderNo, String tradingChannel) {
         LambdaQueryWrapper<EdjTrading> wrapper = new LambdaQueryWrapper<EdjTrading>()
@@ -29,7 +27,7 @@ public class EdjTradingServiceImpl extends MPJBaseServiceImpl<EdjTradingMapper, 
                 .eq(EdjTrading::getProductOrderNo, productOrderNo)
                 .eq(EdjTrading::getTradingChannel, tradingChannel)
                 .eq(EdjTrading::getTradingState, EdjTradingState.PAYMENT_IN_PROGRESS);
-        return baseMapper.selectList(wrapper).getFirst();
+        return CollUtils.getFirst(baseMapper.selectList(wrapper));
     }
 
     @Override
@@ -38,7 +36,7 @@ public class EdjTradingServiceImpl extends MPJBaseServiceImpl<EdjTradingMapper, 
                 .eq(EdjTrading::getProductAppId, productAppId)
                 .eq(EdjTrading::getProductOrderNo, productOrderNo)
                 .eq(EdjTrading::getTradingState, EdjTradingState.SETTLED);
-        return baseMapper.selectList(wrapper).getFirst();
+        return CollUtils.getFirst(baseMapper.selectList(wrapper));
     }
 
     @Override

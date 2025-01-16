@@ -163,7 +163,7 @@ public class EdjOrdersCreateServiceImpl extends MPJBaseServiceImpl<EdjOrdersMapp
                     tradeProperties.getAliEnterpriseId() : tradeProperties.getWechatEnterpriseId();
             if (ObjectUtils.isNull(enterpriseId)) {
                 log.error("商户号缺失");
-                throw new ServerErrorException();
+                throw new ServerErrorException("商户号缺失");
             }
 
             // 构建支付请求参数
@@ -174,6 +174,7 @@ public class EdjOrdersCreateServiceImpl extends MPJBaseServiceImpl<EdjOrdersMapp
                     .tradingAmount(orders.getRealPayAmount())
                     .enterpriseId(enterpriseId)
                     .productAppId(PRODUCT_APP_ID)
+                    .memo(orders.getServeItemName())
                     .build();
 
             // 判断是否切换支付渠道
