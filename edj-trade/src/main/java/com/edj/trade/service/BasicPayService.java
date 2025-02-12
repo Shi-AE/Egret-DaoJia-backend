@@ -1,7 +1,7 @@
 package com.edj.trade.service;
 
 
-import com.edj.common.expcetions.CommonException;
+import com.edj.api.api.trade.vo.TradingVO;
 
 /**
  * 支付的基础功能
@@ -11,14 +11,14 @@ import com.edj.common.expcetions.CommonException;
  */
 public interface BasicPayService {
 
-//    /***
-//     * 统一收单线下交易查询
-//     * 该接口提供所有支付订单的查询，商户可以通过该接口主动查询订单状态，完成下一步的业务逻辑。
-//     * @param tradingOrderNo 交易单号
-//     * @return 交易数据对象
-//     */
-//    TradingDTO queryTradingResult(Long tradingOrderNo) throws CommonException;
-//
+    /***
+     * 统一收单线下交易查询
+     * 该接口提供所有支付订单的查询，商户可以通过该接口主动查询订单状态，完成下一步的业务逻辑。
+     * @param tradingOrderNo 交易单号
+     * @return 交易数据对象
+     */
+    TradingVO getTradingResult(Long tradingOrderNo);
+
 //    /***
 //     * 统一收单交易退款接口
 //     * 当交易发生之后一段时间内，由于买家或者卖家的原因需要退款时，卖家可以通过退款接口将支付款退还给买家，
@@ -49,5 +49,5 @@ public interface BasicPayService {
      * @param tradingOrderNo 交易单号
      * @return 是否成功
      */
-    Boolean closeTrading(Long tradingOrderNo) throws CommonException;
+    Boolean closeTrading(Long tradingOrderNo);
 }

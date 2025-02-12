@@ -1,6 +1,5 @@
 package com.edj.trade.handler;
 
-import com.edj.common.expcetions.CommonException;
 import com.edj.trade.domain.entity.EdjTrading;
 
 /**
@@ -11,18 +10,18 @@ import com.edj.trade.domain.entity.EdjTrading;
  */
 public interface BasicPayHandler {
 
-//    /***
-//     * 统一收单线下交易查询
-//     * 该接口提供所有支付订单的查询，商户可以通过该接口主动查询订单状态，完成下一步的业务逻辑。
-//     * @return 是否有变化
-//     */
-//    Boolean queryTrading(Trading trading) throws CommonException;
+    /***
+     * 统一收单线下交易查询
+     * 该接口提供所有支付订单的查询，商户可以通过该接口主动查询订单状态，完成下一步的业务逻辑。
+     * @return 是否有变化
+     */
+    Boolean queryTrading(EdjTrading trading);
 
     /***
      * 关闭交易
      * @return 是否成功
      */
-    Boolean closeTrading(EdjTrading trading) throws CommonException;
+    Boolean closeTrading(EdjTrading trading);
 
 //    /***
 //     * 统一收单交易退款接口
@@ -31,7 +30,7 @@ public interface BasicPayHandler {
 //     * @param refundRecord 退款记录对象
 //     * @return 是否有变化
 //     */
-//    Boolean refundTrading(RefundRecord refundRecord) throws CommonException;
+//    Boolean refundTrading(RefundRecord refundRecord);
 //
 //    /***
 //     * 统一收单交易退款查询接口
@@ -39,6 +38,6 @@ public interface BasicPayHandler {
 //     * @param refundRecord 退款交易单号
 //     * @return 是否有变化
 //     */
-//    Boolean queryRefundTrading(RefundRecord refundRecord) throws CommonException;
+//    Boolean queryRefundTrading(RefundRecord refundRecord);
 
 }

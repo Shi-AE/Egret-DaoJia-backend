@@ -46,4 +46,18 @@ public class ConsumerOrdersController {
     public OrdersPayVO pay(@RequestBody @Validated OrdersPayDTO ordersPayDTO) {
         return ordersCreateService.pay(ordersPayDTO);
     }
+
+    /**
+     * 查询订单支付结果
+     */
+    @GetMapping("/pay/{id}/result")
+    @Operation(summary = "查询订单支付结果")
+    @PreAuthorize("hasAuthority('consumer:orders:payResult')")
+    public OrdersPayVO payResult(@PathVariable Long id) {
+        // 查询支付结果
+        int payStatus = ordersCreateService.getPayResult(id);
+        return OrdersPayVO.builder()
+                .payStatus(payStatus)
+                .build();
+    }
 }

@@ -73,4 +73,11 @@ public class BeforePayHandlerImpl implements BeforePayHandler {
             throw new CommonException(ErrorInfo.Code.TRADE_FAILED, TradingEnum.CLOSE_FAIL.getValue());
         }
     }
+
+    @Override
+    public void checkQueryTrading(EdjTrading trading) {
+        if (ObjectUtils.isEmpty(trading)) {
+            throw new CommonException(ErrorInfo.Code.TRADE_FAILED, TradingEnum.NOT_FOUND.getValue());
+        }
+    }
 }

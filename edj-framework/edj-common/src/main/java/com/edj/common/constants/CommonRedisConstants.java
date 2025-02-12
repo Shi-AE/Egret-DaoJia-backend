@@ -24,5 +24,10 @@ public class CommonRedisConstants {
          * 交易关闭锁
          */
         public static final String TRADE_CLOSE = "LOCK:TRADE:CLOSE:%d";
+
+        /**
+         * 交易查询
+         */
+        public static final String TRADE_QUERY = "LOCK:TRADE:QUERY:%d";
     }
 }

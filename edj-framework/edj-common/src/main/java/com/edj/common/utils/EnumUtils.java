@@ -69,6 +69,23 @@ public class EnumUtils extends EnumUtil {
     }
 
     /**
+     * 判断是否与其中一个枚举值相等
+     */
+    public static boolean eqAny(Object enumValues, Enum<?>... enumNames) {
+        if (ArrayUtils.isEmpty(enumNames)) {
+            return false;
+        }
+
+        for (Enum<?> enumName : enumNames) {
+            if (eq(enumName, enumValues)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * 判断是否与枚举值不等
      */
     public static boolean ne(Enum<?> enumName, Object enumValue) {

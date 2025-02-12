@@ -19,4 +19,10 @@ public interface BeforePayHandler {
      * @param trading 交易订单
      */
     void checkCloseTrading(EdjTrading trading);
+
+    /***
+     * QueryTrading交易单参数校验
+     * @param trading 交易订单
+     */
+    void checkQueryTrading(EdjTrading trading);
 }

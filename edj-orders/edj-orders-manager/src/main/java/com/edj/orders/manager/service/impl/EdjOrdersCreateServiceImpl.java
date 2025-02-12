@@ -1,16 +1,21 @@
 package com.edj.orders.manager.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.edj.api.api.customer.AddressBookApi;
 import com.edj.api.api.customer.dto.AddressBookVO;
 import com.edj.api.api.foundations.ServeApi;
 import com.edj.api.api.foundations.dto.ServeAggregationDTO;
 import com.edj.api.api.trade.NativePayApi;
+import com.edj.api.api.trade.TradingApi;
 import com.edj.api.api.trade.dto.NativePayDTO;
+import com.edj.api.api.trade.enums.EdjTradingState;
 import com.edj.api.api.trade.enums.TradingChannel;
 import com.edj.api.api.trade.vo.NativePayVO;
+import com.edj.api.api.trade.vo.TradingVO;
 import com.edj.common.expcetions.BadRequestException;
+import com.edj.common.expcetions.CommonException;
 import com.edj.common.expcetions.ServerErrorException;
 import com.edj.common.utils.*;
 import com.edj.orders.base.domain.entity.EdjOrders;
@@ -37,6 +42,7 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 import static com.edj.common.constants.CommonRedisConstants.Generator.ORDERS_KEY_ID_GENERATOR;
+import static com.edj.common.constants.ErrorInfo.Code.TRADE_FAILED;
 import static com.edj.common.utils.DateUtils.DEFAULT_DATE_FORMAT_SIMPLE_COMPACT;
 import static com.edj.orders.base.constants.OrderConstants.PRODUCT_APP_ID;
 
@@ -58,6 +64,8 @@ public class EdjOrdersCreateServiceImpl extends MPJBaseServiceImpl<EdjOrdersMapp
     private final ServeApi serveApi;
 
     private final NativePayApi nativePayApi;
+
+    private final TradingApi tradingApi;
 
     private final RedisTemplate<String, Object> redisTemplate;
 
@@ -196,5 +204,41 @@ public class EdjOrdersCreateServiceImpl extends MPJBaseServiceImpl<EdjOrdersMapp
 
             return BeanUtil.toBean(downLineTrading, OrdersPayVO.class);
         }
+    }
+
+    @Override
+    public int getPayResult(Long id) {
+
+        LambdaQueryWrapper<EdjOrders> wrapper = new LambdaQueryWrapper<EdjOrders>()
+                .select(EdjOrders::getPayStatus, EdjOrders::getTradingOrderNo)
+                .eq(EdjOrders::getId, id);
+
+        EdjOrders orders = baseMapper.selectOne(wrapper);
+
+        // 判断订单存在
+        if (ObjectUtils.isNull(orders)) {
+            throw new CommonException(TRADE_FAILED, "订单不存在");
+        }
+
+        // 获取支付结果
+        Integer payStatus = orders.getPayStatus();
+
+        // 如果支付成功返回结果
+        if (EnumUtils.eq(EdjOrderPayStatus.SUCCESS, payStatus)) {
+            return payStatus;
+        }
+
+        // 调用远程服务查询支付结果
+        TradingVO tradingVO = tradingApi.getTradResultByTradingOrderNo(orders.getTradingOrderNo());
+
+        // 支付成功，更新状态
+        if (ObjectUtils.isNotNull(tradingVO) && EnumUtils.eq(EdjTradingState.SETTLED, tradingVO.getTradingState())) {
+            LambdaUpdateWrapper<EdjOrders> updateWrapper = new LambdaUpdateWrapper<EdjOrders>()
+                    .eq(EdjOrders::getId, id)
+                    .set(EdjOrders::getPayStatus, EdjOrderPayStatus.SUCCESS);
+            baseMapper.update(new EdjOrders(), updateWrapper);
+        }
+
+        return tradingVO.getTradingState();
     }
 }

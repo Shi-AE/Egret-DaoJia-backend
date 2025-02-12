@@ -1,14 +1,18 @@
 package com.edj.trade.handler.ali;
 
+import cn.hutool.json.JSONUtil;
 import com.alipay.easysdk.factory.Factory;
 import com.alipay.easysdk.kernel.Config;
 import com.alipay.easysdk.kernel.util.ResponseChecker;
 import com.alipay.easysdk.payment.common.models.AlipayTradeCloseResponse;
+import com.alipay.easysdk.payment.common.models.AlipayTradeQueryResponse;
 import com.edj.api.api.trade.enums.TradingChannel;
 import com.edj.common.constants.ErrorInfo;
 import com.edj.common.expcetions.CommonException;
 import com.edj.common.utils.EnumUtils;
+import com.edj.common.utils.StringUtils;
 import com.edj.trade.annotation.PayChannel;
+import com.edj.trade.constant.TradingConstant;
 import com.edj.trade.domain.entity.EdjTrading;
 import com.edj.trade.enums.EdjTradingState;
 import com.edj.trade.enums.TradingEnum;
@@ -27,53 +31,53 @@ import org.springframework.stereotype.Component;
 @PayChannel(type = TradingChannel.ALI_PAY)
 public class AliBasicPayHandler implements BasicPayHandler {
 
-//    @Override
-//    public Boolean queryTrading(Trading trading) throws CommonException {
-//        //查询配置
-//        Config config = AlipayConfig.getConfig(trading.getEnterpriseId());
-//        //Factory使用配置
-//        Factory.setOptions(config);
-//        AlipayTradeQueryResponse queryResponse;
-//        try {
-//            //调用支付宝API：通用查询支付情况
-//            queryResponse = Factory
-//                    .Payment
-//                    .Common()
-//                    .query(String.valueOf(trading.getTradingOrderNo()));
-//        } catch (Exception e) {
-//            String msg = StrUtil.format("查询支付宝统一下单失败：trading = {}", trading);
-//            log.error(msg, e);
-//            throw new CommonException(ErrorInfo.Code.TRADE_FAILED, TradingEnum.NATIVE_QUERY_FAIL.getValue());
-//        }
-//
-//        //修改交易单状态
-//        trading.setTransactionId(queryResponse.getTradeNo());
-//        trading.setResultCode(queryResponse.getSubCode());
-//        trading.setResultMsg(queryResponse.getSubMsg());
-//        trading.setResultJson(JSONUtil.toJsonStr(queryResponse));
-//
-//        boolean success = ResponseChecker.success(queryResponse);
-//        //响应成功，分析交易状态
-//        if (success) {
-//            String tradeStatus = queryResponse.getTradeStatus();
-//            if (StrUtil.equals(TradingConstant.ALI_TRADE_CLOSED, tradeStatus)) {
-//                //支付取消：TRADE_CLOSED（未付款交易超时关闭，或支付完成后全额退款）
-//                trading.setTradingState(TradingStateEnum.QXDD);
-//            } else if (StrUtil.equalsAny(tradeStatus, TradingConstant.ALI_TRADE_SUCCESS, TradingConstant.ALI_TRADE_FINISHED)) {
-//                // TRADE_SUCCESS（交易支付成功）
-//                // TRADE_FINISHED（交易结束，不可退款）
-//                trading.setTradingState(TradingStateEnum.YJS);
-//            } else {
-//                //非最终状态不处理，当前交易状态：WAIT_BUYER_PAY（交易创建，等待买家付款）不处理
-//                return false;
-//            }
-//            return true;
-//        }
-//        throw new CommonException(ErrorInfo.Code.TRADE_FAILED, TradingEnum.NATIVE_QUERY_FAIL.getValue());
-//    }
+    @Override
+    public Boolean queryTrading(EdjTrading trading) {
+        //查询配置
+        Config config = AlipayConfig.getConfig(trading.getEnterpriseId());
+        //Factory使用配置
+        Factory.setOptions(config);
+        AlipayTradeQueryResponse queryResponse;
+        try {
+            //调用支付宝API：通用查询支付情况
+            queryResponse = Factory
+                    .Payment
+                    .Common()
+                    .query(String.valueOf(trading.getTradingOrderNo()));
+        } catch (Exception e) {
+            String msg = StringUtils.format("查询支付宝统一下单失败：trading = {}", trading);
+            log.error(msg, e);
+            throw new CommonException(ErrorInfo.Code.TRADE_FAILED, TradingEnum.NATIVE_QUERY_FAIL.getValue());
+        }
+
+        //修改交易单状态
+        trading.setTransactionId(queryResponse.getTradeNo());
+        trading.setResultCode(queryResponse.getSubCode());
+        trading.setResultMsg(queryResponse.getSubMsg());
+        trading.setResultJson(JSONUtil.toJsonStr(queryResponse));
+
+        boolean success = ResponseChecker.success(queryResponse);
+        //响应成功，分析交易状态
+        if (success) {
+            String tradeStatus = queryResponse.getTradeStatus();
+            if (StringUtils.equals(TradingConstant.ALI_TRADE_CLOSED, tradeStatus)) {
+                //支付取消：TRADE_CLOSED（未付款交易超时关闭，或支付完成后全额退款）
+                trading.setTradingState(EnumUtils.value(EdjTradingState.ORDER_CANCELLED, Integer.class));
+            } else if (StringUtils.equalsAny(tradeStatus, TradingConstant.ALI_TRADE_SUCCESS, TradingConstant.ALI_TRADE_FINISHED)) {
+                // TRADE_SUCCESS（交易支付成功）
+                // TRADE_FINISHED（交易结束，不可退款）
+                trading.setTradingState(EnumUtils.value(EdjTradingState.SETTLED, Integer.class));
+            } else {
+                //非最终状态不处理，当前交易状态：WAIT_BUYER_PAY（交易创建，等待买家付款）不处理
+                return false;
+            }
+            return true;
+        }
+        throw new CommonException(ErrorInfo.Code.TRADE_FAILED, TradingEnum.NATIVE_QUERY_FAIL.getValue());
+    }
 
     @Override
-    public Boolean closeTrading(EdjTrading trading) throws CommonException {
+    public Boolean closeTrading(EdjTrading trading) {
         // 查询配置
         Config config = AlipayConfig.getConfig(trading.getEnterpriseId());
         // Factory使用配置

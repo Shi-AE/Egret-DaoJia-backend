@@ -50,6 +50,7 @@ public class MyBatisAutoFillInterceptor implements InnerInterceptor {
     @Override
     public void beforeQuery(Executor executor, MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) throws SQLException {
 
+        // todo 修改输出设置不跟随debug级别
         // 只有debug级别输出explain
         if (!log.isDebugEnabled()) {
             return;

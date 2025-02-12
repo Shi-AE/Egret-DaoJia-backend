@@ -24,4 +24,9 @@ public interface EdjOrdersCreateService extends MPJBaseService<EdjOrders> {
      * 订单支付
      */
     OrdersPayVO pay(OrdersPayDTO ordersPayDTO);
+
+    /**
+     * 请求支付服务查询支付结果
+     */
+    int getPayResult(Long id);
 }
