@@ -167,7 +167,7 @@ public class EdjOrdersCreateServiceImpl extends MPJBaseServiceImpl<EdjOrdersMapp
             // 调用支付接口生成二维码
             // 判断支付渠道
             TradingChannel tradingChannel = ordersPayDTO.getTradingChannel();
-            Long enterpriseId = EnumUtils.eq(TradingChannel.ALI_PAY, tradingChannel) ?
+            Long enterpriseId = ObjectUtils.equals(TradingChannel.ALI_PAY, tradingChannel) ?
                     tradeProperties.getAliEnterpriseId() : tradeProperties.getWechatEnterpriseId();
             if (ObjectUtils.isNull(enterpriseId)) {
                 log.error("商户号缺失");
