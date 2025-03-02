@@ -1,5 +1,6 @@
 package com.edj.mysql.interceptor;
 
+import cn.hutool.extra.spring.SpringUtil;
 import com.baomidou.mybatisplus.extension.plugins.inner.InnerInterceptor;
 import com.edj.common.utils.EnumUtils;
 import com.edj.common.utils.ObjectUtils;
@@ -39,6 +40,8 @@ import static com.edj.mysql.constants.DbValueConstants.EXIST;
 @Slf4j
 public class MyBatisAutoFillInterceptor implements InnerInterceptor {
 
+    private final boolean explainEnabled = SpringUtil.getProperty("mysql.explain.enable", Boolean.class, false);
+
     @Override
     public void beforeUpdate(Executor executor, MappedStatement ms, Object parameter) {
         // 更新操作
@@ -50,9 +53,8 @@ public class MyBatisAutoFillInterceptor implements InnerInterceptor {
     @Override
     public void beforeQuery(Executor executor, MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) throws SQLException {
 
-        // todo 修改输出设置不跟随debug级别
         // 只有debug级别输出explain
-        if (!log.isDebugEnabled()) {
+        if (!log.isDebugEnabled() && explainEnabled) {
             return;
         }
 
