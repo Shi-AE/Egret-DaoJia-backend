@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Schema(description = "下单返回信息")
-public class PlaceOrderVo {
+public class PlaceOrderVO {
     /**
      * 订单id
      */

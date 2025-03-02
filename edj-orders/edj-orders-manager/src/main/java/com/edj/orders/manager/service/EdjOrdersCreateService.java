@@ -4,7 +4,7 @@ import com.edj.orders.base.domain.entity.EdjOrders;
 import com.edj.orders.manager.domain.dto.OrdersPayDTO;
 import com.edj.orders.manager.domain.dto.PlaceOrderDTO;
 import com.edj.orders.manager.domain.vo.OrdersPayVO;
-import com.edj.orders.manager.domain.vo.PlaceOrderVo;
+import com.edj.orders.manager.domain.vo.PlaceOrderVO;
 import com.github.yulichang.base.MPJBaseService;
 
 /**
@@ -18,7 +18,7 @@ public interface EdjOrdersCreateService extends MPJBaseService<EdjOrders> {
     /**
      * 下单
      */
-    PlaceOrderVo placeOrder(PlaceOrderDTO placeOrderDTO);
+    PlaceOrderVO placeOrder(PlaceOrderDTO placeOrderDTO);
 
     /**
      * 订单支付

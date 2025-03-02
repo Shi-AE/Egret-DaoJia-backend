@@ -6,7 +6,7 @@ import com.edj.orders.manager.domain.dto.OrdersPayDTO;
 import com.edj.orders.manager.domain.dto.PlaceOrderDTO;
 import com.edj.orders.manager.domain.vo.OrdersPayVO;
 import com.edj.orders.manager.domain.vo.OrdersSimpleVO;
-import com.edj.orders.manager.domain.vo.PlaceOrderVo;
+import com.edj.orders.manager.domain.vo.PlaceOrderVO;
 import com.edj.orders.manager.service.EdjOrdersCreateService;
 import com.edj.orders.manager.service.EdjOrdersManagerService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -53,10 +53,10 @@ public class ConsumerOrdersController {
     /**
      * 下单
      */
-    @Operation(summary = "下单")
     @PostMapping("place")
+    @Operation(summary = "下单")
     @PreAuthorize("hasAuthority('consumer:orders:place')")
-    public PlaceOrderVo place(@RequestBody @Validated PlaceOrderDTO placeOrderDTO) {
+    public PlaceOrderVO place(@RequestBody @Validated PlaceOrderDTO placeOrderDTO) {
         return ordersCreateService.placeOrder(placeOrderDTO);
     }
 

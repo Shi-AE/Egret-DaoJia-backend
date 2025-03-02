@@ -25,7 +25,7 @@ import com.edj.orders.base.mapper.EdjOrdersMapper;
 import com.edj.orders.manager.domain.dto.OrdersPayDTO;
 import com.edj.orders.manager.domain.dto.PlaceOrderDTO;
 import com.edj.orders.manager.domain.vo.OrdersPayVO;
-import com.edj.orders.manager.domain.vo.PlaceOrderVo;
+import com.edj.orders.manager.domain.vo.PlaceOrderVO;
 import com.edj.orders.manager.porperties.TradeProperties;
 import com.edj.orders.manager.service.EdjOrdersCreateService;
 import com.edj.security.utils.SecurityUtils;
@@ -81,7 +81,7 @@ public class EdjOrdersCreateServiceImpl extends MPJBaseServiceImpl<EdjOrdersMapp
 
     @Override
     @Transactional
-    public PlaceOrderVo placeOrder(PlaceOrderDTO placeOrderDTO) {
+    public PlaceOrderVO placeOrder(PlaceOrderDTO placeOrderDTO) {
         // 获取地址信息
         Long addressBookId = placeOrderDTO.getAddressBookId();
         CompletableFuture<AddressBookVO> future1 = AsyncUtils.supplyAsync(() -> addressBookApi.detail(addressBookId));
@@ -146,7 +146,7 @@ public class EdjOrdersCreateServiceImpl extends MPJBaseServiceImpl<EdjOrdersMapp
             throw new ServerErrorException("下单失败");
         }
 
-        return PlaceOrderVo.builder().id(id).build();
+        return PlaceOrderVO.builder().id(id).build();
     }
 
     @Override
