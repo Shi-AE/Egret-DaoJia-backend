@@ -136,7 +136,7 @@ public class EdjOrders extends EjdBaseEntity {
     private LocalDateTime payTime;
 
     /**
-     * 订单状态（0待支付 100派单中 200待服务 300服务中 500订单完成 600已取消 700已关闭）
+     * 订单状态（0待支付 100派单中 200待服务 300服务中 400待评价 500订单完成 600已取消 700已关闭）
      */
     private Integer ordersStatus;
 

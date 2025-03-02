@@ -80,6 +80,11 @@
             <groupId>com.edj</groupId>
             <artifactId>edj-sentinel</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>com.edj</groupId>
+            <artifactId>edj-cache</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

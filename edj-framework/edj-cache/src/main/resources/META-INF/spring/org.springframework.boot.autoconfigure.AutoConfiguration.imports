@@ -1,3 +1,4 @@
+com.edj.cache.config.CacheConfiguration
 com.edj.cache.config.RedissonConfiguration
 com.edj.cache.config.LockConfiguration
 com.edj.cache.config.SpringCacheConfig

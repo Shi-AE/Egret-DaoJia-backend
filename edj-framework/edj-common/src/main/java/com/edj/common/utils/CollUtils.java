@@ -4,9 +4,9 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.collection.IterUtil;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * 继承自 hutool 的集合工具类
@@ -132,19 +132,16 @@ public class CollUtils extends CollectionUtil {
 
     /**
      * 获取数组为空的序号列表
-     *
-     * @param list
-     * @return
      */
     public static List<Integer> getIndexListOfNullData(List<?> list) {
         if (isEmpty(list)) {
             return null;
         }
-        AtomicInteger counter = new AtomicInteger(0);
-        // filter 中的过滤条件不能调换，和表达式的执行顺序有关系
-        return list.stream().filter(x -> counter.incrementAndGet() >= 0 && x == null)
-                .map(x -> counter.intValue() - 1)
-                .collect(Collectors.toList());
+
+        return IntStream.range(0, list.size())
+                .filter(i -> list.get(i) == null) // 过滤出值为 null 的索引
+                .boxed()
+                .toList();
     }
 
     public static <T> List<T> valueofIndexList(List<T> list, List<Integer> indexs) {
@@ -159,12 +156,6 @@ public class CollUtils extends CollectionUtil {
 
     /**
      * 获取集合中某一列的值集合
-     *
-     * @param list
-     * @param function
-     * @param <T>
-     * @param <R>
-     * @return
      */
     public static <T, R> List<R> getFieldValues(List<T> list, Function<T, R> function) {
         if (isEmpty(list)) {
@@ -176,11 +167,6 @@ public class CollUtils extends CollectionUtil {
 
     /**
      * 将两个列表合并出第三个列表
-     *
-     * @param list1
-     * @param list2
-     * @param <T>
-     * @return
      */
     public static <T> List<T> union(List<T> list1, List<T> list2) {
         if (isEmpty(list1)) {

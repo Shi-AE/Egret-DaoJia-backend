@@ -1,16 +1,24 @@
 package com.edj.orders.manager.controller.consumer;
 
+import com.edj.mvc.annotation.enums.Enums;
+import com.edj.orders.base.enums.EdjOrderStatus;
 import com.edj.orders.manager.domain.dto.OrdersPayDTO;
 import com.edj.orders.manager.domain.dto.PlaceOrderDTO;
 import com.edj.orders.manager.domain.vo.OrdersPayVO;
+import com.edj.orders.manager.domain.vo.OrdersSimpleVO;
 import com.edj.orders.manager.domain.vo.PlaceOrderVo;
 import com.edj.orders.manager.service.EdjOrdersCreateService;
+import com.edj.orders.manager.service.EdjOrdersManagerService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * 用户端 - 订单相关接口
@@ -26,6 +34,21 @@ import org.springframework.web.bind.annotation.*;
 public class ConsumerOrdersController {
 
     private final EdjOrdersCreateService ordersCreateService;
+
+    private final EdjOrdersManagerService ordersManagerService;
+
+    /**
+     * 订单查询
+     */
+    @GetMapping("list")
+    @Operation(summary = "订单查询")
+    @PreAuthorize("hasAuthority('consumer:orders:list')")
+    public List<OrdersSimpleVO> list(
+            @RequestParam(required = false) @Enums(EdjOrderStatus.class) @Schema(description = "订单状态") Integer ordersStatus,
+            @RequestParam(required = false) @PositiveOrZero @Schema(description = "上一组数据最后一个订单序号") Long sortBy
+    ) {
+        return ordersManagerService.list(ordersStatus, sortBy);
+    }
 
     /**
      * 下单

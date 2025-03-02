@@ -48,6 +48,11 @@ public class CacheConstants {
          * 服务缓存
          */
         public static final String SERVE_CACHE = EDJ_CACHE + ":SERVE";
+
+        /**
+         * 用户订单缓存
+         */
+        public static String USER_ORDERS_CACHE = EDJ_CACHE + ":USER:ORDERS:SERVE:%s";
     }
 
     public static final class CacheManager {
@@ -70,8 +75,18 @@ public class CacheConstants {
 
     public static final class Ttl {
         /**
-         * 缓存时间30分钟
+         * 短期缓存
          */
-        public static final int THIRTY = 30;
+        public static final long SHORT_TERM = 60;
+
+        /**
+         * 中期缓存
+         */
+        public static final long MEDIUM_TERM = 10 * 60;
+
+        /**
+         * 长期缓存
+         */
+        public static final long LONG_TERM = 24 * 60 * 60;
     }
 }
