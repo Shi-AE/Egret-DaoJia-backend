@@ -1,6 +1,7 @@
 package com.edj.orders.manager.service;
 
 import com.edj.orders.base.domain.entity.EdjOrders;
+import com.edj.orders.manager.domain.vo.OrdersDetailVO;
 import com.edj.orders.manager.domain.vo.OrdersSimpleVO;
 import com.github.yulichang.base.MPJBaseService;
 
@@ -23,4 +24,9 @@ public interface EdjOrdersManagerService extends MPJBaseService<EdjOrders> {
      * 订单查询
      */
     List<OrdersSimpleVO> list(Integer ordersStatus, Long lastId);
+
+    /**
+     * 根据id查询订单详细信息
+     */
+    OrdersDetailVO detail(Long id);
 }

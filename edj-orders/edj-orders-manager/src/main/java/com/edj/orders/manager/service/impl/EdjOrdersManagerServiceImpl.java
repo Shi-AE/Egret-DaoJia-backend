@@ -5,12 +5,15 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.OrderItem;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.edj.cache.helper.CacheHelper;
+import com.edj.common.expcetions.BadRequestException;
+import com.edj.common.utils.BeanUtils;
 import com.edj.common.utils.CollUtils;
 import com.edj.common.utils.IdUtils;
 import com.edj.common.utils.ObjectUtils;
 import com.edj.orders.base.domain.entity.EdjOrders;
 import com.edj.orders.base.enums.EdjOrderDisplay;
 import com.edj.orders.base.mapper.EdjOrdersMapper;
+import com.edj.orders.manager.domain.vo.OrdersDetailVO;
 import com.edj.orders.manager.domain.vo.OrdersSimpleVO;
 import com.edj.orders.manager.service.EdjOrdersManagerService;
 import com.edj.security.utils.SecurityUtils;
@@ -93,5 +96,27 @@ public class EdjOrdersManagerServiceImpl extends MPJBaseServiceImpl<EdjOrdersMap
                             o -> BeanUtil.toBean(o, OrdersSimpleVO.class)
                     ));
         }, OrdersSimpleVO.class, MEDIUM_TERM);
+    }
+
+    @Override
+    public OrdersDetailVO detail(Long id) {
+        LambdaQueryWrapper<EdjOrders> wrapper = new LambdaQueryWrapper<EdjOrders>()
+                .eq(EdjOrders::getId, id)
+                .eq(EdjOrders::getEdjUserId, SecurityUtils.getUserId());
+
+        EdjOrders orders = baseMapper.selectOne(wrapper);
+
+        if (orders == null) {
+            throw new BadRequestException("订单不存在");
+        }
+
+        OrdersDetailVO detailVO = BeanUtils.toBean(orders, OrdersDetailVO.class);
+        detailVO.setServeTypeId(orders.getEdjServeTypeId());
+        detailVO.setServeItemId(orders.getEdjServeItemId());
+        detailVO.setServeId(orders.getEdjServeId());
+
+        // todo 派单后服务人信息
+
+        return detailVO;
     }
 }

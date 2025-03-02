@@ -4,6 +4,7 @@ import com.edj.mvc.annotation.enums.Enums;
 import com.edj.orders.base.enums.EdjOrderStatus;
 import com.edj.orders.manager.domain.dto.OrdersPayDTO;
 import com.edj.orders.manager.domain.dto.PlaceOrderDTO;
+import com.edj.orders.manager.domain.vo.OrdersDetailVO;
 import com.edj.orders.manager.domain.vo.OrdersPayVO;
 import com.edj.orders.manager.domain.vo.OrdersSimpleVO;
 import com.edj.orders.manager.domain.vo.PlaceOrderVO;
@@ -82,5 +83,15 @@ public class ConsumerOrdersController {
         return OrdersPayVO.builder()
                 .payStatus(payStatus)
                 .build();
+    }
+
+    /**
+     * 根据id查询订单详细信息
+     */
+    @GetMapping("{id}")
+    @Operation(summary = "根据id查询订单详细信息")
+    @PreAuthorize("hasAuthority('consumer:orders:detail')")
+    public OrdersDetailVO detail(@PathVariable Long id) {
+        return ordersManagerService.detail(id);
     }
 }
