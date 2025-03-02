@@ -195,7 +195,7 @@ public class EdjOrdersCreateServiceImpl extends MPJBaseServiceImpl<EdjOrdersMapp
             // 生成支付二维码
             NativePayVO downLineTrading = nativePayApi.createDownLineTrading(nativePayDTO);
 
-            //将交易单信息更新到订单中
+            // 将交易单信息更新到订单中
             LambdaUpdateWrapper<EdjOrders> wrapper = new LambdaUpdateWrapper<EdjOrders>()
                     .eq(EdjOrders::getId, orders.getId())
                     .set(EdjOrders::getTradingOrderNo, downLineTrading.getTradingOrderNo())
@@ -235,6 +235,7 @@ public class EdjOrdersCreateServiceImpl extends MPJBaseServiceImpl<EdjOrdersMapp
         if (ObjectUtils.isNotNull(tradingVO) && EnumUtils.eq(EdjTradingState.SETTLED, tradingVO.getTradingState())) {
             LambdaUpdateWrapper<EdjOrders> updateWrapper = new LambdaUpdateWrapper<EdjOrders>()
                     .eq(EdjOrders::getId, id)
+                    .set(EdjOrders::getOrdersStatus, EdjOrderStatus.DISPATCHING)
                     .set(EdjOrders::getPayStatus, EdjOrderPayStatus.SUCCESS);
             baseMapper.update(new EdjOrders(), updateWrapper);
         }
