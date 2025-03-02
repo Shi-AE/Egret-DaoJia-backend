@@ -235,8 +235,11 @@ public class EdjOrdersCreateServiceImpl extends MPJBaseServiceImpl<EdjOrdersMapp
         if (ObjectUtils.isNotNull(tradingVO) && EnumUtils.eq(EdjTradingState.SETTLED, tradingVO.getTradingState())) {
             LambdaUpdateWrapper<EdjOrders> updateWrapper = new LambdaUpdateWrapper<EdjOrders>()
                     .eq(EdjOrders::getId, id)
+                    .eq(EdjOrders::getOrdersStatus, EdjOrderStatus.PENDING_PAYMENT)
+                    .set(EdjOrders::getTransactionId, tradingVO.getTransactionId())
                     .set(EdjOrders::getOrdersStatus, EdjOrderStatus.DISPATCHING)
-                    .set(EdjOrders::getPayStatus, EdjOrderPayStatus.SUCCESS);
+                    .set(EdjOrders::getPayStatus, EdjOrderPayStatus.SUCCESS)
+                    .set(EdjOrders::getPayTime, LocalDateTime.now());
             baseMapper.update(new EdjOrders(), updateWrapper);
         }
 
