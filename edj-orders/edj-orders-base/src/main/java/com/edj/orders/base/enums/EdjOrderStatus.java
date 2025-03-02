@@ -18,6 +18,7 @@ public enum EdjOrderStatus {
     DISPATCHING(100, "派单中"),
     PENDING_SERVE(200, "待服务"),
     IN_SERVE(300, "服务中"),
+    PENDING_EVALUATION(400, "待评价"),
     COMPLETED(500, "订单完成"),
     CANCELLED(600, "已取消"),
     CLOSED(700, "已关闭");
