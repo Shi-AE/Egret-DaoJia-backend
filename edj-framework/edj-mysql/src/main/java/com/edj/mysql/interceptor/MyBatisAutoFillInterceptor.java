@@ -54,7 +54,7 @@ public class MyBatisAutoFillInterceptor implements InnerInterceptor {
     public void beforeQuery(Executor executor, MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) throws SQLException {
 
         // 只有debug级别输出explain
-        if (!log.isDebugEnabled() && explainEnabled) {
+        if (!log.isDebugEnabled() || !explainEnabled) {
             return;
         }
 
