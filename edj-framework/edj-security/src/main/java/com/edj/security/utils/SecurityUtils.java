@@ -20,6 +20,16 @@ public class SecurityUtils {
     }
 
     /**
+     * 系统用户id
+     */
+    public static long SYSTEM_USER_ID = 1;
+
+    /**
+     * 系统用户id
+     */
+    public static String SYSTEM_USER_NAME = "admin";
+
+    /**
      * 用户ID
      **/
     public static Long getUserId() {

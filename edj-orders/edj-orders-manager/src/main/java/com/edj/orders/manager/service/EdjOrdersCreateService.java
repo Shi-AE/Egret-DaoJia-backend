@@ -7,6 +7,8 @@ import com.edj.orders.manager.domain.vo.OrdersPayVO;
 import com.edj.orders.manager.domain.vo.PlaceOrderVO;
 import com.github.yulichang.base.MPJBaseService;
 
+import java.util.List;
+
 /**
  * 针对表【edj_orders(订单表)】的数据库操作Service
  *
@@ -29,4 +31,9 @@ public interface EdjOrdersCreateService extends MPJBaseService<EdjOrders> {
      * 请求支付服务查询支付结果
      */
     int getPayResult(Long id);
+
+    /**
+     * 查询超时订单id
+     */
+    List<Long> selectOverTimePayOrdersListByCount(Integer count);
 }

@@ -25,6 +25,8 @@ spring:
             refresh: false
           - data-id: edj-orders-manager.yaml
             refresh: false
+          - data-id: shared-xxl-job.yaml
+            refresh: false
 
 #################     项目独有配置     #################
 
@@ -43,3 +45,15 @@ snowflake:
 
 feign:
   enable: true
+
+xxl-job:
+  port: 33551
+
+edj:
+  orders:
+    job:
+      auto-evaluate-count: 100
+      dispatch-over-time-order-count: 100
+      over-time-pay-order-count: 100
+      refund-order-count: 100
+      order-over-time: 15

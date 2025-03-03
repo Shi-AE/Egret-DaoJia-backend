@@ -1,6 +1,7 @@
 package com.edj.orders.manager.service;
 
 import com.edj.orders.base.domain.entity.EdjOrders;
+import com.edj.orders.manager.domain.dto.OrdersCancelDTO;
 import com.edj.orders.manager.domain.vo.OrdersDetailVO;
 import com.edj.orders.manager.domain.vo.OrdersSimpleVO;
 import com.github.yulichang.base.MPJBaseService;
@@ -29,4 +30,14 @@ public interface EdjOrdersManagerService extends MPJBaseService<EdjOrders> {
      * 根据id查询订单详细信息
      */
     OrdersDetailVO detail(Long id);
+
+    /**
+     * 取消订单
+     */
+    void cancel(OrdersCancelDTO ordersCancelDTO);
+
+    /**
+     * 取消未支付订单
+     */
+    void cancelForPendingPayment(OrdersCancelDTO ordersCancelDTO);
 }

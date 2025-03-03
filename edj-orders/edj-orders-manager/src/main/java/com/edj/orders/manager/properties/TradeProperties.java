@@ -1,4 +1,4 @@
-package com.edj.orders.manager.porperties;
+package com.edj.orders.manager.properties;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;

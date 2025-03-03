@@ -25,7 +25,7 @@ public class TempTest {
     void addAuthority() {
         // 设置权限条目
         List.of(
-                        Pair.of("根据id查询订单详细信息", "consumer:orders:detail")
+                        Pair.of("取消订单", "consumer:orders:cancel")
                 )
                 .parallelStream()
                 .unordered()

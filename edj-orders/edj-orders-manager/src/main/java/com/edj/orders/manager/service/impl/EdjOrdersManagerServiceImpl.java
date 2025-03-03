@@ -2,17 +2,20 @@ package com.edj.orders.manager.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.OrderItem;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.edj.cache.helper.CacheHelper;
 import com.edj.common.expcetions.BadRequestException;
-import com.edj.common.utils.BeanUtils;
-import com.edj.common.utils.CollUtils;
-import com.edj.common.utils.IdUtils;
-import com.edj.common.utils.ObjectUtils;
+import com.edj.common.expcetions.ServerErrorException;
+import com.edj.common.utils.*;
 import com.edj.orders.base.domain.entity.EdjOrders;
+import com.edj.orders.base.domain.entity.EdjOrdersCanceled;
 import com.edj.orders.base.enums.EdjOrderDisplay;
+import com.edj.orders.base.enums.EdjOrderStatus;
+import com.edj.orders.base.mapper.EdjOrdersCanceledMapper;
 import com.edj.orders.base.mapper.EdjOrdersMapper;
+import com.edj.orders.manager.domain.dto.OrdersCancelDTO;
 import com.edj.orders.manager.domain.vo.OrdersDetailVO;
 import com.edj.orders.manager.domain.vo.OrdersSimpleVO;
 import com.edj.orders.manager.service.EdjOrdersManagerService;
@@ -21,6 +24,7 @@ import com.github.yulichang.base.MPJBaseServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -40,6 +44,8 @@ import static com.edj.cache.constants.CacheConstants.Ttl.MEDIUM_TERM;
 public class EdjOrdersManagerServiceImpl extends MPJBaseServiceImpl<EdjOrdersMapper, EdjOrders> implements EdjOrdersManagerService {
 
     private final CacheHelper cacheHelper;
+
+    private final EdjOrdersCanceledMapper ordersCanceledMapper;
 
     @Override
     public List<EdjOrders> selectByIdList(List<Long> idList) {
@@ -118,5 +124,64 @@ public class EdjOrdersManagerServiceImpl extends MPJBaseServiceImpl<EdjOrdersMap
         // todo 派单后服务人信息
 
         return detailVO;
+    }
+
+    @Override
+    public void cancel(OrdersCancelDTO ordersCancelDTO) {
+        // 订单id
+        Long id = ordersCancelDTO.getId();
+        Long currentUserId = ordersCancelDTO.getCurrentUserId();
+
+        LambdaQueryWrapper<EdjOrders> wrapper = new LambdaQueryWrapper<EdjOrders>()
+                .select(EdjOrders::getId, EdjOrders::getOrdersStatus)
+                .eq(EdjOrders::getId, id)
+                .eq(EdjOrders::getEdjUserId, currentUserId);
+        EdjOrders orders = baseMapper.selectOne(wrapper);
+
+        if (ObjectUtils.isNull(orders)) {
+            throw new BadRequestException("订单不存在");
+        }
+
+        // 订单状态
+        Integer ordersStatus = orders.getOrdersStatus();
+
+        if (EnumUtils.eq(EdjOrderStatus.PENDING_PAYMENT, ordersStatus)) {
+            // 待支付订单取消操作
+            cancelForPendingPayment(ordersCancelDTO);
+        } else if (EnumUtils.eq(EdjOrderStatus.DISPATCHING, ordersStatus)) {
+            // 已付款订单取消操作
+            cancelForDispatching(ordersCancelDTO);
+        } else {
+            throw new BadRequestException("当前状态订单不支持取消");
+        }
+
+        // todo 删除此订单的缓存
+    }
+
+    public void cancelForPendingPayment(OrdersCancelDTO ordersCancelDTO) {
+        // 添加订单取消记录
+        EdjOrdersCanceled ordersCanceled = EdjOrdersCanceled.builder()
+                .cancellerId(ordersCancelDTO.getCurrentUserId())
+                .cancellerName(ordersCancelDTO.getCurrentUserName())
+                .cancelReason(ordersCancelDTO.getCancelReason())
+                .cancelTime(LocalDateTime.now())
+                .build();
+        int insert = ordersCanceledMapper.insert(ordersCanceled);
+        if (insert != 1) {
+            throw new ServerErrorException("添加订单取消记录失败");
+        }
+
+        // 修改订单状态
+        LambdaUpdateWrapper<EdjOrders> wrapper = new LambdaUpdateWrapper<EdjOrders>()
+                .eq(EdjOrders::getId, ordersCancelDTO.getId())
+                .eq(EdjOrders::getOrdersStatus, EdjOrderStatus.PENDING_PAYMENT)
+                .set(EdjOrders::getOrdersStatus, EdjOrderStatus.CANCELLED);
+        int update = baseMapper.update(new EdjOrders(), wrapper);
+        if (update != 1) {
+            throw new ServerErrorException("订单取消失败");
+        }
+    }
+
+    public void cancelForDispatching(OrdersCancelDTO ordersCancelDTO) {
     }
 }

@@ -14,6 +14,7 @@ import com.edj.api.api.trade.enums.EdjTradingState;
 import com.edj.api.api.trade.enums.TradingChannel;
 import com.edj.api.api.trade.vo.NativePayVO;
 import com.edj.api.api.trade.vo.TradingVO;
+import com.edj.common.domain.entity.EjdBaseEntity;
 import com.edj.common.expcetions.BadRequestException;
 import com.edj.common.expcetions.CommonException;
 import com.edj.common.expcetions.ServerErrorException;
@@ -26,7 +27,8 @@ import com.edj.orders.manager.domain.dto.OrdersPayDTO;
 import com.edj.orders.manager.domain.dto.PlaceOrderDTO;
 import com.edj.orders.manager.domain.vo.OrdersPayVO;
 import com.edj.orders.manager.domain.vo.PlaceOrderVO;
-import com.edj.orders.manager.porperties.TradeProperties;
+import com.edj.orders.manager.properties.OrdersJobProperties;
+import com.edj.orders.manager.properties.TradeProperties;
 import com.edj.orders.manager.service.EdjOrdersCreateService;
 import com.edj.security.utils.SecurityUtils;
 import com.github.yulichang.base.MPJBaseServiceImpl;
@@ -38,6 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
@@ -58,6 +61,8 @@ import static com.edj.orders.base.constants.OrderConstants.PRODUCT_APP_ID;
 public class EdjOrdersCreateServiceImpl extends MPJBaseServiceImpl<EdjOrdersMapper, EdjOrders> implements EdjOrdersCreateService {
 
     private final TradeProperties tradeProperties;
+
+    private final OrdersJobProperties ordersJobProperties;
 
     private final AddressBookApi addressBookApi;
 
@@ -244,5 +249,24 @@ public class EdjOrdersCreateServiceImpl extends MPJBaseServiceImpl<EdjOrdersMapp
         }
 
         return tradingVO.getTradingState();
+    }
+
+    @Override
+    public List<Long> selectOverTimePayOrdersListByCount(Integer count) {
+
+        Integer orderOverTime = ordersJobProperties.getOrderOverTime();
+
+        LambdaQueryWrapper<EdjOrders> wrapper = new LambdaQueryWrapper<EdjOrders>()
+                .select(EdjOrders::getId)
+                .eq(EdjOrders::getOrdersStatus, EdjOrderStatus.PENDING_PAYMENT)
+                .lt(EjdBaseEntity::getCreateTime, LocalDateTime.now().minusMinutes(orderOverTime))
+                .orderByAsc(EjdBaseEntity::getCreateTime)
+                .last("LIMIT " + count);
+        List<EdjOrders> ordersList = baseMapper.selectList(wrapper);
+
+        return ordersList
+                .stream()
+                .map(EdjOrders::getId)
+                .toList();
     }
 }

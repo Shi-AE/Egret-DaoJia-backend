@@ -2,6 +2,7 @@ package com.edj.orders.manager.controller.consumer;
 
 import com.edj.mvc.annotation.enums.Enums;
 import com.edj.orders.base.enums.EdjOrderStatus;
+import com.edj.orders.manager.domain.dto.OrdersCancelDTO;
 import com.edj.orders.manager.domain.dto.OrdersPayDTO;
 import com.edj.orders.manager.domain.dto.PlaceOrderDTO;
 import com.edj.orders.manager.domain.vo.OrdersDetailVO;
@@ -10,6 +11,7 @@ import com.edj.orders.manager.domain.vo.OrdersSimpleVO;
 import com.edj.orders.manager.domain.vo.PlaceOrderVO;
 import com.edj.orders.manager.service.EdjOrdersCreateService;
 import com.edj.orders.manager.service.EdjOrdersManagerService;
+import com.edj.security.utils.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -93,5 +95,17 @@ public class ConsumerOrdersController {
     @PreAuthorize("hasAuthority('consumer:orders:detail')")
     public OrdersDetailVO detail(@PathVariable Long id) {
         return ordersManagerService.detail(id);
+    }
+
+    /**
+     * 取消订单
+     */
+    @PutMapping("cancel")
+    @Operation(summary = "取消订单")
+    @PreAuthorize("hasAuthority('consumer:orders:cancel')")
+    public void cancel(@RequestBody OrdersCancelDTO ordersCancelDTO) {
+        ordersCancelDTO.setCurrentUserId(SecurityUtils.getUserId());
+        ordersCancelDTO.setCurrentUserName(SecurityUtils.getNickname());
+        ordersManagerService.cancel(ordersCancelDTO);
     }
 }
