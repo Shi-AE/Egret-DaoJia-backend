@@ -1,5 +1,6 @@
 package com.edj.trade.handler;
 
+import com.edj.trade.domain.entity.EdjRefundRecord;
 import com.edj.trade.domain.entity.EdjTrading;
 
 /**
@@ -23,21 +24,20 @@ public interface BasicPayHandler {
      */
     Boolean closeTrading(EdjTrading trading);
 
-//    /***
-//     * 统一收单交易退款接口
-//     * 当交易发生之后一段时间内，由于买家或者卖家的原因需要退款时，卖家可以通过退款接口将支付款退还给买家，
-//     * 将在收到退款请求并且验证成功之后，按照退款规则将支付款按原路退到买家帐号上。
-//     * @param refundRecord 退款记录对象
-//     * @return 是否有变化
-//     */
-//    Boolean refundTrading(RefundRecord refundRecord);
-//
-//    /***
-//     * 统一收单交易退款查询接口
-//     *
-//     * @param refundRecord 退款交易单号
-//     * @return 是否有变化
-//     */
-//    Boolean queryRefundTrading(RefundRecord refundRecord);
+    /***
+     * 统一收单交易退款接口
+     * 当交易发生之后一段时间内，由于买家或者卖家的原因需要退款时，卖家可以通过退款接口将支付款退还给买家，
+     * 将在收到退款请求并且验证成功之后，按照退款规则将支付款按原路退到买家帐号上。
+     * @param refundRecord 退款记录对象
+     * @return 是否有变化
+     */
+    Boolean refundTrading(EdjRefundRecord refundRecord);
 
+    /***
+     * 统一收单交易退款查询接口
+     *
+     * @param refundRecord 退款交易单号
+     * @return 是否有变化
+     */
+    Boolean queryRefundTrading(EdjRefundRecord refundRecord);
 }

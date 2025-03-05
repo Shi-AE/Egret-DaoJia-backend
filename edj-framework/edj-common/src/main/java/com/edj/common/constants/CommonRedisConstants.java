@@ -29,5 +29,15 @@ public class CommonRedisConstants {
          * 交易查询
          */
         public static final String TRADE_QUERY = "LOCK:TRADE:QUERY:%d";
+
+        /**
+         * 交易退款
+         */
+        public static final String TRADE_REFUND = "LOCK:TRADE:REFUND:%d";
+
+        /**
+         * 交易退款查询
+         */
+        public static final String TRADE_REFUND_QUERY = "LOCK:TRADE:REFUND:QUERY:%d";
     }
 }

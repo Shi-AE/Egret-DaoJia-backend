@@ -1,11 +1,14 @@
 package com.edj.trade.handler.ali;
 
+import cn.hutool.core.convert.Convert;
 import cn.hutool.json.JSONUtil;
 import com.alipay.easysdk.factory.Factory;
 import com.alipay.easysdk.kernel.Config;
 import com.alipay.easysdk.kernel.util.ResponseChecker;
 import com.alipay.easysdk.payment.common.models.AlipayTradeCloseResponse;
+import com.alipay.easysdk.payment.common.models.AlipayTradeFastpayRefundQueryResponse;
 import com.alipay.easysdk.payment.common.models.AlipayTradeQueryResponse;
+import com.alipay.easysdk.payment.common.models.AlipayTradeRefundResponse;
 import com.edj.api.api.trade.enums.TradingChannel;
 import com.edj.common.constants.ErrorInfo;
 import com.edj.common.expcetions.CommonException;
@@ -13,7 +16,9 @@ import com.edj.common.utils.EnumUtils;
 import com.edj.common.utils.StringUtils;
 import com.edj.trade.annotation.PayChannel;
 import com.edj.trade.constant.TradingConstant;
+import com.edj.trade.domain.entity.EdjRefundRecord;
 import com.edj.trade.domain.entity.EdjTrading;
+import com.edj.trade.enums.EdjRefundStatus;
 import com.edj.trade.enums.EdjTradingState;
 import com.edj.trade.enums.TradingEnum;
 import com.edj.trade.handler.BasicPayHandler;
@@ -99,62 +104,63 @@ public class AliBasicPayHandler implements BasicPayHandler {
         }
     }
 
-//    @Override
-//    public Boolean refundTrading(RefundRecord refundRecord) throws CommonException {
-//        //查询配置
-//        Config config = AlipayConfig.getConfig(refundRecord.getEnterpriseId());
-//        //Factory使用配置
-//        Factory.setOptions(config);
-//        //调用支付宝API：通用查询支付情况
-//        AlipayTradeRefundResponse refundResponse;
-//        try {
-//            // 支付宝easy sdk
-//            refundResponse = Factory
-//                    .Payment
-//                    .Common()
-//                    //扩展参数：退款单号
-//                    .optional("out_request_no", refundRecord.getRefundNo())
-//                    .refund(Convert.toStr(refundRecord.getTradingOrderNo()),
-//                            Convert.toStr(refundRecord.getRefundAmount()));
-//        } catch (Exception e) {
-//            String msg = StrUtil.format("调用支付宝退款接口出错！refundRecord = {}", refundRecord);
-//            log.error(msg, e);
-//            throw new CommonException(ErrorInfo.Code.TRADE_FAILED, msg);
-//        }
-//        refundRecord.setRefundId(null);
-//        refundRecord.setRefundCode(refundResponse.getSubCode());
-//        refundRecord.setRefundMsg(JSONUtil.toJsonStr(refundResponse));
-//        boolean success = ResponseChecker.success(refundResponse);
-//        if (success) {
-//            refundRecord.setRefundStatus(RefundStatusEnum.SUCCESS);
-//            return true;
-//        }
-//        throw new CommonException(ErrorInfo.Code.TRADE_FAILED, TradingEnum.NATIVE_REFUND_FAIL.getValue());
-//    }
-//
-//    @Override
-//    public Boolean queryRefundTrading(RefundRecord refundRecord) throws CommonException {
-//        //查询配置
-//        Config config = AlipayConfig.getConfig(refundRecord.getEnterpriseId());
-//        //Factory使用配置
-//        Factory.setOptions(config);
-//        AlipayTradeFastpayRefundQueryResponse response;
-//        try {
-//            response = Factory.Payment.Common().queryRefund(
-//                    Convert.toStr(refundRecord.getTradingOrderNo()),
-//                    Convert.toStr(refundRecord.getRefundNo()));
-//        } catch (Exception e) {
-//            log.error("调用支付宝查询退款接口出错！refundRecord = {}", refundRecord, e);
-//            throw new CommonException(ErrorInfo.Code.TRADE_FAILED, TradingEnum.NATIVE_REFUND_FAIL.getValue());
-//        }
-//
-//        refundRecord.setRefundCode(response.getSubCode());
-//        refundRecord.setRefundMsg(JSONUtil.toJsonStr(response));
-//        boolean success = ResponseChecker.success(response);
-//        if (success) {
-//            refundRecord.setRefundStatus(RefundStatusEnum.SUCCESS);
-//            return true;
-//        }
-//        throw new CommonException(ErrorInfo.Code.TRADE_FAILED, TradingEnum.NATIVE_REFUND_FAIL.getValue());
-//    }
+    @Override
+    public Boolean refundTrading(EdjRefundRecord refundRecord)  {
+        // 查询配置
+        Config config = AlipayConfig.getConfig(refundRecord.getEnterpriseId());
+        // Factory使用配置
+        Factory.setOptions(config);
+        // 调用支付宝API：通用查询支付情况
+        AlipayTradeRefundResponse refundResponse;
+        try {
+            // 支付宝easy sdk
+            refundResponse = Factory
+                    .Payment
+                    .Common()
+                    // 扩展参数：退款单号
+                    .optional("out_request_no", refundRecord.getRefundNo())
+                    .refund(Convert.toStr(refundRecord.getTradingOrderNo()),
+                            Convert.toStr(refundRecord.getRefundAmount()));
+        } catch (Exception e) {
+            String msg = StringUtils.format("调用支付宝退款接口出错！refundRecord = {}", refundRecord);
+            log.error(msg, e);
+            throw new CommonException(ErrorInfo.Code.TRADE_FAILED, msg);
+        }
+        refundRecord.setRefundId(null);
+        refundRecord.setRefundCode(refundResponse.getSubCode());
+        refundRecord.setRefundMsg(JSONUtil.toJsonStr(refundResponse));
+        boolean success = ResponseChecker.success(refundResponse);
+        if (success) {
+            refundRecord.setRefundStatus(EnumUtils.value(EdjRefundStatus.SUCCESS, Integer.class));
+            return true;
+        }
+        throw new CommonException(ErrorInfo.Code.TRADE_FAILED, TradingEnum.NATIVE_REFUND_FAIL.getValue());
+    }
+
+    @Override
+    public Boolean queryRefundTrading(EdjRefundRecord refundRecord) {
+        // 查询配置
+        Config config = AlipayConfig.getConfig(refundRecord.getEnterpriseId());
+        // Factory使用配置
+        Factory.setOptions(config);
+        AlipayTradeFastpayRefundQueryResponse response;
+        try {
+            response = Factory.Payment.Common().queryRefund(
+                    Convert.toStr(refundRecord.getTradingOrderNo()),
+                    Convert.toStr(refundRecord.getRefundNo())
+            );
+        } catch (Exception e) {
+            log.error("调用支付宝查询退款接口出错！refundRecord = {}", refundRecord, e);
+            throw new CommonException(ErrorInfo.Code.TRADE_FAILED, TradingEnum.NATIVE_REFUND_FAIL.getValue());
+        }
+
+        refundRecord.setRefundCode(response.getSubCode());
+        refundRecord.setRefundMsg(JSONUtil.toJsonStr(response));
+        boolean success = ResponseChecker.success(response);
+        if (success) {
+            refundRecord.setRefundStatus(EnumUtils.value(EdjRefundStatus.SUCCESS, Integer.class));
+            return true;
+        }
+        throw new CommonException(ErrorInfo.Code.TRADE_FAILED, TradingEnum.NATIVE_REFUND_FAIL.getValue());
+    }
 }

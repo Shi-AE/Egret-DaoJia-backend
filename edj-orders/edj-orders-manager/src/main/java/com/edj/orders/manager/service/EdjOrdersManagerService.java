@@ -40,4 +40,9 @@ public interface EdjOrdersManagerService extends MPJBaseService<EdjOrders> {
      * 取消未支付订单
      */
     void cancelForPendingPayment(OrdersCancelDTO ordersCancelDTO);
+
+    /**
+     * 取消派单中订单
+     */
+    void cancelForDispatching(OrdersCancelDTO ordersCancelDTO);
 }

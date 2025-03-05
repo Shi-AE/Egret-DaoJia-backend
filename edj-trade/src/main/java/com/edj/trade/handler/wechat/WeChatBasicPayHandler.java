@@ -1,5 +1,6 @@
 package com.edj.trade.handler.wechat;
 
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
@@ -7,10 +8,13 @@ import com.edj.api.api.trade.enums.TradingChannel;
 import com.edj.common.constants.ErrorInfo;
 import com.edj.common.expcetions.CommonException;
 import com.edj.common.utils.EnumUtils;
+import com.edj.common.utils.NumberUtils;
 import com.edj.common.utils.StringUtils;
 import com.edj.trade.annotation.PayChannel;
 import com.edj.trade.constant.TradingConstant;
+import com.edj.trade.domain.entity.EdjRefundRecord;
 import com.edj.trade.domain.entity.EdjTrading;
+import com.edj.trade.enums.EdjRefundStatus;
 import com.edj.trade.enums.EdjTradingState;
 import com.edj.trade.enums.TradingEnum;
 import com.edj.trade.handler.BasicPayHandler;
@@ -108,86 +112,86 @@ public class WeChatBasicPayHandler implements BasicPayHandler {
         }
     }
 
-//    @Override
-//    public Boolean refundTrading(RefundRecord refundRecord) throws CommonException {
-//        // 获取微信支付的client对象
-//        WechatPayHttpClient client = WechatPayHttpClient.get(refundRecord.getEnterpriseId());
-//        //请求地址
-//        String apiPath = "/v3/refund/domestic/refunds";
-//        //请求参数
-//        Map<String, Object> params = MapUtil.<String, Object>builder()
-//                .put("out_refund_no", Convert.toStr(refundRecord.getRefundNo()))
-//                .put("out_trade_no", Convert.toStr(refundRecord.getTradingOrderNo()))
-//                .put("amount", MapUtil.<String, Object>builder()
-//                        .put("refund", NumberUtil.mul(refundRecord.getRefundAmount(), 100)) //本次退款金额
-//                        .put("total", NumberUtil.mul(refundRecord.getTotal(), 100)) //原订单金额
-//                        .put("currency", "CNY") //币种
-//                        .build())
-//                .build();
-//        WeChatResponse response;
-//        try {
-//            response = client.doPost(apiPath, params);
-//        } catch (Exception e) {
-//            log.error("调用微信接口出错！apiPath = {}, params = {}", apiPath, JSONUtil.toJsonStr(params), e);
-//            throw new CommonException(ErrorInfo.Code.TRADE_FAILED, NATIVE_REFUND_FAIL.getValue());
-//        }
-//        refundRecord.setRefundCode(Convert.toStr(response.getStatus()));
-//        refundRecord.setRefundMsg(response.getBody());
-//        if (response.isOk()) {
-//            JSONObject jsonObject = JSONUtil.parseObj(response.getBody());
-//            refundRecord.setRefundId(jsonObject.getStr("refund_id"));
-//            // SUCCESS：退款成功
-//            // CLOSED：退款关闭
-//            // PROCESSING：退款处理中
-//            // ABNORMAL：退款异常
-//            String status = jsonObject.getStr("status");
-//            if (StrUtil.equals(status, TradingConstant.WECHAT_REFUND_PROCESSING)) {
-//                refundRecord.setRefundStatus(RefundStatusEnum.SENDING);
-//            } else if (StrUtil.equals(status, TradingConstant.WECHAT_REFUND_SUCCESS)) {
-//                refundRecord.setRefundStatus(RefundStatusEnum.SUCCESS);
-//            } else {
-//                refundRecord.setRefundStatus(RefundStatusEnum.FAIL);
-//            }
-//            return true;
-//        }
-//        throw new CommonException(ErrorInfo.Code.TRADE_FAILED, NATIVE_REFUND_FAIL.getValue());
-//    }
-//
-//    @Override
-//    public Boolean queryRefundTrading(RefundRecord refundRecord) throws CommonException {
-//        // 获取微信支付的client对象
-//        WechatPayHttpClient client = WechatPayHttpClient.get(refundRecord.getEnterpriseId());
-//
-//        //请求地址
-//        String apiPath = StrUtil.format("/v3/refund/domestic/refunds/{}", refundRecord.getRefundNo());
-//
-//        WeChatResponse response;
-//        try {
-//            response = client.doGet(apiPath);
-//        } catch (Exception e) {
-//            log.error("调用微信接口出错！apiPath = {}", apiPath, e);
-//            throw new CommonException(ErrorInfo.Code.TRADE_FAILED, TradingEnum.NATIVE_QUERY_REFUND_FAIL.getValue());
-//        }
-//
-//        refundRecord.setRefundCode(Convert.toStr(response.getStatus()));
-//        refundRecord.setRefundMsg(response.getBody());
-//        if (response.isOk()) {
-//            JSONObject jsonObject = JSONUtil.parseObj(response.getBody());
-//            refundRecord.setRefundId(jsonObject.getStr("refund_id"));
-//            // SUCCESS：退款成功
-//            // CLOSED：退款关闭
-//            // PROCESSING：退款处理中
-//            // ABNORMAL：退款异常
-//            String status = jsonObject.getStr("status");
-//            if (StrUtil.equals(status, TradingConstant.WECHAT_REFUND_PROCESSING)) {
-//                refundRecord.setRefundStatus(RefundStatusEnum.SENDING);
-//            } else if (StrUtil.equals(status, TradingConstant.WECHAT_REFUND_SUCCESS)) {
-//                refundRecord.setRefundStatus(RefundStatusEnum.SUCCESS);
-//            } else {
-//                refundRecord.setRefundStatus(RefundStatusEnum.FAIL);
-//            }
-//            return true;
-//        }
-//        throw new CommonException(ErrorInfo.Code.TRADE_FAILED, TradingEnum.NATIVE_QUERY_REFUND_FAIL.getValue());
-//    }
+    @Override
+    public Boolean refundTrading(EdjRefundRecord refundRecord) {
+        // 获取微信支付的client对象
+        WechatPayHttpClient client = WechatPayHttpClient.get(refundRecord.getEnterpriseId());
+        // 请求地址
+        String apiPath = "/v3/refund/domestic/refunds";
+        // 请求参数
+        Map<String, Object> params = MapUtil.<String, Object>builder()
+                .put("out_refund_no", Convert.toStr(refundRecord.getRefundNo()))
+                .put("out_trade_no", Convert.toStr(refundRecord.getTradingOrderNo()))
+                .put("amount", MapUtil.<String, Object>builder()
+                        .put("refund", NumberUtils.mul(refundRecord.getRefundAmount(), 100)) // 本次退款金额
+                        .put("total", NumberUtils.mul(refundRecord.getTotal(), 100)) // 原订单金额
+                        .put("currency", "CNY") //币种
+                        .build())
+                .build();
+        WeChatResponse response;
+        try {
+            response = client.doPost(apiPath, params);
+        } catch (Exception e) {
+            log.error("调用微信接口出错！apiPath = {}, params = {}", apiPath, JSONUtil.toJsonStr(params), e);
+            throw new CommonException(ErrorInfo.Code.TRADE_FAILED, NATIVE_REFUND_FAIL.getValue());
+        }
+        refundRecord.setRefundCode(Convert.toStr(response.getStatus()));
+        refundRecord.setRefundMsg(response.getBody());
+        if (response.isOk()) {
+            JSONObject jsonObject = JSONUtil.parseObj(response.getBody());
+            refundRecord.setRefundId(jsonObject.getStr("refund_id"));
+            // SUCCESS：退款成功
+            // CLOSED：退款关闭
+            // PROCESSING：退款处理中
+            // ABNORMAL：退款异常
+            String status = jsonObject.getStr("status");
+            if (StringUtils.equals(status, TradingConstant.WECHAT_REFUND_PROCESSING)) {
+                refundRecord.setRefundStatus(EnumUtils.value(EdjRefundStatus.REFUNDING, Integer.class));
+            } else if (StringUtils.equals(status, TradingConstant.WECHAT_REFUND_SUCCESS)) {
+                refundRecord.setRefundStatus(EnumUtils.value(EdjRefundStatus.SUCCESS, Integer.class));
+            } else {
+                refundRecord.setRefundStatus(EnumUtils.value(EdjRefundStatus.FAILED, Integer.class));
+            }
+            return true;
+        }
+        throw new CommonException(ErrorInfo.Code.TRADE_FAILED, NATIVE_REFUND_FAIL.getValue());
+    }
+
+    @Override
+    public Boolean queryRefundTrading(EdjRefundRecord refundRecord) {
+        // 获取微信支付的client对象
+        WechatPayHttpClient client = WechatPayHttpClient.get(refundRecord.getEnterpriseId());
+
+        // 请求地址
+        String apiPath = StringUtils.format("/v3/refund/domestic/refunds/{}", refundRecord.getRefundNo());
+
+        WeChatResponse response;
+        try {
+            response = client.doGet(apiPath);
+        } catch (Exception e) {
+            log.error("调用微信接口出错！apiPath = {}", apiPath, e);
+            throw new CommonException(ErrorInfo.Code.TRADE_FAILED, TradingEnum.NATIVE_QUERY_REFUND_FAIL.getValue());
+        }
+
+        refundRecord.setRefundCode(Convert.toStr(response.getStatus()));
+        refundRecord.setRefundMsg(response.getBody());
+        if (response.isOk()) {
+            JSONObject jsonObject = JSONUtil.parseObj(response.getBody());
+            refundRecord.setRefundId(jsonObject.getStr("refund_id"));
+            // SUCCESS：退款成功
+            // CLOSED：退款关闭
+            // PROCESSING：退款处理中
+            // ABNORMAL：退款异常
+            String status = jsonObject.getStr("status");
+            if (StringUtils.equals(status, TradingConstant.WECHAT_REFUND_PROCESSING)) {
+                refundRecord.setRefundStatus(EnumUtils.value(EdjRefundStatus.REFUNDING, Integer.class));
+            } else if (StringUtils.equals(status, TradingConstant.WECHAT_REFUND_SUCCESS)) {
+                refundRecord.setRefundStatus(EnumUtils.value(EdjRefundStatus.SUCCESS, Integer.class));
+            } else {
+                refundRecord.setRefundStatus(EnumUtils.value(EdjRefundStatus.FAILED, Integer.class));
+            }
+            return true;
+        }
+        throw new CommonException(ErrorInfo.Code.TRADE_FAILED, TradingEnum.NATIVE_QUERY_REFUND_FAIL.getValue());
+    }
 }

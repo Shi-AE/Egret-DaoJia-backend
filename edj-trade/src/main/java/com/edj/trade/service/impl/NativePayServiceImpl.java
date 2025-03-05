@@ -25,7 +25,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static com.edj.cache.helper.LockHelper.SIMPLE_OPERATION_WAIT_TIME;
+import static com.edj.cache.helper.LockHelper.COMPLEX_OPERATION_WAIT_TIME;
 
 /**
  * 二维码本地支付实现
@@ -71,7 +71,7 @@ public class NativePayServiceImpl implements NativePayService {
         Long productOrderNo = tradingEntity.getProductOrderNo();
         lockHelper.syncLock(
                 String.format(CommonRedisConstants.Lock.TRADE_CREATE, productOrderNo),
-                SIMPLE_OPERATION_WAIT_TIME,
+                COMPLEX_OPERATION_WAIT_TIME,
                 () -> {
                     NativePayHandler nativePayHandler = HandlerFactory.get(tradingEntity.getTradingChannel(), NativePayHandler.class);
                     nativePayHandler.createDownLineTrading(tradingEntity);
@@ -109,7 +109,7 @@ public class NativePayServiceImpl implements NativePayService {
                     v.getTradingState().equals(EnumUtils.value(EdjTradingState.PAYMENT_IN_PROGRESS))
             ) {
                 // 关单
-                Boolean result = basicPayService.closeTrading(v.getTradingOrderNo());
+                basicPayService.closeTrading(v.getTradingOrderNo());
                 log.info("业务系统:{},业务订单:{},切换交易订单:{}的支付渠道为:{},关闭其它支付渠道:{}", productAppId, productOrderNo, v.getTradingOrderNo(), tradingChannel, v.getTradingChannel());
             }
         });

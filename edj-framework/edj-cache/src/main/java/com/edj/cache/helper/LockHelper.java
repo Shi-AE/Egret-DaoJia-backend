@@ -121,6 +121,30 @@ public class LockHelper {
     }
 
     /**
+     * 普通锁同步锁
+     * 获取返回值
+     *
+     * @param lockName 锁名
+     * @param waitTime 等待时间，单位s
+     * @param callback 加锁后执行函数
+     */
+    public <T> T syncLockResult(String lockName, long waitTime, final Callback<T> callback) {
+        RLock lock = null;
+        try {
+            // 加锁
+            lock = tryLock(lockName, waitTime, -1, TIME_UNIT);
+            // 加锁成功执行操作
+            return callback.call();
+        } catch (Exception e) {
+            log.error("同步锁任务执行异常e:", e);
+            throw new ServerErrorException();
+        } finally {
+            // 解锁
+            unlock(lock);
+        }
+    }
+
+    /**
      * 给传入的锁尝试加锁
      */
     public void tryLock(RLock lock, long waitTime, long leaseTime, TimeUnit unit) {
@@ -197,6 +221,16 @@ public class LockHelper {
          * 加锁后操作
          */
         void execute();
+    }
+
+    /**
+     * 加锁操作函数接口，带返回值
+     */
+    public interface Callback<T> {
+        /**
+         * 加锁后操作
+         */
+        T call();
     }
 
 }

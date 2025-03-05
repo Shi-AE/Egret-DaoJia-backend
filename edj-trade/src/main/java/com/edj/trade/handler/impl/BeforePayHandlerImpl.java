@@ -7,7 +7,9 @@ import com.edj.common.expcetions.ServerErrorException;
 import com.edj.common.utils.EnumUtils;
 import com.edj.common.utils.NumberUtils;
 import com.edj.common.utils.ObjectUtils;
+import com.edj.trade.domain.entity.EdjRefundRecord;
 import com.edj.trade.domain.entity.EdjTrading;
+import com.edj.trade.enums.EdjRefundStatus;
 import com.edj.trade.enums.EdjTradingState;
 import com.edj.trade.enums.TradingEnum;
 import com.edj.trade.handler.BeforePayHandler;
@@ -78,6 +80,33 @@ public class BeforePayHandlerImpl implements BeforePayHandler {
     public void checkQueryTrading(EdjTrading trading) {
         if (ObjectUtils.isEmpty(trading)) {
             throw new CommonException(ErrorInfo.Code.TRADE_FAILED, TradingEnum.NOT_FOUND.getValue());
+        }
+    }
+
+    @Override
+    public void checkRefundTrading(EdjTrading trading, BigDecimal refundAmount) {
+        if (ObjectUtils.isEmpty(trading)) {
+            throw new CommonException(ErrorInfo.Code.TRADE_FAILED, TradingEnum.NOT_FOUND.getValue());
+        }
+
+        if (EnumUtils.ne(EdjTradingState.SETTLED, trading.getTradingState())) {
+            throw new CommonException(ErrorInfo.Code.TRADE_FAILED, TradingEnum.NATIVE_REFUND_FAIL.getValue());
+        }
+
+        //退款总金额不可超实付总金额
+        if (NumberUtils.isGreater(refundAmount, trading.getTradingAmount())) {
+            throw new CommonException(ErrorInfo.Code.TRADE_FAILED, TradingEnum.BASIC_REFUND_OUT_FAIL.getValue());
+        }
+    }
+
+    @Override
+    public void checkQueryRefundTrading(EdjRefundRecord refundRecord) {
+        if (ObjectUtils.isEmpty(refundRecord)) {
+            throw new CommonException(ErrorInfo.Code.TRADE_FAILED, TradingEnum.REFUND_NOT_FOUND.getValue());
+        }
+
+        if (EnumUtils.eq(EdjRefundStatus.SUCCESS, refundRecord.getRefundStatus())) {
+            throw new CommonException(ErrorInfo.Code.TRADE_FAILED, TradingEnum.REFUND_ALREADY_COMPLETED.getValue());
         }
     }
 }
