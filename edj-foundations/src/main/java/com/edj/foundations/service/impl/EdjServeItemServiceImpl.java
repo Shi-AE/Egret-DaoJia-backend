@@ -92,31 +92,37 @@ public class EdjServeItemServiceImpl extends MPJBaseServiceImpl<EdjServeItemMapp
     @Transactional
     @CacheEvict(cacheNames = SEVER_ITEM_CACHE, key = "#serveItemUpdateDTO.id", beforeInvocation = true)
     public void update(ServeItemUpdateDTO serveItemUpdateDTO) {
-        // 检查名称重复
-        String name = serveItemUpdateDTO.getName();
         Long id = serveItemUpdateDTO.getId();
         String img = serveItemUpdateDTO.getImg();
         String icon = serveItemUpdateDTO.getIcon();
         Integer sortNum = serveItemUpdateDTO.getSortNum();
         Integer unit = serveItemUpdateDTO.getUnit();
-        LambdaQueryWrapper<EdjServeItem> checkWrapper = new LambdaQueryWrapper<EdjServeItem>()
-                .select(EdjServeItem::getId)
-                .eq(EdjServeItem::getName, name)
-                .ne(EdjServeItem::getId, id);
-        boolean exists = baseMapper.exists(checkWrapper);
-        if (exists) {
-            throw new BadRequestException("存在相同的服务项名称");
+        String detailImg = serveItemUpdateDTO.getDetailImg();
+
+        // 检查名称重复
+        String name = serveItemUpdateDTO.getName();
+        if (StringUtils.isNotBlank(name)) {
+            LambdaQueryWrapper<EdjServeItem> checkWrapper = new LambdaQueryWrapper<EdjServeItem>()
+                    .select(EdjServeItem::getId)
+                    .eq(EdjServeItem::getName, name)
+                    .ne(EdjServeItem::getId, id);
+            boolean exists = baseMapper.exists(checkWrapper);
+            if (exists) {
+                throw new BadRequestException("存在相同的服务项名称");
+            }
         }
 
         // 检查服务类型存在
         Long edjServeTypeId = serveItemUpdateDTO.getEdjServeTypeId();
-        LambdaQueryWrapper<EdjServeType> existsWrapper = new LambdaQueryWrapper<EdjServeType>()
-                .select(EdjServeType::getId)
-                .eq(EdjServeType::getId, edjServeTypeId)
-                .eq(EdjServeType::getActiveStatus, EdjServeTypeActiveStatus.ENABLED);
-        boolean ServeItemExists = serveTypeMapper.exists(existsWrapper);
-        if (!ServeItemExists) {
-            throw new BadRequestException("服务类型不存在或者未启用");
+        if (ObjectUtils.isNotNull(edjServeTypeId)) {
+            LambdaQueryWrapper<EdjServeType> existsWrapper = new LambdaQueryWrapper<EdjServeType>()
+                    .select(EdjServeType::getId)
+                    .eq(EdjServeType::getId, edjServeTypeId)
+                    .eq(EdjServeType::getActiveStatus, EdjServeTypeActiveStatus.ENABLED);
+            boolean ServeItemExists = serveTypeMapper.exists(existsWrapper);
+            if (!ServeItemExists) {
+                throw new BadRequestException("服务类型不存在或者未启用");
+            }
         }
 
         // 更新
@@ -126,11 +132,23 @@ public class EdjServeItemServiceImpl extends MPJBaseServiceImpl<EdjServeItemMapp
         // 同步更新至同步表
         LambdaUpdateWrapper<EdjServeSync> wrapper = new LambdaUpdateWrapper<EdjServeSync>()
                 .eq(EdjServeSync::getEdjServeItemId, id)
+                .set(StringUtils.isNotBlank(detailImg), EdjServeSync::getDetailImg, detailImg)
                 .set(StringUtils.isNotBlank(name), EdjServeSync::getServeItemName, name)
                 .set(StringUtils.isNotBlank(img), EdjServeSync::getServeItemImg, img)
                 .set(StringUtils.isNotBlank(icon), EdjServeSync::getServeItemIcon, icon)
                 .set(ObjectUtils.isNotNull(sortNum), EdjServeSync::getServeItemSortNum, sortNum)
                 .set(ObjectUtils.isNotNull(unit), EdjServeSync::getUnit, unit);
+
+        // 如果修改服务类型，则需要同步更换服务类型信息
+        if (ObjectUtils.isNotNull(edjServeTypeId)) {
+            EdjServeType serveType = serveTypeMapper.selectById(edjServeTypeId);
+            wrapper.set(EdjServeSync::getEdjServeTypeId, serveType.getId())
+                    .set(EdjServeSync::getServeTypeName, serveType.getName())
+                    .set(EdjServeSync::getServeTypeSortNum, serveType.getSortNum())
+                    .set(EdjServeSync::getServeTypeImg, serveType.getImg())
+                    .set(EdjServeSync::getServeTypeIcon, serveType.getIcon());
+        }
+
         if (SqlUtils.isUpdate(wrapper)) {
             serveSyncMapper.update(new EdjServeSync(), wrapper);
         }
