@@ -117,11 +117,12 @@ public class EdjOrdersManagerServiceImpl extends MPJBaseServiceImpl<EdjOrdersMap
 
     @Override
     public OrdersDetailVO detail(Long id) {
-        LambdaQueryWrapper<EdjOrders> wrapper = new LambdaQueryWrapper<EdjOrders>()
+        Long userId = SecurityUtils.getUserId();
+        LambdaQueryWrapper<EdjOrders> ordersWrapper = new LambdaQueryWrapper<EdjOrders>()
                 .eq(EdjOrders::getId, id)
-                .eq(EdjOrders::getEdjUserId, SecurityUtils.getUserId());
+                .eq(EdjOrders::getEdjUserId, userId);
 
-        EdjOrders orders = baseMapper.selectOne(wrapper);
+        EdjOrders orders = baseMapper.selectOne(ordersWrapper);
 
         if (orders == null) {
             throw new BadRequestException("订单不存在");
@@ -131,6 +132,22 @@ public class EdjOrdersManagerServiceImpl extends MPJBaseServiceImpl<EdjOrdersMap
         detailVO.setServeTypeId(orders.getEdjServeTypeId());
         detailVO.setServeItemId(orders.getEdjServeItemId());
         detailVO.setServeId(orders.getEdjServeId());
+
+        // 如果订单已退款，查询退款相关信息
+        if (
+                EnumUtils.ne(EdjOrderRefundStatus.NO_REFUND, orders.getRefundStatus()) ||
+                        EnumUtils.eq(EdjOrderStatus.CANCELLED, orders.getOrdersStatus())
+        ) {
+            LambdaQueryWrapper<EdjOrdersCanceled> ordersCanceledWrapper = new LambdaQueryWrapper<EdjOrdersCanceled>()
+                    .select(EdjOrdersCanceled::getCancelReason, EdjOrdersCanceled::getCancelTime)
+                    .eq(EdjOrdersCanceled::getId, orders.getId());
+
+            EdjOrdersCanceled ordersCanceled = ordersCanceledMapper.selectOne(ordersCanceledWrapper);
+            if (ordersCanceled != null) {
+                detailVO.setCancelReason(ordersCanceled.getCancelReason());
+                detailVO.setCancelTime(ordersCanceled.getCancelTime());
+            }
+        }
 
         // todo 派单后服务人信息
 
@@ -182,6 +199,7 @@ public class EdjOrdersManagerServiceImpl extends MPJBaseServiceImpl<EdjOrdersMap
     public void cancelForPendingPayment(OrdersCancelDTO ordersCancelDTO) {
         // 添加订单取消记录
         EdjOrdersCanceled ordersCanceled = EdjOrdersCanceled.builder()
+                .id(ordersCancelDTO.getId())
                 .cancellerId(ordersCancelDTO.getCurrentUserId())
                 .cancellerName(ordersCancelDTO.getCurrentUserName())
                 .cancelReason(ordersCancelDTO.getCancelReason())
@@ -208,6 +226,7 @@ public class EdjOrdersManagerServiceImpl extends MPJBaseServiceImpl<EdjOrdersMap
     public void cancelForDispatching(OrdersCancelDTO ordersCancelDTO) {
         // 添加订单取消记录
         EdjOrdersCanceled ordersCanceled = EdjOrdersCanceled.builder()
+                .id(ordersCancelDTO.getId())
                 .cancellerId(ordersCancelDTO.getCurrentUserId())
                 .cancellerName(ordersCancelDTO.getCurrentUserName())
                 .cancelReason(ordersCancelDTO.getCancelReason())

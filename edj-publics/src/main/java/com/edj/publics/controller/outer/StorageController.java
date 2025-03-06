@@ -35,7 +35,7 @@ public class StorageController {
     @Operation(summary = "文件上传")
     @PostMapping("upload")
     public StorageUploadResDTO upload(@RequestPart("file") MultipartFile file) {
-        //获得文件扩展名
+        // 获得文件扩展名
         String filename = file.getOriginalFilename();
         if (StringUtils.isBlank(filename)) {
             log.debug("文件名为空");
