@@ -1,6 +1,5 @@
 package com.edj.common.domain.msg;
 
-import cn.hutool.json.JSONUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -68,8 +67,4 @@ public class TradeStatusMsg {
      * 创建时间
      */
     private LocalDateTime created;
-
-    public String toJson() {
-        return JSONUtil.toJsonStr(this);
-    }
 }

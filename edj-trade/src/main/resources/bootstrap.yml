@@ -21,6 +21,10 @@ spring:
             refresh: false
           - data-id: shared-swagger.yaml
             refresh: false
+          - data-id: shared-rabbitmq.yaml
+            refresh: false
+          - data-id: shared-xxl-job.yaml
+            refresh: false
 
 #################     项目独有配置     #################
 
@@ -36,3 +40,9 @@ swagger:
 snowflake:
   workerId: 6
   datacenterId: 6
+
+rabbitmq:
+  enable: true
+
+xxl-job:
+  port: 33561

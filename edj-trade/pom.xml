@@ -97,6 +97,16 @@
             <groupId>com.edj</groupId>
             <artifactId>edj-cache</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>com.edj</groupId>
+            <artifactId>edj-xxl-job</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.edj</groupId>
+            <artifactId>edj-rabbitmq</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

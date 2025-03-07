@@ -38,13 +38,13 @@ public class AliBasicPayHandler implements BasicPayHandler {
 
     @Override
     public Boolean queryTrading(EdjTrading trading) {
-        //查询配置
+        // 查询配置
         Config config = AlipayConfig.getConfig(trading.getEnterpriseId());
-        //Factory使用配置
+        // Factory使用配置
         Factory.setOptions(config);
         AlipayTradeQueryResponse queryResponse;
         try {
-            //调用支付宝API：通用查询支付情况
+            // 调用支付宝API：通用查询支付情况
             queryResponse = Factory
                     .Payment
                     .Common()
@@ -55,30 +55,30 @@ public class AliBasicPayHandler implements BasicPayHandler {
             throw new CommonException(ErrorInfo.Code.TRADE_FAILED, TradingEnum.NATIVE_QUERY_FAIL.getValue());
         }
 
-        //修改交易单状态
+        // 修改交易单状态
         trading.setTransactionId(queryResponse.getTradeNo());
         trading.setResultCode(queryResponse.getSubCode());
         trading.setResultMsg(queryResponse.getSubMsg());
         trading.setResultJson(JSONUtil.toJsonStr(queryResponse));
 
         boolean success = ResponseChecker.success(queryResponse);
-        //响应成功，分析交易状态
+        // 响应成功，分析交易状态
         if (success) {
             String tradeStatus = queryResponse.getTradeStatus();
             if (StringUtils.equals(TradingConstant.ALI_TRADE_CLOSED, tradeStatus)) {
-                //支付取消：TRADE_CLOSED（未付款交易超时关闭，或支付完成后全额退款）
+                // 支付取消：TRADE_CLOSED（未付款交易超时关闭，或支付完成后全额退款）
                 trading.setTradingState(EnumUtils.value(EdjTradingState.ORDER_CANCELLED, Integer.class));
             } else if (StringUtils.equalsAny(tradeStatus, TradingConstant.ALI_TRADE_SUCCESS, TradingConstant.ALI_TRADE_FINISHED)) {
                 // TRADE_SUCCESS（交易支付成功）
                 // TRADE_FINISHED（交易结束，不可退款）
                 trading.setTradingState(EnumUtils.value(EdjTradingState.SETTLED, Integer.class));
             } else {
-                //非最终状态不处理，当前交易状态：WAIT_BUYER_PAY（交易创建，等待买家付款）不处理
+                // 非最终状态不处理，当前交易状态：WAIT_BUYER_PAY（交易创建，等待买家付款）不处理
                 return false;
             }
             return true;
         }
-        throw new CommonException(ErrorInfo.Code.TRADE_FAILED, TradingEnum.NATIVE_QUERY_FAIL.getValue());
+        return false;
     }
 
     @Override
@@ -95,10 +95,11 @@ public class AliBasicPayHandler implements BasicPayHandler {
                     .close(String.valueOf(trading.getTradingOrderNo()));
             boolean success = ResponseChecker.success(closeResponse);
             if (success) {
-                trading.setTradingState(EnumUtils.value(EdjTradingState.ORDER_CANCELLED, Integer.class));
-                return true;
+                log.info("阿里支付关闭订单完成");
             }
-            return false;
+            log.info("阿里支付关闭订单失败，可能订单未创建");
+            trading.setTradingState(EnumUtils.value(EdjTradingState.ORDER_CANCELLED, Integer.class));
+            return true;
         } catch (Exception e) {
             throw new CommonException(ErrorInfo.Code.TRADE_FAILED, TradingEnum.CLOSE_FAIL.getValue());
         }

@@ -1,6 +1,7 @@
 package com.edj.trade.service;
 
 import com.edj.trade.domain.entity.EdjTrading;
+import com.edj.trade.enums.EdjTradingState;
 import com.github.yulichang.base.MPJBaseService;
 
 import java.util.List;
@@ -39,4 +40,12 @@ public interface EdjTradingService extends MPJBaseService<EdjTrading> {
      * @return 交易单数据
      */
     EdjTrading findTradByTradingOrderNo(Long tradingOrderNo);
+
+    /***
+     * 按交易状态查询交易单，按照时间正序排序
+     * @param tradingState 状态
+     * @param count 查询数量，默认查询10条
+     * @return 交易单数据列表
+     */
+    List<EdjTrading> findListByTradingState(EdjTradingState tradingState, Integer count);
 }

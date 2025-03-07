@@ -2,6 +2,8 @@ package com.edj.trade.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.edj.common.utils.CollUtils;
+import com.edj.common.utils.NumberUtils;
+import com.edj.trade.constant.Constants;
 import com.edj.trade.domain.entity.EdjTrading;
 import com.edj.trade.enums.EdjTradingState;
 import com.edj.trade.mapper.EdjTradingMapper;
@@ -52,5 +54,16 @@ public class EdjTradingServiceImpl extends MPJBaseServiceImpl<EdjTradingMapper, 
         LambdaQueryWrapper<EdjTrading> wrapper = new LambdaQueryWrapper<EdjTrading>()
                 .eq(EdjTrading::getTradingOrderNo, tradingOrderNo);
         return baseMapper.selectOne(wrapper);
+    }
+
+    @Override
+    public List<EdjTrading> findListByTradingState(EdjTradingState tradingState, Integer count) {
+        count = NumberUtils.max(count, 10);
+        LambdaQueryWrapper<EdjTrading> wrapper = new LambdaQueryWrapper<EdjTrading>()
+                .eq(EdjTrading::getTradingState, tradingState)
+                .eq(EdjTrading::getEnableFlag, Constants.YES)
+                .orderByAsc(EdjTrading::getCreateTime)
+                .last("LIMIT " + count);
+        return baseMapper.selectList(wrapper);
     }
 }
