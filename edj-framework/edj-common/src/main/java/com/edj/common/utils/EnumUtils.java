@@ -38,9 +38,7 @@ public class EnumUtils extends EnumUtil {
 
         Class<E> enumClass = enumName.getDeclaringClass();
 
-        List<Field> fieldList = Arrays.stream(
-                        enumClass.getDeclaredFields()
-                )
+        List<Field> fieldList = Arrays.stream(enumClass.getDeclaredFields())
                 .filter(x -> !x.isEnumConstant() && x.isAnnotationPresent(EnumValue.class))
                 .toList();
 
@@ -106,6 +104,23 @@ public class EnumUtils extends EnumUtil {
             log.error("getter方法无法访问", e);
         } catch (InvocationTargetException e) {
             log.error("getter方法异常，请检查getter方法内部逻辑", e);
+        }
+        throw new ServerErrorException();
+    }
+
+    /**
+     * 根据字段值获取枚举字段
+     * 仅作单值匹配
+     */
+    public static <E extends Enum<E>> E getEnum(Object target, Class<E> enumClass) {
+        if (target == null || enumClass == null) {
+            throw new ServerErrorException();
+        }
+        for (E enumConstant : enumClass.getEnumConstants()) {
+            Object enumValue = value(enumConstant);
+            if (Objects.equals(target, enumValue)) {
+                return enumConstant;
+            }
         }
         throw new ServerErrorException();
     }
