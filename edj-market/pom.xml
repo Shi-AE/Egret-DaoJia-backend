@@ -5,11 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.edj</groupId>
-        <artifactId>edj-orders</artifactId>
+        <artifactId>edj-framework</artifactId>
         <version>1.0-SNAPSHOT</version>
+        <relativePath>../edj-framework/pom.xml</relativePath>
     </parent>
 
-    <artifactId>edj-orders-manager</artifactId>
+    <artifactId>edj-market</artifactId>
 
     <properties>
         <java.version>21</java.version>
@@ -19,11 +20,6 @@
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>com.edj</groupId>
-            <artifactId>edj-orders-base</artifactId>
-        </dependency>
-
         <dependency>
             <groupId>com.alibaba.cloud</groupId>
             <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
@@ -63,37 +59,17 @@
 
         <dependency>
             <groupId>com.edj</groupId>
+            <artifactId>edj-mysql</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.edj</groupId>
             <artifactId>edj-redis</artifactId>
         </dependency>
 
         <dependency>
             <groupId>com.edj</groupId>
             <artifactId>edj-security</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.edj</groupId>
-            <artifactId>edj-api</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.edj</groupId>
-            <artifactId>edj-sentinel</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.edj</groupId>
-            <artifactId>edj-cache</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.edj</groupId>
-            <artifactId>edj-xxl-job</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.edj</groupId>
-            <artifactId>edj-rabbitmq</artifactId>
         </dependency>
     </dependencies>
 
@@ -111,7 +87,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <mainClass>com.edj.orders.manager.OrdersManagerApplication</mainClass>
+                    <mainClass>com.edj.market.MarketApplication</mainClass>
                 </configuration>
             </plugin>
         </plugins>

@@ -92,7 +92,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <mainClass>com.edj.foundations.FoundationsApplication</mainClass>
+                    <mainClass>com.edj.user.UserApplication</mainClass>
                 </configuration>
             </plugin>
         </plugins>

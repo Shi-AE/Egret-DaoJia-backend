@@ -30,6 +30,7 @@
         <module>../edj-orders</module>
         <module>edj-sentinel</module>
         <module>../edj-trade</module>
+        <module>../edj-market</module>
     </modules>
 
     <properties>

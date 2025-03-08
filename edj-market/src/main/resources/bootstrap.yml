@@ -1,0 +1,38 @@
+#################     服务器配置     #################
+
+server:
+  port: 33570 #端口
+
+#################     spring公共配置     #################
+
+spring:
+  profiles:
+    active: dev
+  application:
+    name: edj-market
+  cloud:
+    nacos:
+      config:
+        file-extension: yaml
+        shared-configs:
+          - data-id: shared-redis.yaml
+            refresh: false
+          - data-id: shared-mysql.yaml
+            refresh: false
+          - data-id: shared-swagger.yaml
+            refresh: false
+
+#################     项目独有配置     #################
+
+mysql:
+  db-name: edj-market
+mybatis-plus:
+  mapper-locations: mapper/market/*.xml
+  type-aliases-package: com.edj.market.mapper
+swagger:
+  title: 白鹭到家-优惠券服务接口文档
+  description: 用于优惠券管理
+
+snowflake:
+  workerId: 7
+  datacenterId: 7
