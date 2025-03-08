@@ -56,4 +56,20 @@ public class EdjActivityServiceImpl extends MPJBaseServiceImpl<EdjActivityMapper
 
         return PageUtils.toPage(activityPage, ActivityPageVO.class);
     }
+
+    @Override
+    public ActivityPageVO detail(Long id) {
+
+        EdjActivity activity = baseMapper.selectById(id);
+
+        if (ObjectUtils.isNull(activity)) {
+            return new ActivityPageVO();
+        }
+
+        ActivityPageVO activityPageVO = BeanUtils.toBean(activity, ActivityPageVO.class);
+
+        // todo 领取数量、核销量
+
+        return activityPageVO;
+    }
 }

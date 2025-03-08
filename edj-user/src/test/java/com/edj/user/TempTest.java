@@ -25,7 +25,7 @@ public class TempTest {
     void addAuthority() {
         // 设置权限条目
         List.of(
-                        Pair.of("保存优惠券活动", "foundations:activity:page")
+                        Pair.of("查询优惠券活动详情", "foundations:activity:detail")
                 )
                 .parallelStream()
                 .unordered()

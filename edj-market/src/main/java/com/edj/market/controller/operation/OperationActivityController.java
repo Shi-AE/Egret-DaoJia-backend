@@ -46,4 +46,14 @@ public class OperationActivityController {
     public PageResult<ActivityPageVO> queryForPage(ActivityPageDTO activityPageDTO) {
         return activityService.page(activityPageDTO);
     }
+
+    /**
+     * 查询优惠券活动详情
+     */
+    @GetMapping("{id}")
+    @Operation(summary = "查询优惠券活动详情")
+    @PreAuthorize("hasAuthority('foundations:activity:detail')")
+    public ActivityPageVO detail(@PathVariable Long id) {
+        return activityService.detail(id);
+    }
 }
