@@ -42,7 +42,7 @@ public class TradeJob {
 
     /**
      * 处理支付状态
-     * 每5秒执行一次
+     * 每1分钟执行一次
      */
     @XxlJob("TradingStateHandle")
     public void tradingStateHandle() {
