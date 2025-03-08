@@ -1,6 +1,10 @@
 package com.edj.market.service;
 
+import com.edj.common.domain.PageResult;
+import com.edj.market.domain.dto.ActivityPageDTO;
+import com.edj.market.domain.dto.ActivitySaveDTO;
 import com.edj.market.domain.entity.EdjActivity;
+import com.edj.market.domain.vo.ActivityPageVO;
 import com.github.yulichang.base.MPJBaseService;
 
 /**
@@ -10,4 +14,14 @@ import com.github.yulichang.base.MPJBaseService;
  * @date 2025/03/09
  */
 public interface EdjActivityService extends MPJBaseService<EdjActivity> {
+
+    /**
+     * 保存优惠券活动
+     */
+    void save(ActivitySaveDTO activitySaveDTO);
+
+    /**
+     * 运营端分页查询优惠券活动
+     */
+    PageResult<ActivityPageVO> page(ActivityPageDTO activityPageDTO);
 }
