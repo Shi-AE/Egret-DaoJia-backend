@@ -2,16 +2,14 @@ package com.edj.foundations.handler;
 
 import com.edj.canal.listener.AbstractCanalRabbitMqMsgListener;
 import com.edj.common.constants.IndexConstants;
+import com.edj.common.constants.MqConstants;
 import com.edj.common.utils.ThreadUtils;
 import com.edj.es.core.ElasticSearchTemplate;
 import com.edj.foundations.domain.entity.EdjServeSync;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.core.ExchangeTypes;
 import org.springframework.amqp.core.Message;
-import org.springframework.amqp.rabbit.annotation.Exchange;
-import org.springframework.amqp.rabbit.annotation.Queue;
-import org.springframework.amqp.rabbit.annotation.QueueBinding;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.annotation.*;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -28,10 +26,16 @@ public class ServeCanalDataSyncHandler extends AbstractCanalRabbitMqMsgListener<
 
     private final ElasticSearchTemplate elasticSearchTemplate;
 
+    /**
+     * 处理消息同步至es
+     */
     @RabbitListener(bindings = @QueueBinding(
-            value = @Queue(name = "canal-mq-edj-foundation"),
-            exchange = @Exchange(name = "exchange.canal-edj", type = ExchangeTypes.TOPIC),
-            key = "canal-mq-edj-foundation"),
+            value = @Queue(
+                    name = MqConstants.Queues.FOUNDATION_SYNC_TO_ES,
+                    arguments = {@Argument(name = MqConstants.X_QUEUE_TYPE, value = MqConstants.QUORUM)}
+            ),
+            exchange = @Exchange(name = MqConstants.Exchanges.CANAL, type = ExchangeTypes.TOPIC),
+            key = MqConstants.RoutingKeys.SERVE_SYNC_TO_ES),
             concurrency = "1"
     )
     public void onMessage(Message message) {

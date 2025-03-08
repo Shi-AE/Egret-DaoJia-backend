@@ -158,9 +158,10 @@ public class DefaultDocumentOperations implements DocumentOperations {
 
         BulkRequest.Builder builder = new BulkRequest.Builder();
 
-        idList.forEach(id ->
-                builder.operations(b -> b.delete(d -> d.index(index).id(id.toString())))
-        );
+        idList.forEach(id -> builder.operations(b -> b.delete(d -> d
+                .index(index)
+                .id(id.toString())
+        )));
 
         try {
             BulkResponse bulk = elasticsearchClient.bulk(builder.build());

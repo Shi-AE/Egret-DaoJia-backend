@@ -15,10 +15,7 @@ import com.edj.orders.base.mapper.EdjOrdersMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.ExchangeTypes;
-import org.springframework.amqp.rabbit.annotation.Exchange;
-import org.springframework.amqp.rabbit.annotation.Queue;
-import org.springframework.amqp.rabbit.annotation.QueueBinding;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.annotation.*;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -43,9 +40,12 @@ public class TradeStatusListener {
      * 监听并更新支付结果
      */
     @RabbitListener(bindings = @QueueBinding(
-            value = @Queue(name = MqConstants.Queues.ORDERS_TRADE_UPDATE_STATUS),
-            exchange = @Exchange(name = MqConstants.Exchanges.TRADE, type = ExchangeTypes.FANOUT),
-            key = {MqConstants.RoutingKeys.TRADE_UPDATE_STATUS}
+            value = @Queue(
+                    name = MqConstants.Queues.ORDERS_TRADE_UPDATE_STATUS,
+                    arguments = {@Argument(name = MqConstants.X_QUEUE_TYPE, value = MqConstants.QUORUM)}
+            ),
+            exchange = @Exchange(name = MqConstants.Exchanges.TRADE, type = ExchangeTypes.TOPIC),
+            key = {MqConstants.RoutingKeys.UPDATE_STATUS}
     ))
     public void listenTradeUpdatePayStatusMes(String msg) {
         log.info("接收到支付结果状态的消息 ({}) -> {}", MqConstants.Queues.ORDERS_TRADE_UPDATE_STATUS, msg);

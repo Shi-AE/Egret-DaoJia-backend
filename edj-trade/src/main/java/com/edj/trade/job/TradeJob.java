@@ -94,7 +94,7 @@ public class TradeJob {
         String msg = JSONUtil.toJsonStr(tradeMsgList);
         rabbitClient.sendMsg(
                 MqConstants.Exchanges.TRADE,
-                "MqConstants.RoutingKeys.TRADE_UPDATE_STATUS",
+                MqConstants.RoutingKeys.UPDATE_STATUS,
                 msg,
                 null,
                 null,
