@@ -23,7 +23,9 @@ import com.edj.mysql.utils.PageUtils;
 import com.github.yulichang.base.MPJBaseServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -99,6 +101,7 @@ public class EdjActivityServiceImpl extends MPJBaseServiceImpl<EdjActivityMapper
     }
 
     @Override
+    @Transactional
     public void revoke(Long id) {
         LambdaUpdateWrapper<EdjActivity> activityWrapper = new LambdaUpdateWrapper<EdjActivity>()
                 .eq(EdjActivity::getId, id)
@@ -116,5 +119,24 @@ public class EdjActivityServiceImpl extends MPJBaseServiceImpl<EdjActivityMapper
                 .eq(EdjCoupon::getStatus, EdjCouponStatus.UNUSED)
                 .set(EdjCoupon::getStatus, EdjCouponStatus.CANCELLED);
         couponMapper.update(new EdjCoupon(), couponWrapper);
+    }
+
+    @Override
+    public void updateStatus() {
+        LocalDateTime now = LocalDateTime.now();
+        // 1. 到达发放开始时间状态改为“进行中”
+        LambdaUpdateWrapper<EdjActivity> wrapper1 = new LambdaUpdateWrapper<EdjActivity>()
+                .eq(EdjActivity::getStatus, EdjActivityStatus.PENDING) // 待生效的活动
+                .le(EdjActivity::getDistributeStartTime, now) // 活动开始时间小于等于当前时间
+                .gt(EdjActivity::getDistributeEndTime, now) // 活动结束时间大于当前时间
+                .set(EdjActivity::getStatus, EdjActivityStatus.ONGOING);
+        baseMapper.update(new EdjActivity(), wrapper1);
+
+        // 2. 到达发放结束时间状态改为“已失效”
+        LambdaUpdateWrapper<EdjActivity> wrapper2 = new LambdaUpdateWrapper<EdjActivity>()
+                .in(EdjActivity::getStatus, List.of(EdjActivityStatus.PENDING, EdjActivityStatus.ONGOING)) // 待生效及进行中的活动
+                .le(EdjActivity::getDistributeEndTime, now) // 活动结束时间小于等于当前时间
+                .set(EdjActivity::getStatus, EdjActivityStatus.EXPIRED);
+        baseMapper.update(new EdjActivity(), wrapper2);
     }
 }

@@ -21,6 +21,8 @@ spring:
             refresh: false
           - data-id: shared-swagger.yaml
             refresh: false
+          - data-id: shared-xxl-job.yaml
+            refresh: false
 
 #################     项目独有配置     #################
 
@@ -36,3 +38,6 @@ swagger:
 snowflake:
   workerId: 7
   datacenterId: 7
+
+xxl-job:
+  port: 33571

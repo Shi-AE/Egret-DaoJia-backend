@@ -71,6 +71,11 @@
             <groupId>com.edj</groupId>
             <artifactId>edj-security</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>com.edj</groupId>
+            <artifactId>edj-xxl-job</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

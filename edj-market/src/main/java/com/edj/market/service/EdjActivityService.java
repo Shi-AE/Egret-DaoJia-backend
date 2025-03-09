@@ -34,4 +34,11 @@ public interface EdjActivityService extends MPJBaseService<EdjActivity> {
      * 撤销优惠券活动
      */
     void revoke(Long id);
+
+    /**
+     * 更新优惠券活动状态
+     * 1. 到达发放开始时间状态改为“进行中”
+     * 2. 到达发放结束时间状态改为“已失效”
+     */
+    void updateStatus();
 }
