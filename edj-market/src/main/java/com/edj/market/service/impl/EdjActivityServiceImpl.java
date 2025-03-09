@@ -11,11 +11,13 @@ import com.edj.market.domain.dto.ActivityPageDTO;
 import com.edj.market.domain.dto.ActivitySaveDTO;
 import com.edj.market.domain.entity.EdjActivity;
 import com.edj.market.domain.entity.EdjCoupon;
+import com.edj.market.domain.entity.EdjCouponWriteOff;
 import com.edj.market.domain.vo.ActivityPageVO;
 import com.edj.market.enums.EdjActivityStatus;
 import com.edj.market.enums.EdjCouponStatus;
 import com.edj.market.mapper.EdjActivityMapper;
 import com.edj.market.mapper.EdjCouponMapper;
+import com.edj.market.mapper.EdjCouponWriteOffMapper;
 import com.edj.market.service.EdjActivityService;
 import com.edj.mysql.utils.PageUtils;
 import com.github.yulichang.base.MPJBaseServiceImpl;
@@ -35,6 +37,8 @@ import java.util.List;
 public class EdjActivityServiceImpl extends MPJBaseServiceImpl<EdjActivityMapper, EdjActivity> implements EdjActivityService {
 
     private final EdjCouponMapper couponMapper;
+
+    private final EdjCouponWriteOffMapper couponWriteOffMapper;
 
     @Override
     public void save(ActivitySaveDTO activitySaveDTO) {
@@ -80,7 +84,16 @@ public class EdjActivityServiceImpl extends MPJBaseServiceImpl<EdjActivityMapper
 
         ActivityPageVO activityPageVO = BeanUtils.toBean(activity, ActivityPageVO.class);
 
-        // todo 领取数量、核销量
+        LambdaQueryWrapper<EdjCoupon> couponCountWrapper = new LambdaQueryWrapper<EdjCoupon>()
+                .eq(EdjCoupon::getEdjActivityId, id);
+        Long couponCount = couponMapper.selectCount(couponCountWrapper);
+
+        LambdaQueryWrapper<EdjCouponWriteOff> writeOffCountWrapper = new LambdaQueryWrapper<EdjCouponWriteOff>()
+                .eq(EdjCouponWriteOff::getEdjActivityId, id);
+        Long writeOffCountCount = couponWriteOffMapper.selectCount(writeOffCountWrapper);
+
+        activityPageVO.setReceiveNum(Math.toIntExact(couponCount));
+        activityPageVO.setWriteOffNum(Math.toIntExact(writeOffCountCount));
 
         return activityPageVO;
     }
