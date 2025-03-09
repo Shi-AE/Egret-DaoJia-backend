@@ -91,7 +91,7 @@ public class EdjCoupon extends EjdBaseEntity {
     private LocalDateTime useTime;
 
     /**
-     * 优惠券状态（1未使用 2已使用 3已过期）
+     * 优惠券状态（1未使用 2已使用 3已过期 4已作废）
      */
     private Integer status;
 }

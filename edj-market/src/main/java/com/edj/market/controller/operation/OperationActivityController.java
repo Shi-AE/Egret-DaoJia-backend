@@ -56,4 +56,14 @@ public class OperationActivityController {
     public ActivityPageVO detail(@PathVariable Long id) {
         return activityService.detail(id);
     }
+
+    /**
+     * 撤销优惠券活动
+     */
+    @PutMapping("revoke/{id}")
+    @Operation(summary = "撤销优惠券活动")
+    @PreAuthorize("hasAuthority('foundations:activity:revoke')")
+    public void revoke(@PathVariable Long id) {
+        activityService.revoke(id);
+    }
 }

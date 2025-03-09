@@ -29,4 +29,9 @@ public interface EdjActivityService extends MPJBaseService<EdjActivity> {
      * 查询优惠券活动详情
      */
     ActivityPageVO detail(Long id);
+
+    /**
+     * 撤销优惠券活动
+     */
+    void revoke(Long id);
 }
