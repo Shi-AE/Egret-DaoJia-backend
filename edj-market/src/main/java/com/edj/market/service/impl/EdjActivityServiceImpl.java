@@ -67,8 +67,7 @@ public class EdjActivityServiceImpl extends MPJBaseServiceImpl<EdjActivityMapper
                 .eq(ObjectUtils.isNotNull(id), EdjActivity::getId, id)
                 .like(StringUtils.isNotBlank(name), EdjActivity::getName, name)
                 .eq(ObjectUtils.isNotNull(type), EdjActivity::getType, type)
-                .eq(ObjectUtils.isNotNull(status), EdjActivity::getStatus, status)
-                .orderByDesc(EdjActivity::getId);
+                .eq(ObjectUtils.isNotNull(status), EdjActivity::getStatus, status);
 
         Page<EdjActivity> activityPage = baseMapper.selectPage(page, wrapper);
 
