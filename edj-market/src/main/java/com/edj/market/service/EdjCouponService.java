@@ -1,6 +1,9 @@
 package com.edj.market.service;
 
+import com.edj.common.domain.PageResult;
+import com.edj.market.domain.dto.CouponPageDTO;
 import com.edj.market.domain.entity.EdjCoupon;
+import com.edj.market.domain.vo.CouponPageVO;
 import com.github.yulichang.base.MPJBaseService;
 
 /**
@@ -10,4 +13,9 @@ import com.github.yulichang.base.MPJBaseService;
  * @date 2025/03/09
  */
 public interface EdjCouponService extends MPJBaseService<EdjCoupon> {
+
+    /**
+     * 查询活动优惠券领取记录
+     */
+    PageResult<CouponPageVO> pageByActivity(CouponPageDTO couponPageDTO);
 }

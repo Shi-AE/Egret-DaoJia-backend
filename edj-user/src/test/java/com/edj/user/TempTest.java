@@ -25,7 +25,7 @@ public class TempTest {
     void addAuthority() {
         // 设置权限条目
         List.of(
-                        Pair.of("撤销优惠券活动", "foundations:activity:revoke")
+                        Pair.of("查询活动优惠券领取记录", "foundations:coupon:page")
                 )
                 .parallelStream()
                 .unordered()
@@ -34,7 +34,7 @@ public class TempTest {
                     EdjAuthority edjAuthority = EdjAuthority
                             .builder()
                             // 设置父id
-                            .parentId(53324284332089344L)
+                            .parentId(53520249987014656L)
                             .name(authority.getKey())
                             .permission(authority.getValue())
                             .build();
