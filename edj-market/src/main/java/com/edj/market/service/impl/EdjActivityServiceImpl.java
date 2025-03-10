@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.edj.common.domain.PageResult;
+import com.edj.common.expcetions.BadRequestException;
 import com.edj.common.utils.*;
 import com.edj.market.domain.dto.ActivityPageDTO;
 import com.edj.market.domain.dto.ActivitySaveDTO;
@@ -52,11 +53,29 @@ public class EdjActivityServiceImpl extends MPJBaseServiceImpl<EdjActivityMapper
         // 参数校验
         activitySaveDTO.check();
 
-        // 数据组装
-        EdjActivity activity = BeanUtils.toBean(activitySaveDTO, EdjActivity.class);
+        // 区分新增与修改
+        Long id = activitySaveDTO.getId();
 
-        // 保存数据
-        saveOrUpdate(activity);
+        // 新增
+        if (id == null) {
+            // 数据组装
+            EdjActivity activity = BeanUtils.toBean(activitySaveDTO, EdjActivity.class);
+            baseMapper.insert(activity);
+            return;
+        }
+
+        // 修改
+        LambdaQueryWrapper<EdjActivity> wrapper = new LambdaQueryWrapper<EdjActivity>()
+                .select(EdjActivity::getId, EdjActivity::getStatus)
+                .eq(EdjActivity::getId, id);
+        EdjActivity activity = baseMapper.selectOne(wrapper);
+
+        // 校验
+        if (activity == null || EnumUtils.ne(EdjActivityStatus.PENDING, activity.getStatus())) {
+            throw new BadRequestException("活动不存在或活动已生效无法修改");
+        }
+
+        baseMapper.updateById(BeanUtils.toBean(activitySaveDTO, EdjActivity.class));
     }
 
     @Override
