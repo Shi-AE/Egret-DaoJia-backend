@@ -52,7 +52,17 @@ public class CacheConstants {
         /**
          * 用户订单缓存
          */
-        public static String USER_ORDERS_CACHE = EDJ_CACHE + ":USER:ORDERS:SERVE:%s";
+        public static final String USER_ORDERS_CACHE = EDJ_CACHE + ":USER:ORDERS:SERVE:%s";
+
+        /**
+         * 抢券缓存前缀
+         */
+        public static final String GRAB_COUPON = EDJ_CACHE + ":GRAB_COUPON";
+
+        /**
+         * 优惠券活动缓存
+         */
+        public static final String ACTIVITY_CACHE = GRAB_COUPON + ":ACTIVITY";
     }
 
     public static final class CacheManager {

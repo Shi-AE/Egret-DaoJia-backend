@@ -4,14 +4,13 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.edj.common.domain.PageResult;
-import com.edj.common.utils.BeanUtils;
-import com.edj.common.utils.ObjectUtils;
-import com.edj.common.utils.StringUtils;
+import com.edj.common.utils.*;
 import com.edj.market.domain.dto.ActivityPageDTO;
 import com.edj.market.domain.dto.ActivitySaveDTO;
 import com.edj.market.domain.entity.EdjActivity;
 import com.edj.market.domain.entity.EdjCoupon;
 import com.edj.market.domain.entity.EdjCouponWriteOff;
+import com.edj.market.domain.vo.ActivityInfoVO;
 import com.edj.market.domain.vo.ActivityPageVO;
 import com.edj.market.enums.EdjActivityStatus;
 import com.edj.market.enums.EdjCouponStatus;
@@ -22,11 +21,15 @@ import com.edj.market.service.EdjActivityService;
 import com.edj.mysql.utils.PageUtils;
 import com.github.yulichang.base.MPJBaseServiceImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+
+import static com.edj.cache.constants.CacheConstants.CacheName.ACTIVITY_CACHE;
 
 /**
  * 针对表【edj_activity(优惠券活动表)】的数据库操作Service实现
@@ -41,6 +44,8 @@ public class EdjActivityServiceImpl extends MPJBaseServiceImpl<EdjActivityMapper
     private final EdjCouponMapper couponMapper;
 
     private final EdjCouponWriteOffMapper couponWriteOffMapper;
+
+    private final RedisTemplate<String, String> redisTemplate;
 
     @Override
     public void save(ActivitySaveDTO activitySaveDTO) {
@@ -137,5 +142,90 @@ public class EdjActivityServiceImpl extends MPJBaseServiceImpl<EdjActivityMapper
                 .le(EdjActivity::getDistributeEndTime, now) // 活动结束时间小于等于当前时间
                 .set(EdjActivity::getStatus, EdjActivityStatus.EXPIRED);
         baseMapper.update(new EdjActivity(), wrapper2);
+    }
+
+    @Override
+    public void perHeat() {
+        LambdaQueryWrapper<EdjActivity> wrapper = new LambdaQueryWrapper<EdjActivity>()
+                .in(EdjActivity::getStatus, List.of(EdjActivityStatus.ONGOING, EdjActivityStatus.PENDING))
+                .le(EdjActivity::getDistributeStartTime, LocalDateTime.now().plusDays(30))
+                .orderByDesc(EdjActivity::getDistributeStartTime);
+        List<EdjActivity> activityList = baseMapper.selectList(wrapper);
+
+        if (CollUtils.isEmpty(activityList)) {
+            activityList = new ArrayList<>();
+        }
+
+        // 转类型
+        List<ActivityInfoVO> activityInfoVOList = activityList.stream()
+                .map(activity -> {
+                    ActivityInfoVO activityInfoVO = BeanUtils.toBean(activity, ActivityInfoVO.class);
+
+                    Integer totalNum = activity.getTotalNum();
+                    if (totalNum == 0) {
+                        // 无限量
+                        activityInfoVO.setRemainNum(Integer.MAX_VALUE);
+                    } else {
+                        // todo 查询剩余数量
+                        activityInfoVO.setRemainNum(totalNum);
+                    }
+
+                    return activityInfoVO;
+                })
+                .toList();
+
+        // 写入缓存
+        String jsonStr = JsonUtils.toJsonStr(activityInfoVOList);
+        redisTemplate.opsForValue().set(ACTIVITY_CACHE, jsonStr);
+    }
+
+    @Override
+    public List<ActivityInfoVO> listFromCache(Integer tabType) {
+
+        // 从 redis 查询活动信息
+        String jsonStr = redisTemplate.opsForValue().get(ACTIVITY_CACHE);
+        if (ObjectUtils.isNull(jsonStr)) {
+            return new ArrayList<>();
+        }
+
+        // json 转实体
+        List<ActivityInfoVO> activityInfoVOList = JsonUtils.toList(jsonStr, ActivityInfoVO.class);
+
+        Integer queryStatus = EnumUtils.value(tabType == 1 ? EdjActivityStatus.ONGOING : EdjActivityStatus.PENDING, Integer.class);
+
+        // 过滤活动，实时状态
+        return activityInfoVOList.stream()
+                // 获取实际状态
+                .peek(item -> {
+                    // 修改实际状态
+                    Integer status = item.getStatus();
+                    LocalDateTime distributeStartTime = item.getDistributeStartTime();
+                    LocalDateTime distributeEndTime = item.getDistributeEndTime();
+                    LocalDateTime now = LocalDateTime.now();
+
+                    // 活动待生效
+                    if (EnumUtils.eq(EdjActivityStatus.PENDING, status)) {
+                        // 活动已结束
+                        if (distributeEndTime.isBefore(now)) {
+                            item.setStatus(EnumUtils.value(EdjActivityStatus.EXPIRED, Integer.class));
+                            return;
+                        }
+                        // 活动开始
+                        if (distributeStartTime.isEqual(now) || distributeStartTime.isBefore(now)) {
+                            item.setStatus(EnumUtils.value(EdjActivityStatus.ONGOING, Integer.class));
+                            return;
+                        }
+                    }
+
+                    // 活动进行中
+                    if (EnumUtils.eq(EdjActivityStatus.ONGOING, status)) {
+                        // 活动已结束
+                        if (distributeEndTime.isBefore(now)) {
+                            item.setStatus(EnumUtils.value(EdjActivityStatus.EXPIRED, Integer.class));
+                        }
+                    }
+                })
+                .filter(item -> ObjectUtils.equals(item.getStatus(), queryStatus))
+                .toList();
     }
 }

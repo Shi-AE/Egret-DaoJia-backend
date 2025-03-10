@@ -27,14 +27,28 @@ public class MarketJob {
      */
     @XxlJob("UpdateActivityStatus")
     public void updateActivityStatus() {
-        log.info(">>>>>>>> 开始优惠券服务状态自动更新");
+        log.info(">>>>>>>> 开始优惠券活动状态自动更新");
 
         try {
             activityService.updateStatus();
+            log.info(">>>>>>>> 完成优惠券活动状态自动更新");
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
+    }
 
-        log.info(">>>>>>>> 完成优惠券服务状态自动更新");
+    /**
+     * 优惠券活动预热
+     */
+    @XxlJob("ActivityPerHeat")
+    public void activityPerHeat() {
+        log.info(">>>>>>>> 开始优惠券活动预热");
+
+        try {
+            activityService.perHeat();
+            log.info(">>>>>>>> 完成优惠券活动预热");
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
     }
 }
