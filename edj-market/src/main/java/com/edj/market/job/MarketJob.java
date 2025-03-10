@@ -51,4 +51,19 @@ public class MarketJob {
             log.error(e.getMessage(), e);
         }
     }
+
+    /**
+     * 优惠券库存预热
+     */
+    @XxlJob("ActivityStockPerHeat")
+    public void activityStockPerHeat() {
+        log.info(">>>>>>>> 开始优惠券库存预热");
+
+        try {
+            activityService.stockPerHeat();
+            log.info(">>>>>>>> 完成优惠券库存预热");
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+    }
 }

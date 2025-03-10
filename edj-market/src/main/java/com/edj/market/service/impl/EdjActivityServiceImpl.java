@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.edj.cache.constants.CacheConstants.CacheName.ACTIVITY_CACHE;
+import static com.edj.cache.constants.CacheConstants.CacheName.ACTIVITY_STOCK_CACHE;
 
 /**
  * 针对表【edj_activity(优惠券活动表)】的数据库操作Service实现
@@ -47,6 +48,8 @@ public class EdjActivityServiceImpl extends MPJBaseServiceImpl<EdjActivityMapper
     private final EdjCouponWriteOffMapper couponWriteOffMapper;
 
     private final RedisTemplate<String, String> redisTemplate;
+
+    private final RedisTemplate<String, Long> longRedisTemplate;
 
     @Override
     public void save(ActivitySaveDTO activitySaveDTO) {
@@ -109,10 +112,12 @@ public class EdjActivityServiceImpl extends MPJBaseServiceImpl<EdjActivityMapper
 
         ActivityPageVO activityPageVO = BeanUtils.toBean(activity, ActivityPageVO.class);
 
+        // 查询领取数量
         LambdaQueryWrapper<EdjCoupon> couponCountWrapper = new LambdaQueryWrapper<EdjCoupon>()
                 .eq(EdjCoupon::getEdjActivityId, id);
         Long couponCount = couponMapper.selectCount(couponCountWrapper);
 
+        // 查询核销数量
         LambdaQueryWrapper<EdjCouponWriteOff> writeOffCountWrapper = new LambdaQueryWrapper<EdjCouponWriteOff>()
                 .eq(EdjCouponWriteOff::getEdjActivityId, id);
         Long writeOffCountCount = couponWriteOffMapper.selectCount(writeOffCountWrapper);
@@ -246,5 +251,63 @@ public class EdjActivityServiceImpl extends MPJBaseServiceImpl<EdjActivityMapper
                 })
                 .filter(item -> ObjectUtils.equals(item.getStatus(), queryStatus))
                 .toList();
+    }
+
+    @Override
+    public void stockPerHeat() {
+        LambdaQueryWrapper<EdjActivity> wrapper = new LambdaQueryWrapper<EdjActivity>()
+                .select(EdjActivity::getId, EdjActivity::getStatus, EdjActivity::getTotalNum)
+                .in(EdjActivity::getStatus, List.of(EdjActivityStatus.ONGOING, EdjActivityStatus.PENDING))
+                .le(EdjActivity::getDistributeStartTime, LocalDateTime.now().plusDays(30));
+        List<EdjActivity> activityList = baseMapper.selectList(wrapper);
+
+        for (EdjActivity activity : activityList) {
+            Integer status = activity.getStatus();
+            Integer totalNum = activity.getTotalNum();
+            Long id = activity.getId();
+
+            // 构造key
+            String key = String.format(ACTIVITY_STOCK_CACHE, id % 10);
+
+            // 活动待生效，直接保存总量到 redis
+            if (EnumUtils.eq(EdjActivityStatus.PENDING, status)) {
+                // 无限制
+                if (totalNum == 0) {
+                    longRedisTemplate.opsForHash().put(key, id, Long.MAX_VALUE);
+                    continue;
+                }
+
+                // 有限制
+                longRedisTemplate.opsForHash().put(key, id, totalNum);
+                continue;
+            }
+
+            // 活动进行中
+            if (EnumUtils.eq(EdjActivityStatus.ONGOING, status)) {
+                // 无限制
+                if (totalNum == 0) {
+                    longRedisTemplate.opsForHash().put(key, id, Long.MAX_VALUE);
+                    continue;
+                }
+
+                // 有限制
+                // 检查是否存在key
+                Boolean hasKey = longRedisTemplate.opsForHash().hasKey(key, id);
+                // 库存不存在则同步
+                if (!hasKey) {
+
+                    // 查询已领取数量
+                    LambdaQueryWrapper<EdjCoupon> couponCountWrapper = new LambdaQueryWrapper<EdjCoupon>()
+                            .eq(EdjCoupon::getEdjActivityId, id);
+                    int couponCount = couponMapper.selectCount(couponCountWrapper).intValue();
+
+                    // 计算库存
+                    int stock = NumberUtils.max(totalNum - couponCount, 0);
+
+                    // 同步库存
+                    longRedisTemplate.opsForHash().put(key, id, stock);
+                }
+            }
+        }
     }
 }

@@ -63,6 +63,11 @@ public class CacheConstants {
          * 优惠券活动缓存
          */
         public static final String ACTIVITY_CACHE = GRAB_COUPON + ":ACTIVITY";
+
+        /**
+         * 优惠券库存缓存
+         */
+        public static final String ACTIVITY_STOCK_CACHE = GRAB_COUPON + ":ACTIVITY:STOCK:{%s}";
     }
 
     public static final class CacheManager {

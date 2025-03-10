@@ -55,4 +55,9 @@ public interface EdjActivityService extends MPJBaseService<EdjActivity> {
      * 查询用户端抢券列表
      */
     List<ActivityInfoVO> listFromCache(Integer tabType);
+
+    /**
+     * 优惠券库存预热
+     */
+    void stockPerHeat();
 }
