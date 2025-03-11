@@ -143,10 +143,10 @@ public class EdjCouponServiceImpl extends MPJBaseServiceImpl<EdjCouponMapper, Ed
         if (result == -1) {
             throw new BadRequestException("限领一张");
         }
-        if (result == -2 || result == -4) {
+        if (result == -2 || result == -3) {
             throw new BadRequestException("已抢光");
         }
-        if (result == -3) {
+        if (result == -4) {
             throw new BadRequestException("抢券失败");
         }
     }
