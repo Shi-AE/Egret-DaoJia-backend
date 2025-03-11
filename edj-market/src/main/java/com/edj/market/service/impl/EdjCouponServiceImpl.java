@@ -102,8 +102,8 @@ public class EdjCouponServiceImpl extends MPJBaseServiceImpl<EdjCouponMapper, Ed
             throw new BadRequestException("活动已结束");
         }
 
-        //-- key: 库存(KEYS[1]), 抢券成功列表(KEYS[2]), 抢券同步队列(KEYS[3])
-        //-- argv: 活动id(ARGV[1]), 用户id(ARGV[2]), EdjCoupon实体(ARGV[3])
+        // key: 库存(KEYS[1]), 抢券成功列表(KEYS[2])
+        // argv: 活动id(ARGV[1]), 用户id(ARGV[2])
 
         // 用户id
         Long userId = SecurityUtils.getUserId();
@@ -115,24 +115,13 @@ public class EdjCouponServiceImpl extends MPJBaseServiceImpl<EdjCouponMapper, Ed
         // 库存key
         String stockKey = String.format(ACTIVITY_STOCK_CACHE, index);
         // 抢券成功列表key
-        String successListKey = String.format(SUCCESS_LIST_CACHE, activityId, index);
-        // 抢券同步队列key
-        String successSyncKey = String.format(SUCCESS_SYNC_CACHE, index);
-
-        // 构建领取优惠券元组
-        EdjCoupon coupon = EdjCoupon
-                .builder()
-                .edjUserId(userId)
-                .edjActivityId(activityId)
-                .build();
-        // 转为字符串
-        String couponStr = JsonUtils.toJsonStr(coupon);
+        String successListKey = String.format(SUCCESS_LIST_CACHE, index, activityId);
 
         // 执行脚本
         Long result = longRedisTemplate.execute(
                 grabCouponScript,
-                List.of(stockKey, successListKey, successSyncKey),
-                activityId, userId, couponStr
+                List.of(stockKey, successListKey),
+                activityId, userId
         );
 
         if (ObjectUtils.isNull(result)) {
@@ -143,10 +132,10 @@ public class EdjCouponServiceImpl extends MPJBaseServiceImpl<EdjCouponMapper, Ed
         if (result == -1) {
             throw new BadRequestException("限领一张");
         }
-        if (result == -2 || result == -4) {
+        if (result == -2 || result == -3) {
             throw new BadRequestException("已抢光");
         }
-        if (result == -3) {
+        if (result == -4) {
             throw new BadRequestException("抢券失败");
         }
     }
