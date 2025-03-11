@@ -1,5 +1,6 @@
 package com.edj.market.controller.consumer;
 
+import com.edj.market.domain.dto.GrabCouponDTO;
 import com.edj.market.domain.vo.CouponPageVO;
 import com.edj.market.enums.EdjCouponStatus;
 import com.edj.market.service.EdjCouponService;
@@ -12,10 +13,7 @@ import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -45,5 +43,15 @@ public class ConsumerCouponController {
             @RequestParam @Schema(description = "优惠券状态") @NotNull @Enums(EdjCouponStatus.class) Integer status
     ) {
         return couponService.getMyCouponForPage(lastId, status);
+    }
+
+    /**
+     * 抢券
+     */
+    @PostMapping("grab")
+    @Operation(summary = "抢券")
+    @PreAuthorize("hasAuthority('consumer:coupon:grab')")
+    public void grabCoupon(@Validated @RequestBody GrabCouponDTO grabCouponDTO) {
+        couponService.grabCoupon(grabCouponDTO);
     }
 }

@@ -299,7 +299,7 @@ public class EdjActivityServiceImpl extends MPJBaseServiceImpl<EdjActivityMapper
                     // 查询已领取数量
                     LambdaQueryWrapper<EdjCoupon> couponCountWrapper = new LambdaQueryWrapper<EdjCoupon>()
                             .eq(EdjCoupon::getEdjActivityId, id);
-                    int couponCount = couponMapper.selectCount(couponCountWrapper).intValue();
+                    int couponCount = Math.toIntExact(couponMapper.selectCount(couponCountWrapper));
 
                     // 计算库存
                     int stock = NumberUtils.max(totalNum - couponCount, 0);

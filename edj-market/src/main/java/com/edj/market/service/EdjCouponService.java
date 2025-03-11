@@ -2,6 +2,7 @@ package com.edj.market.service;
 
 import com.edj.common.domain.PageResult;
 import com.edj.market.domain.dto.CouponPageDTO;
+import com.edj.market.domain.dto.GrabCouponDTO;
 import com.edj.market.domain.entity.EdjCoupon;
 import com.edj.market.domain.vo.CouponPageVO;
 import com.github.yulichang.base.MPJBaseService;
@@ -25,4 +26,9 @@ public interface EdjCouponService extends MPJBaseService<EdjCoupon> {
      * 我的优惠券列表
      */
     List<CouponPageVO> getMyCouponForPage(Long lastId, Integer status);
+
+    /**
+     * 抢券
+     */
+    void grabCoupon(GrabCouponDTO grabCouponDTO);
 }
