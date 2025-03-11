@@ -31,4 +31,9 @@ public interface EdjCouponService extends MPJBaseService<EdjCoupon> {
      * 抢券
      */
     void grabCoupon(GrabCouponDTO grabCouponDTO);
+
+    /**
+     * 同步抢券结果
+     */
+    void grabCouponSync();
 }

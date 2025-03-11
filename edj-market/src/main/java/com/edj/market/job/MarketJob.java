@@ -1,6 +1,7 @@
 package com.edj.market.job;
 
 import com.edj.market.service.EdjActivityService;
+import com.edj.market.service.EdjCouponService;
 import com.xxl.job.core.handler.annotation.XxlJob;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +19,8 @@ import org.springframework.stereotype.Component;
 public class MarketJob {
 
     private final EdjActivityService activityService;
+
+    private final EdjCouponService couponService;
 
     /**
      * 优惠券活动状态自动更新
@@ -65,5 +68,15 @@ public class MarketJob {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    /**
+     * 同步抢券结果
+     */
+    @XxlJob("GrabCouponSync")
+    public void grabCouponSync() {
+        log.info(">>>>>>>> 开始同步抢券结果");
+        couponService.grabCouponSync();
+        log.info(">>>>>>>> 完成同步抢券结果");
     }
 }

@@ -2,18 +2,20 @@ package com.edj.market.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.edj.api.api.user.UserApi;
+import com.edj.api.api.user.dto.UserDTO;
+import com.edj.cache.helper.LockHelper;
 import com.edj.common.domain.PageResult;
 import com.edj.common.expcetions.BadRequestException;
 import com.edj.common.expcetions.ServerErrorException;
-import com.edj.common.utils.BeanUtils;
-import com.edj.common.utils.CollUtils;
-import com.edj.common.utils.JsonUtils;
-import com.edj.common.utils.ObjectUtils;
+import com.edj.common.utils.*;
 import com.edj.market.domain.dto.CouponPageDTO;
 import com.edj.market.domain.dto.GrabCouponDTO;
+import com.edj.market.domain.entity.EdjActivity;
 import com.edj.market.domain.entity.EdjCoupon;
 import com.edj.market.domain.vo.ActivityInfoVO;
 import com.edj.market.domain.vo.CouponPageVO;
+import com.edj.market.mapper.EdjActivityMapper;
 import com.edj.market.mapper.EdjCouponMapper;
 import com.edj.market.service.EdjCouponService;
 import com.edj.mysql.utils.PageUtils;
@@ -21,14 +23,22 @@ import com.edj.security.utils.SecurityUtils;
 import com.github.yulichang.base.MPJBaseServiceImpl;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.IntStream;
 
 import static com.edj.cache.constants.CacheConstants.CacheName.*;
+import static com.edj.cache.helper.LockHelper.COMPLEX_OPERATION_WAIT_TIME;
+import static com.edj.common.constants.CommonRedisConstants.Lock.GRAB_COUPON_LOCK;
+import static com.edj.market.constants.RedisConstants.LIMIT;
+import static com.edj.market.constants.RedisConstants.QUEUE_NUM;
 
 /**
  * 针对表【edj_coupon(用户优惠券表)】的数据库操作Service实现
@@ -37,12 +47,19 @@ import static com.edj.cache.constants.CacheConstants.CacheName.*;
  * @date 2025/03/09
  */
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class EdjCouponServiceImpl extends MPJBaseServiceImpl<EdjCouponMapper, EdjCoupon> implements EdjCouponService {
 
     private final RedisTemplate<String, String> stringRedisTemplate;
 
-    private final RedisTemplate<String, Long> longRedisTemplate;
+    private final RedisTemplate<String, Object> redisTemplate;
+
+    private final UserApi userApi;
+
+    private final EdjActivityMapper activityMapper;
+
+    private final LockHelper lockHelper;
 
     @Resource(name = "grabCouponScript")
     private DefaultRedisScript<Long> grabCouponScript;
@@ -107,10 +124,8 @@ public class EdjCouponServiceImpl extends MPJBaseServiceImpl<EdjCouponMapper, Ed
 
         // 用户id
         Long userId = SecurityUtils.getUserId();
-        // 队列总数
-        int n = 10;
         // 序号
-        long index = activityId % n;
+        long index = activityId % QUEUE_NUM;
 
         // 库存key
         String stockKey = String.format(ACTIVITY_STOCK_CACHE, index);
@@ -129,7 +144,7 @@ public class EdjCouponServiceImpl extends MPJBaseServiceImpl<EdjCouponMapper, Ed
         String couponStr = JsonUtils.toJsonStr(coupon);
 
         // 执行脚本
-        Long result = longRedisTemplate.execute(
+        Long result = redisTemplate.execute(
                 grabCouponScript,
                 List.of(stockKey, successListKey, successSyncKey),
                 activityId, userId, couponStr
@@ -149,5 +164,90 @@ public class EdjCouponServiceImpl extends MPJBaseServiceImpl<EdjCouponMapper, Ed
         if (result == -4) {
             throw new BadRequestException("抢券失败");
         }
+    }
+
+    @Override
+    public void grabCouponSync() {
+        // 分线程处理
+        List<CompletableFuture<Void>> futureList = IntStream.range(0, QUEUE_NUM)
+                .mapToObj(i -> AsyncUtils.runAsync(() -> {
+                    // 获取key
+                    String key = String.format(SUCCESS_SYNC_CACHE, i);
+                    log.debug("线程: {} -> 获取key | key: {}", i, key);
+
+                    // 加锁执行
+                    LockHelper.Execution execution = () -> {
+                        // 获取同步列表数据
+                        List<Object> couponStrList = redisTemplate.opsForList().rightPop(key, LIMIT);
+                        log.debug("线程: {} -> 获取同步列表数据 | couponStrList: {}", i, couponStrList);
+
+                        // 判断空
+                        if (CollUtils.isEmpty(couponStrList)) {
+                            return;
+                        }
+
+                        for (Object couponStr : couponStrList) {
+                            try {
+                                // 解析为实体
+                                EdjCoupon coupon = JsonUtils.toBean(
+                                        StringUtils.strip((String) couponStr, "\""),
+                                        EdjCoupon.class
+                                );
+
+                                // 获取redis数据
+                                Long userId = coupon.getEdjUserId();
+                                Long activityId = coupon.getEdjActivityId();
+                                if (userId == null || activityId == null) {
+                                    log.error("同步列表数据不完整 userId: {}, activityId: {}", userId, activityId);
+                                    continue;
+                                }
+
+                                // 获取用户数据
+                                UserDTO user = userApi.getUserById(userId);
+                                if (ObjectUtils.isNull(user)) {
+                                    log.error("用户不存在 userId: {}", userId);
+                                    continue;
+                                }
+
+                                // 获取活动数据
+                                EdjActivity activity = activityMapper.selectById(activityId);
+                                if (ObjectUtils.isNull(activity)) {
+                                    log.error("活动不存在 activityId: {}", activityId);
+                                    continue;
+                                }
+
+                                // 组装数据
+                                coupon.setName(activity.getName());
+                                coupon.setUsername(user.getUsername());
+                                coupon.setNickname(user.getNickname());
+                                coupon.setUserPhone(user.getPhoneNumber());
+                                coupon.setType(activity.getType());
+                                coupon.setDiscountRate(activity.getDiscountRate());
+                                coupon.setDiscountAmount(activity.getDiscountAmount());
+                                coupon.setAmountCondition(activity.getAmountCondition());
+                                coupon.setValidityTime(LocalDateTime.now().plusDays(activity.getValidityDays()));
+
+                                int insert = baseMapper.insert(coupon);
+                                if (insert != 1) {
+                                    log.error("保存失败 coupon: {}", coupon);
+                                    throw new ServerErrorException("coupon保存失败");
+                                }
+                            } catch (DuplicateKeyException duplicateKeyException) {
+                                log.error("优惠券重复获得 coupon: {}", couponStr);
+                            } catch (Exception e) {
+                                // 保存失败恢复redis数据
+                                redisTemplate.opsForList().leftPush(key, couponStr);
+                            }
+                        }
+                    };
+
+                    lockHelper.syncLock(
+                            String.format(GRAB_COUPON_LOCK, key),
+                            COMPLEX_OPERATION_WAIT_TIME,
+                            execution
+                    );
+                }))
+                .toList();
+        CompletableFuture.allOf(futureList.toArray(new CompletableFuture[0])).join();
     }
 }

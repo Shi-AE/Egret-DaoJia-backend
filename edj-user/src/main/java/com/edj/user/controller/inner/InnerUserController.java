@@ -2,6 +2,8 @@ package com.edj.user.controller.inner;
 
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.edj.api.api.user.UserApi;
+import com.edj.api.api.user.dto.UserDTO;
+import com.edj.common.utils.BeanUtils;
 import com.edj.user.domain.entity.EdjUser;
 import com.edj.user.service.EdjUserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,10 +14,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * 内部接口 - 用户信息相关接口
@@ -47,5 +46,16 @@ public class InnerUserController implements UserApi {
                 .set(EdjUser::getUsername, username)
                 .set(EdjUser::getNickname, username);
         userService.update(wrapper);
+    }
+
+    /**
+     * 根据用户id获取用户数据
+     */
+    @Override
+    @GetMapping("{id}")
+    @Operation(summary = "根据用户id获取用户数据")
+    public UserDTO getUserById(@PathVariable Long id) {
+        EdjUser user = userService.getById(id);
+        return BeanUtils.toBean(user, UserDTO.class);
     }
 }

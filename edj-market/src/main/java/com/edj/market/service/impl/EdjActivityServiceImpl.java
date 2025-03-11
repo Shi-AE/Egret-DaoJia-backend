@@ -32,6 +32,7 @@ import java.util.List;
 
 import static com.edj.cache.constants.CacheConstants.CacheName.ACTIVITY_CACHE;
 import static com.edj.cache.constants.CacheConstants.CacheName.ACTIVITY_STOCK_CACHE;
+import static com.edj.market.constants.RedisConstants.QUEUE_NUM;
 
 /**
  * 针对表【edj_activity(优惠券活动表)】的数据库操作Service实现
@@ -47,9 +48,11 @@ public class EdjActivityServiceImpl extends MPJBaseServiceImpl<EdjActivityMapper
 
     private final EdjCouponWriteOffMapper couponWriteOffMapper;
 
-    private final RedisTemplate<String, String> redisTemplate;
+    private final RedisTemplate<String, String> stringRedisTemplate;
 
     private final RedisTemplate<String, Long> longRedisTemplate;
+
+    private final RedisTemplate<String, Object> redisTemplate;
 
     @Override
     public void save(ActivitySaveDTO activitySaveDTO) {
@@ -185,14 +188,11 @@ public class EdjActivityServiceImpl extends MPJBaseServiceImpl<EdjActivityMapper
                 .map(activity -> {
                     ActivityInfoVO activityInfoVO = BeanUtils.toBean(activity, ActivityInfoVO.class);
 
-                    Integer totalNum = activity.getTotalNum();
-                    if (totalNum == 0) {
-                        // 无限量
-                        activityInfoVO.setRemainNum(Integer.MAX_VALUE);
-                    } else {
-                        // todo 查询剩余数量
-                        activityInfoVO.setRemainNum(totalNum);
-                    }
+                    // 从redis获取库存
+                    Long activityId = activity.getId();
+                    String stockKey = String.format(ACTIVITY_STOCK_CACHE, activityId % QUEUE_NUM);
+                    Long stock = (Long) longRedisTemplate.opsForHash().get(stockKey, activityId);
+                    activityInfoVO.setRemainNum(NumberUtils.null2Default(stock, 0));
 
                     return activityInfoVO;
                 })
@@ -200,14 +200,14 @@ public class EdjActivityServiceImpl extends MPJBaseServiceImpl<EdjActivityMapper
 
         // 写入缓存
         String jsonStr = JsonUtils.toJsonStr(activityInfoVOList);
-        redisTemplate.opsForValue().set(ACTIVITY_CACHE, jsonStr);
+        stringRedisTemplate.opsForValue().set(ACTIVITY_CACHE, jsonStr);
     }
 
     @Override
     public List<ActivityInfoVO> listFromCache(Integer tabType) {
 
         // 从 redis 查询活动信息
-        String jsonStr = redisTemplate.opsForValue().get(ACTIVITY_CACHE);
+        String jsonStr = stringRedisTemplate.opsForValue().get(ACTIVITY_CACHE);
         if (ObjectUtils.isNull(jsonStr)) {
             return new ArrayList<>();
         }
@@ -267,7 +267,7 @@ public class EdjActivityServiceImpl extends MPJBaseServiceImpl<EdjActivityMapper
             Long id = activity.getId();
 
             // 构造key
-            String key = String.format(ACTIVITY_STOCK_CACHE, id % 10);
+            String key = String.format(ACTIVITY_STOCK_CACHE, id % QUEUE_NUM);
 
             // 活动待生效，直接保存总量到 redis
             if (EnumUtils.eq(EdjActivityStatus.PENDING, status)) {
@@ -278,7 +278,7 @@ public class EdjActivityServiceImpl extends MPJBaseServiceImpl<EdjActivityMapper
                 }
 
                 // 有限制
-                longRedisTemplate.opsForHash().put(key, id, totalNum);
+                longRedisTemplate.opsForHash().put(key, id, (long) totalNum);
                 continue;
             }
 
@@ -299,10 +299,10 @@ public class EdjActivityServiceImpl extends MPJBaseServiceImpl<EdjActivityMapper
                     // 查询已领取数量
                     LambdaQueryWrapper<EdjCoupon> couponCountWrapper = new LambdaQueryWrapper<EdjCoupon>()
                             .eq(EdjCoupon::getEdjActivityId, id);
-                    int couponCount = Math.toIntExact(couponMapper.selectCount(couponCountWrapper));
+                    long couponCount = couponMapper.selectCount(couponCountWrapper);
 
                     // 计算库存
-                    int stock = NumberUtils.max(totalNum - couponCount, 0);
+                    long stock = NumberUtils.max(totalNum - couponCount, 0);
 
                     // 同步库存
                     longRedisTemplate.opsForHash().put(key, id, stock);

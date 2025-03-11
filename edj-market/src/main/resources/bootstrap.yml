@@ -41,3 +41,6 @@ snowflake:
 
 xxl-job:
   port: 33571
+
+feign:
+  enable: true
