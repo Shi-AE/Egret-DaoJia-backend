@@ -79,4 +79,15 @@ public class MarketJob {
         couponService.grabCouponSync();
         log.info(">>>>>>>> 完成同步抢券结果");
     }
+
+    /**
+     * 优惠券活动已结束清理缓存
+     * 每1天执行一次
+     */
+    @XxlJob("CleanActivityCache")
+    public void cleanActivityCache() {
+        log.info(">>>>>>>> 开始优惠券活动已结束清理缓存");
+        activityService.cleanCache();
+        log.info(">>>>>>>> 完成优惠券活动已结束清理缓存");
+    }
 }

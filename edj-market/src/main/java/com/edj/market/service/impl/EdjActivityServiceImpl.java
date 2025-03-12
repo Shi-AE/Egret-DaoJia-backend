@@ -1,5 +1,6 @@
 package com.edj.market.service.impl;
 
+import cn.hutool.core.util.ReUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -22,6 +23,7 @@ import com.edj.market.service.EdjActivityService;
 import com.edj.mysql.utils.PageUtils;
 import com.github.yulichang.base.MPJBaseServiceImpl;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,9 +31,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.regex.Pattern;
 
-import static com.edj.cache.constants.CacheConstants.CacheName.ACTIVITY_CACHE;
-import static com.edj.cache.constants.CacheConstants.CacheName.ACTIVITY_STOCK_CACHE;
+import static com.edj.cache.constants.CacheConstants.CacheName.*;
 import static com.edj.market.constants.RedisConstants.QUEUE_NUM;
 
 /**
@@ -41,6 +45,7 @@ import static com.edj.market.constants.RedisConstants.QUEUE_NUM;
  * @date 2025/03/09
  */
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class EdjActivityServiceImpl extends MPJBaseServiceImpl<EdjActivityMapper, EdjActivity> implements EdjActivityService {
 
@@ -307,6 +312,69 @@ public class EdjActivityServiceImpl extends MPJBaseServiceImpl<EdjActivityMapper
                     // 同步库存
                     longRedisTemplate.opsForHash().put(key, id, stock);
                 }
+            }
+        }
+    }
+
+    @Override
+    public void cleanCache() {
+        // 清理库存缓存
+        // 获取所有库存key
+        Set<String> stockKeys = redisTemplate.keys(ACTIVITY_STOCK_CACHE
+                .substring(0, ACTIVITY_STOCK_CACHE.length() - 4)
+                .concat("*")
+        );
+
+        if (CollUtils.isNotEmpty(stockKeys)) {
+            stockKeys.forEach(stockKey -> {
+                // 获取所有活动id
+                Set<Object> activityIdSet = redisTemplate.opsForHash().keys(stockKey);
+                // 校验活动是否结束
+                LambdaQueryWrapper<EdjActivity> wrapper = new LambdaQueryWrapper<EdjActivity>()
+                        .select(EdjActivity::getId)
+                        .in(EdjActivity::getStatus, List.of(EdjActivityStatus.EXPIRED, EdjActivityStatus.CANCELLED))
+                        .in(EdjActivity::getId, activityIdSet);
+                List<EdjActivity> activityEndList = baseMapper.selectList(wrapper);
+                // 清除缓存
+                Object[] activityEndIdList = activityEndList
+                        .stream()
+                        .map(EdjActivity::getId)
+                        .toArray();
+                if (ArrayUtils.isNotEmpty(activityEndIdList)) {
+                    log.info("清理库存缓存 activityEndIdList", activityEndIdList);
+                    redisTemplate.opsForHash().delete(stockKey, activityEndIdList);
+                }
+            });
+        }
+
+        // 清理抢券成功队列缓存
+        // 获取所有key
+        String prefix = SUCCESS_LIST_CACHE.substring(0, SUCCESS_LIST_CACHE.length() - 7);
+        Set<String> successKeys = redisTemplate.keys(prefix.concat("*"));
+
+        if (CollUtils.isNotEmpty(successKeys)) {
+            // 匹配所有活动id
+            Pattern pattern = Pattern.compile("^" + prefix + "(\\d+)_\\{\\d+}$");
+            List<String> activityIdList = successKeys
+                    .stream()
+                    .map(key -> ReUtil.get(pattern, key, 1))
+                    .filter(Objects::nonNull)
+                    .toList();
+            // 校验活动是否结束
+            LambdaQueryWrapper<EdjActivity> wrapper = new LambdaQueryWrapper<EdjActivity>()
+                    .select(EdjActivity::getId)
+                    .in(EdjActivity::getStatus, List.of(EdjActivityStatus.EXPIRED, EdjActivityStatus.CANCELLED))
+                    .in(EdjActivity::getId, activityIdList);
+            List<EdjActivity> activityEndList = baseMapper.selectList(wrapper);
+            // 清除缓存
+            List<String> activityEndKeys = activityEndList
+                    .stream()
+                    .map(EdjActivity::getId)
+                    .map(id -> String.format(SUCCESS_LIST_CACHE, id, id % QUEUE_NUM))
+                    .toList();
+            if (CollUtils.isNotEmpty(activityEndKeys)) {
+                log.info("清理抢券成功队列缓存 activityEndKeys: {}", activityEndKeys);
+                redisTemplate.delete(activityEndKeys);
             }
         }
     }

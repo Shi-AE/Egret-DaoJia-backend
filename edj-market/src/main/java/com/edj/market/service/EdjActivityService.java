@@ -60,4 +60,9 @@ public interface EdjActivityService extends MPJBaseService<EdjActivity> {
      * 优惠券库存预热
      */
     void stockPerHeat();
+
+    /**
+     * 清理已结束活动缓存
+     */
+    void cleanCache();
 }
