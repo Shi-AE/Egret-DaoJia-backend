@@ -1,5 +1,6 @@
 package com.edj.orders.manager.controller.consumer;
 
+import com.edj.api.api.market.vo.AvailableCouponVO;
 import com.edj.mvc.annotation.enums.Enums;
 import com.edj.orders.base.enums.EdjOrderStatus;
 import com.edj.orders.manager.domain.dto.OrdersCancelDTO;
@@ -15,6 +16,8 @@ import com.edj.security.utils.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -107,5 +110,18 @@ public class ConsumerOrdersController {
         ordersCancelDTO.setCurrentUserId(SecurityUtils.getUserId());
         ordersCancelDTO.setCurrentUserName(SecurityUtils.getNickname());
         ordersManagerService.cancel(ordersCancelDTO);
+    }
+
+    /**
+     * 获取可用优惠券
+     */
+    @GetMapping("available/coupon")
+    @Operation(summary = "获取可用优惠券")
+    @PreAuthorize("hasAuthority('consumer:orders:availableCoupon')")
+    public List<AvailableCouponVO> getAvailableCoupon(
+            @RequestParam @NotNull @Positive Long serveId,
+            @RequestParam @Positive Integer purNum
+    ) {
+        return ordersCreateService.getAvailableCoupon(serveId, purNum);
     }
 }

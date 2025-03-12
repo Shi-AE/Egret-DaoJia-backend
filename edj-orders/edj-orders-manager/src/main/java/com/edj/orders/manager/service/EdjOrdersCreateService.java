@@ -1,5 +1,6 @@
 package com.edj.orders.manager.service;
 
+import com.edj.api.api.market.vo.AvailableCouponVO;
 import com.edj.orders.base.domain.entity.EdjOrders;
 import com.edj.orders.manager.domain.dto.OrdersPayDTO;
 import com.edj.orders.manager.domain.dto.PlaceOrderDTO;
@@ -36,4 +37,9 @@ public interface EdjOrdersCreateService extends MPJBaseService<EdjOrders> {
      * 查询超时订单id
      */
     List<Long> selectOverTimePayOrdersListByCount(Integer count);
+
+    /**
+     * 获取可用优惠券
+     */
+    List<AvailableCouponVO> getAvailableCoupon(Long serveId, Integer purNum);
 }

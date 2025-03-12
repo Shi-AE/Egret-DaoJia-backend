@@ -2,6 +2,7 @@ package com.edj.market.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.edj.api.api.market.vo.AvailableCouponVO;
 import com.edj.api.api.user.UserApi;
 import com.edj.api.api.user.dto.UserDTO;
 import com.edj.cache.helper.LockHelper;
@@ -15,9 +16,11 @@ import com.edj.market.domain.entity.EdjActivity;
 import com.edj.market.domain.entity.EdjCoupon;
 import com.edj.market.domain.vo.ActivityInfoVO;
 import com.edj.market.domain.vo.CouponPageVO;
+import com.edj.market.enums.EdjCouponStatus;
 import com.edj.market.mapper.EdjActivityMapper;
 import com.edj.market.mapper.EdjCouponMapper;
 import com.edj.market.service.EdjCouponService;
+import com.edj.market.utils.CouponUtils;
 import com.edj.mysql.utils.PageUtils;
 import com.edj.security.utils.SecurityUtils;
 import com.github.yulichang.base.MPJBaseServiceImpl;
@@ -29,7 +32,9 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.IntStream;
@@ -249,5 +254,29 @@ public class EdjCouponServiceImpl extends MPJBaseServiceImpl<EdjCouponMapper, Ed
                 }))
                 .toList();
         CompletableFuture.allOf(futureList.toArray(new CompletableFuture[0])).join();
+    }
+
+    @Override
+    public List<AvailableCouponVO> getAvailable(BigDecimal totalAmount) {
+
+        // 查询符合条件的优惠券
+        LambdaQueryWrapper<EdjCoupon> wrapper = new LambdaQueryWrapper<EdjCoupon>()
+                .eq(EdjCoupon::getEdjUserId, SecurityUtils.getUserId())
+                .eq(EdjCoupon::getStatus, EdjCouponStatus.UNUSED)
+                .gt(EdjCoupon::getValidityTime, LocalDateTime.now())
+                .le(EdjCoupon::getAmountCondition, totalAmount);
+        List<EdjCoupon> couponList = baseMapper.selectList(wrapper);
+
+        // 判空
+        if (CollUtils.isEmpty(couponList)) {
+            return List.of();
+        }
+
+        // 计算优惠金额
+        return couponList.stream()
+                .peek(coupon -> coupon.setDiscountAmount(CouponUtils.calDiscountAmount(coupon, totalAmount)))
+                .sorted(Comparator.comparing(EdjCoupon::getDiscountAmount).reversed())
+                .map(coupon -> BeanUtils.toBean(coupon, AvailableCouponVO.class))
+                .toList();
     }
 }

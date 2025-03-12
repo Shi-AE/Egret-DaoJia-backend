@@ -1,5 +1,6 @@
 package com.edj.market.service;
 
+import com.edj.api.api.market.vo.AvailableCouponVO;
 import com.edj.common.domain.PageResult;
 import com.edj.market.domain.dto.CouponPageDTO;
 import com.edj.market.domain.dto.GrabCouponDTO;
@@ -7,6 +8,7 @@ import com.edj.market.domain.entity.EdjCoupon;
 import com.edj.market.domain.vo.CouponPageVO;
 import com.github.yulichang.base.MPJBaseService;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -36,4 +38,9 @@ public interface EdjCouponService extends MPJBaseService<EdjCoupon> {
      * 同步抢券结果
      */
     void grabCouponSync();
+
+    /**
+     * 获取可用优惠券，按照优惠金额从大到小排序
+     */
+    List<AvailableCouponVO> getAvailable(BigDecimal totalAmount);
 }

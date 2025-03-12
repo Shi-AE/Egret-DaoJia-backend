@@ -7,6 +7,8 @@ import com.edj.api.api.customer.AddressBookApi;
 import com.edj.api.api.customer.dto.AddressBookVO;
 import com.edj.api.api.foundations.ServeApi;
 import com.edj.api.api.foundations.dto.ServeAggregationDTO;
+import com.edj.api.api.market.CouponApi;
+import com.edj.api.api.market.vo.AvailableCouponVO;
 import com.edj.api.api.trade.NativePayApi;
 import com.edj.api.api.trade.TradingApi;
 import com.edj.api.api.trade.dto.NativePayDTO;
@@ -71,6 +73,8 @@ public class EdjOrdersCreateServiceImpl extends MPJBaseServiceImpl<EdjOrdersMapp
     private final NativePayApi nativePayApi;
 
     private final TradingApi tradingApi;
+
+    private final CouponApi couponApi;
 
     private final RedisTemplate<String, Object> redisTemplate;
 
@@ -268,5 +272,20 @@ public class EdjOrdersCreateServiceImpl extends MPJBaseServiceImpl<EdjOrdersMapp
                 .stream()
                 .map(EdjOrders::getId)
                 .toList();
+    }
+
+    @Override
+    public List<AvailableCouponVO> getAvailableCoupon(Long serveId, Integer purNum) {
+        // 查询服务
+        ServeAggregationDTO serveAggregationDTO = serveApi.findServeDetailById(serveId);
+        // 校验服务
+        if (ObjectUtils.isNull(serveAggregationDTO) || serveAggregationDTO.getSaleStatus() != 2) {
+            throw new BadRequestException("服务不可用");
+        }
+        // 计算订单总金额
+        BigDecimal totalAmount = serveAggregationDTO.getPrice()
+                .multiply(new BigDecimal(NumberUtils.null2Default(purNum, 1)));
+        // 获取优惠券
+        return couponApi.getAvailable(totalAmount);
     }
 }
