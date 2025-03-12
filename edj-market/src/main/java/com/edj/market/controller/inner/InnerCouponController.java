@@ -1,16 +1,15 @@
 package com.edj.market.controller.inner;
 
 import com.edj.api.api.market.CouponApi;
+import com.edj.api.api.market.dto.CouponUseDTO;
 import com.edj.api.api.market.vo.AvailableCouponVO;
+import com.edj.api.api.market.vo.CouponUseVO;
 import com.edj.market.service.EdjCouponService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -40,5 +39,14 @@ public class InnerCouponController implements CouponApi {
             @RequestParam @NotNull BigDecimal totalAmount
     ) {
         return couponService.getAvailable(userId, totalAmount);
+    }
+
+    /**
+     * 使用优惠券，返回优惠金额
+     */
+    @Override
+    @PostMapping("use")
+    public CouponUseVO use(@Validated @RequestBody CouponUseDTO couponUseDTO) {
+        return couponService.use(couponUseDTO);
     }
 }

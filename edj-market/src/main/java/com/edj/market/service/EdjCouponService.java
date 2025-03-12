@@ -1,6 +1,8 @@
 package com.edj.market.service;
 
+import com.edj.api.api.market.dto.CouponUseDTO;
 import com.edj.api.api.market.vo.AvailableCouponVO;
+import com.edj.api.api.market.vo.CouponUseVO;
 import com.edj.common.domain.PageResult;
 import com.edj.market.domain.dto.CouponPageDTO;
 import com.edj.market.domain.dto.GrabCouponDTO;
@@ -43,4 +45,9 @@ public interface EdjCouponService extends MPJBaseService<EdjCoupon> {
      * 获取可用优惠券，按照优惠金额从大到小排序
      */
     List<AvailableCouponVO> getAvailable(Long userId, BigDecimal totalAmount);
+
+    /**
+     * 使用优惠券，返回优惠金额
+     */
+    CouponUseVO use(CouponUseDTO couponUseDTO);
 }

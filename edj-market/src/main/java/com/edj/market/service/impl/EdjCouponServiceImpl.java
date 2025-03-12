@@ -1,24 +1,30 @@
 package com.edj.market.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.edj.api.api.market.dto.CouponUseDTO;
 import com.edj.api.api.market.vo.AvailableCouponVO;
+import com.edj.api.api.market.vo.CouponUseVO;
 import com.edj.api.api.user.UserApi;
 import com.edj.api.api.user.dto.UserDTO;
 import com.edj.cache.helper.LockHelper;
 import com.edj.common.domain.PageResult;
 import com.edj.common.expcetions.BadRequestException;
+import com.edj.common.expcetions.DBException;
 import com.edj.common.expcetions.ServerErrorException;
 import com.edj.common.utils.*;
 import com.edj.market.domain.dto.CouponPageDTO;
 import com.edj.market.domain.dto.GrabCouponDTO;
 import com.edj.market.domain.entity.EdjActivity;
 import com.edj.market.domain.entity.EdjCoupon;
+import com.edj.market.domain.entity.EdjCouponWriteOff;
 import com.edj.market.domain.vo.ActivityInfoVO;
 import com.edj.market.domain.vo.CouponPageVO;
 import com.edj.market.enums.EdjCouponStatus;
 import com.edj.market.mapper.EdjActivityMapper;
 import com.edj.market.mapper.EdjCouponMapper;
+import com.edj.market.mapper.EdjCouponWriteOffMapper;
 import com.edj.market.service.EdjCouponService;
 import com.edj.market.utils.CouponUtils;
 import com.edj.mysql.utils.PageUtils;
@@ -65,6 +71,8 @@ public class EdjCouponServiceImpl extends MPJBaseServiceImpl<EdjCouponMapper, Ed
     private final EdjActivityMapper activityMapper;
 
     private final LockHelper lockHelper;
+
+    private final EdjCouponWriteOffMapper couponWriteOffMapper;
 
     @Resource(name = "grabCouponScript")
     private DefaultRedisScript<Long> grabCouponScript;
@@ -278,5 +286,75 @@ public class EdjCouponServiceImpl extends MPJBaseServiceImpl<EdjCouponMapper, Ed
                 .sorted(Comparator.comparing(EdjCoupon::getDiscountAmount).reversed())
                 .map(coupon -> BeanUtils.toBean(coupon, AvailableCouponVO.class))
                 .toList();
+    }
+
+    @Override
+    public CouponUseVO use(CouponUseDTO couponUseDTO) {
+        // 查询优惠券
+        Long id = couponUseDTO.getId();
+        EdjCoupon coupon = baseMapper.selectById(id);
+
+        // 校验优惠券
+        if (coupon == null) {
+            throw new BadRequestException("优惠券不存在");
+        }
+        // 校验用户
+        Long userId = coupon.getEdjUserId();
+        if (ObjectUtils.notEqual(userId, couponUseDTO.getUserId())) {
+            throw new BadRequestException("优惠券不属于此用户");
+        }
+        // 校验优惠券状态
+        Integer status = coupon.getStatus();
+        if (EnumUtils.ne(EdjCouponStatus.UNUSED, status)) {
+            throw new BadRequestException("优惠券不可用");
+        }
+        // 校验优惠券截止日期
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime validityTime = coupon.getValidityTime();
+        if (validityTime.isBefore(now)) {
+            throw new BadRequestException("优惠券已过期");
+        }
+        // 校验使用条件
+        BigDecimal amountCondition = coupon.getAmountCondition();
+        BigDecimal totalAmount = couponUseDTO.getTotalAmount();
+        if (amountCondition.compareTo(totalAmount) < 0) {
+            throw new BadRequestException("使用条件不符合");
+        }
+
+        Long ordersId = couponUseDTO.getOrdersId();
+        // 更新优惠券状态
+        LambdaUpdateWrapper<EdjCoupon> couponLambdaUpdateWrapper = new LambdaUpdateWrapper<EdjCoupon>()
+                .eq(EdjCoupon::getId, id)
+                .set(EdjCoupon::getEdjOrdersId, ordersId)
+                .set(EdjCoupon::getUseTime, now)
+                .set(EdjCoupon::getStatus, EdjCouponStatus.USED);
+        int update = baseMapper.update(new EdjCoupon(), couponLambdaUpdateWrapper);
+        if (update != 1) {
+            throw new DBException("优惠券核销失败");
+        }
+
+        Long activityId = coupon.getEdjActivityId();
+        String userPhone = coupon.getUserPhone();
+        String username = coupon.getUsername();
+        // 添加核销记录
+        EdjCouponWriteOff couponWriteOff = EdjCouponWriteOff
+                .builder()
+                .edjCouponId(id)
+                .edjUserId(userId)
+                .edjOrdersId(ordersId)
+                .edjActivityId(activityId)
+                .writeOffTime(now)
+                .writeOffManPhone(userPhone)
+                .writeOffManName(username)
+                .build();
+        int insert = couponWriteOffMapper.insert(couponWriteOff);
+        if (insert != 1) {
+            throw new DBException("优惠券核销失败");
+        }
+
+        return CouponUseVO
+                .builder()
+                .discountAmount(CouponUtils.calDiscountAmount(coupon, totalAmount))
+                .build();
     }
 }
