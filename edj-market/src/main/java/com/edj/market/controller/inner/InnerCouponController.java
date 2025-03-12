@@ -35,7 +35,10 @@ public class InnerCouponController implements CouponApi {
      */
     @GetMapping("available")
     @Override
-    public List<AvailableCouponVO> getAvailable(@RequestParam @NotNull BigDecimal totalAmount) {
-        return couponService.getAvailable(totalAmount);
+    public List<AvailableCouponVO> getAvailable(
+            @RequestParam Long userId,
+            @RequestParam @NotNull BigDecimal totalAmount
+    ) {
+        return couponService.getAvailable(userId, totalAmount);
     }
 }

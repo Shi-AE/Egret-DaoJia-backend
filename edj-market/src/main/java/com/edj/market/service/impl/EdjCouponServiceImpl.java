@@ -257,11 +257,11 @@ public class EdjCouponServiceImpl extends MPJBaseServiceImpl<EdjCouponMapper, Ed
     }
 
     @Override
-    public List<AvailableCouponVO> getAvailable(BigDecimal totalAmount) {
+    public List<AvailableCouponVO> getAvailable(Long userId, BigDecimal totalAmount) {
 
         // 查询符合条件的优惠券
         LambdaQueryWrapper<EdjCoupon> wrapper = new LambdaQueryWrapper<EdjCoupon>()
-                .eq(EdjCoupon::getEdjUserId, SecurityUtils.getUserId())
+                .eq(EdjCoupon::getEdjUserId, ObjectUtils.isNull(userId) ? SecurityUtils.getUserId() : userId)
                 .eq(EdjCoupon::getStatus, EdjCouponStatus.UNUSED)
                 .gt(EdjCoupon::getValidityTime, LocalDateTime.now())
                 .le(EdjCoupon::getAmountCondition, totalAmount);

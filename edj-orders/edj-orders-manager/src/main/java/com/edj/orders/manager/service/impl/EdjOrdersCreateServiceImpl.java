@@ -286,6 +286,6 @@ public class EdjOrdersCreateServiceImpl extends MPJBaseServiceImpl<EdjOrdersMapp
         BigDecimal totalAmount = serveAggregationDTO.getPrice()
                 .multiply(new BigDecimal(NumberUtils.null2Default(purNum, 1)));
         // 获取优惠券
-        return couponApi.getAvailable(totalAmount);
+        return couponApi.getAvailable(SecurityUtils.getUserId(), totalAmount);
     }
 }

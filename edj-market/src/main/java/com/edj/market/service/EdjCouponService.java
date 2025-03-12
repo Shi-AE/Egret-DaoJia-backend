@@ -42,5 +42,5 @@ public interface EdjCouponService extends MPJBaseService<EdjCoupon> {
     /**
      * 获取可用优惠券，按照优惠金额从大到小排序
      */
-    List<AvailableCouponVO> getAvailable(BigDecimal totalAmount);
+    List<AvailableCouponVO> getAvailable(Long userId, BigDecimal totalAmount);
 }

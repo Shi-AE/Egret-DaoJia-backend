@@ -22,5 +22,8 @@ public interface CouponApi {
      * 获取可用优惠券，按照优惠金额从大到小排序
      */
     @GetMapping("available")
-    List<AvailableCouponVO> getAvailable(@RequestParam @NotNull BigDecimal totalAmount);
+    List<AvailableCouponVO> getAvailable(
+            @RequestParam Long userId,
+            @RequestParam @NotNull BigDecimal totalAmount
+    );
 }
