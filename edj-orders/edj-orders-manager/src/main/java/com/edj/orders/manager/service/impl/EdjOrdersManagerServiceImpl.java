@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.OrderItem;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.edj.api.api.market.CouponApi;
 import com.edj.cache.helper.CacheHelper;
 import com.edj.common.expcetions.BadRequestException;
 import com.edj.common.expcetions.ServerErrorException;
@@ -27,9 +28,9 @@ import com.edj.orders.manager.service.EdjOrdersManagerService;
 import com.edj.security.utils.SecurityUtils;
 import com.github.yulichang.base.MPJBaseServiceImpl;
 import lombok.RequiredArgsConstructor;
+import org.apache.seata.spring.annotation.GlobalTransactional;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -57,6 +58,8 @@ public class EdjOrdersManagerServiceImpl extends MPJBaseServiceImpl<EdjOrdersMap
     private final EdjOrdersRefundMapper ordersRefundMapper;
 
     private final RedisTemplate<String, Object> redisTemplate;
+
+    private final CouponApi couponApi;
 
     @Override
     public List<EdjOrders> selectByIdList(List<Long> idList) {
@@ -195,11 +198,12 @@ public class EdjOrdersManagerServiceImpl extends MPJBaseServiceImpl<EdjOrdersMap
     }
 
     @Override
-    @Transactional
+    @GlobalTransactional
     public void cancelForPendingPayment(OrdersCancelDTO ordersCancelDTO) {
         // 添加订单取消记录
+        Long id = ordersCancelDTO.getId();
         EdjOrdersCanceled ordersCanceled = EdjOrdersCanceled.builder()
-                .id(ordersCancelDTO.getId())
+                .id(id)
                 .cancellerId(ordersCancelDTO.getCurrentUserId())
                 .cancellerName(ordersCancelDTO.getCurrentUserName())
                 .cancelReason(ordersCancelDTO.getCancelReason())
@@ -212,21 +216,25 @@ public class EdjOrdersManagerServiceImpl extends MPJBaseServiceImpl<EdjOrdersMap
 
         // 修改订单状态
         LambdaUpdateWrapper<EdjOrders> wrapper = new LambdaUpdateWrapper<EdjOrders>()
-                .eq(EdjOrders::getId, ordersCancelDTO.getId())
+                .eq(EdjOrders::getId, id)
                 .eq(EdjOrders::getOrdersStatus, EdjOrderStatus.PENDING_PAYMENT)
                 .set(EdjOrders::getOrdersStatus, EdjOrderStatus.CANCELLED);
         int update = baseMapper.update(new EdjOrders(), wrapper);
         if (update != 1) {
             throw new ServerErrorException("订单取消失败");
         }
+
+        // 退回优惠券
+        couponApi.backIfExist(id);
     }
 
     @Override
-    @Transactional
+    @GlobalTransactional
     public void cancelForDispatching(OrdersCancelDTO ordersCancelDTO) {
         // 添加订单取消记录
+        Long id = ordersCancelDTO.getId();
         EdjOrdersCanceled ordersCanceled = EdjOrdersCanceled.builder()
-                .id(ordersCancelDTO.getId())
+                .id(id)
                 .cancellerId(ordersCancelDTO.getCurrentUserId())
                 .cancellerName(ordersCancelDTO.getCurrentUserName())
                 .cancelReason(ordersCancelDTO.getCancelReason())
@@ -239,7 +247,7 @@ public class EdjOrdersManagerServiceImpl extends MPJBaseServiceImpl<EdjOrdersMap
 
         // 修改订单状态
         LambdaUpdateWrapper<EdjOrders> wrapper = new LambdaUpdateWrapper<EdjOrders>()
-                .eq(EdjOrders::getId, ordersCancelDTO.getId())
+                .eq(EdjOrders::getId, id)
                 .eq(EdjOrders::getOrdersStatus, EdjOrderStatus.DISPATCHING)
                 .set(EdjOrders::getOrdersStatus, EdjOrderStatus.CLOSED)
                 .set(EdjOrders::getRefundStatus, EdjOrderRefundStatus.REFUNDING);
@@ -254,6 +262,9 @@ public class EdjOrdersManagerServiceImpl extends MPJBaseServiceImpl<EdjOrdersMap
         if (insert1 != 1) {
             throw new ServerErrorException("退款记录保存失败");
         }
+
+        // 退回优惠券
+        couponApi.backIfExist(id);
 
         // 异步发起及时退款
         AsyncUtils.runAsync(() -> SpringUtil.getBean(OrdersHandler.class).requestRefundOrder(ordersRefund));

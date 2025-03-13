@@ -365,6 +365,7 @@ public class EdjCouponServiceImpl extends MPJBaseServiceImpl<EdjCouponMapper, Ed
     }
 
     @Override
+    @Transactional
     public void backIfExist(Long orderId) {
         // 查询优惠券信息
         LambdaQueryWrapper<EdjCoupon> wrapper = new LambdaQueryWrapper<EdjCoupon>()
@@ -375,11 +376,6 @@ public class EdjCouponServiceImpl extends MPJBaseServiceImpl<EdjCouponMapper, Ed
         if (coupon == null) {
             // 优惠券不存在直接返回
             return;
-        }
-        // 校验用户
-        Long userId = coupon.getEdjUserId();
-        if (ObjectUtils.notEqual(SecurityUtils.getUserId(), userId)) {
-            throw new BadRequestException("用户不符合");
         }
         // 校验优惠券状态
         Integer status = coupon.getStatus();
@@ -409,6 +405,7 @@ public class EdjCouponServiceImpl extends MPJBaseServiceImpl<EdjCouponMapper, Ed
         }
 
         // 添加优惠券退回记录
+        Long userId = coupon.getEdjUserId();
         int insert = couponUseBackMapper.insert(EdjCouponUseBack
                 .builder()
                 .edjCouponId(id)
