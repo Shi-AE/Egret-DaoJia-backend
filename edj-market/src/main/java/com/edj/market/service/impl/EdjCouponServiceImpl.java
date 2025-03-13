@@ -37,6 +37,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -289,6 +290,7 @@ public class EdjCouponServiceImpl extends MPJBaseServiceImpl<EdjCouponMapper, Ed
     }
 
     @Override
+    @Transactional
     public CouponUseVO use(CouponUseDTO couponUseDTO) {
         // 查询优惠券
         Long id = couponUseDTO.getId();
@@ -317,7 +319,7 @@ public class EdjCouponServiceImpl extends MPJBaseServiceImpl<EdjCouponMapper, Ed
         // 校验使用条件
         BigDecimal amountCondition = coupon.getAmountCondition();
         BigDecimal totalAmount = couponUseDTO.getTotalAmount();
-        if (amountCondition.compareTo(totalAmount) < 0) {
+        if (amountCondition.compareTo(totalAmount) > 0) {
             throw new BadRequestException("使用条件不符合");
         }
 

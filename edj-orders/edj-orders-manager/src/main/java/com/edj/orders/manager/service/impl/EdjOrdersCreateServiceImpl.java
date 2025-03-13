@@ -1,6 +1,7 @@
 package com.edj.orders.manager.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.edj.api.api.customer.AddressBookApi;
@@ -8,7 +9,9 @@ import com.edj.api.api.customer.dto.AddressBookVO;
 import com.edj.api.api.foundations.ServeApi;
 import com.edj.api.api.foundations.dto.ServeAggregationDTO;
 import com.edj.api.api.market.CouponApi;
+import com.edj.api.api.market.dto.CouponUseDTO;
 import com.edj.api.api.market.vo.AvailableCouponVO;
+import com.edj.api.api.market.vo.CouponUseVO;
 import com.edj.api.api.trade.NativePayApi;
 import com.edj.api.api.trade.TradingApi;
 import com.edj.api.api.trade.dto.NativePayDTO;
@@ -36,9 +39,9 @@ import com.edj.security.utils.SecurityUtils;
 import com.github.yulichang.base.MPJBaseServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.seata.spring.annotation.GlobalTransactional;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -89,7 +92,6 @@ public class EdjOrdersCreateServiceImpl extends MPJBaseServiceImpl<EdjOrdersMapp
     }
 
     @Override
-    @Transactional
     public PlaceOrderVO placeOrder(PlaceOrderDTO placeOrderDTO) {
         // 获取地址信息
         Long addressBookId = placeOrderDTO.getAddressBookId();
@@ -150,12 +152,46 @@ public class EdjOrdersCreateServiceImpl extends MPJBaseServiceImpl<EdjOrdersMapp
         // 排序字段
         orders.setSortBy(DateUtils.toEpochMilli(serveStartTime) + orders.getId() % 100000);
 
+        Long couponId = placeOrderDTO.getCouponId();
+        // 使用优惠券
+        if (ObjectUtils.isNotNull(couponId)) {
+            SpringUtil.getBean(this.getClass())
+                    .addWithCoupon(orders, couponId);
+        }
+        // 未使用优惠券
+        else {
+            add(orders);
+        }
+
+        return PlaceOrderVO.builder().id(id).build();
+    }
+
+    private void add(EdjOrders orders) {
         int insert = baseMapper.insert(orders);
         if (insert != 1) {
             throw new ServerErrorException("下单失败");
         }
+    }
 
-        return PlaceOrderVO.builder().id(id).build();
+    @GlobalTransactional
+    public void addWithCoupon(EdjOrders orders, Long couponId) {
+        // 核销优惠券
+        BigDecimal totalAmount = orders.getTotalAmount();
+        CouponUseVO couponUseVO = couponApi.use(CouponUseDTO
+                .builder()
+                .id(couponId)
+                .ordersId(orders.getId())
+                .totalAmount(totalAmount)
+                .userId(SecurityUtils.getUserId())
+                .build()
+        );
+        BigDecimal discountAmount = couponUseVO.getDiscountAmount();
+        // 设置优惠金额
+        orders.setDiscountAmount(discountAmount);
+        // 计算实际金额
+        orders.setRealPayAmount(totalAmount.subtract(discountAmount));
+        // 添加订单
+        add(orders);
     }
 
     @Override

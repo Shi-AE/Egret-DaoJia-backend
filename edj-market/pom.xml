@@ -86,6 +86,11 @@
             <groupId>com.edj</groupId>
             <artifactId>edj-api</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>com.edj</groupId>
+            <artifactId>edj-seata</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
