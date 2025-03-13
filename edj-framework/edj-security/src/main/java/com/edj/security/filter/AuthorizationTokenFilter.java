@@ -16,6 +16,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import static com.edj.common.constants.AuthorizationConstants.HeaderKey.AUTHORIZATION_ACCESS_TOKEN;
 import static com.edj.common.constants.AuthorizationConstants.RedisKey.ACCESS_TOKEN_KEY;
@@ -34,6 +35,12 @@ public class AuthorizationTokenFilter extends OncePerRequestFilter {
         // token 已经由 gateway 过滤, 不存在非法请求
         String accessToken = request.getHeader(AUTHORIZATION_ACCESS_TOKEN);
         if (accessToken == null) {
+            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                    new AuthorizationUserDTO(),
+                    null,
+                    new ArrayList<>()
+            );
+            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             filterChain.doFilter(request, response);
             return;
         }
@@ -53,6 +60,12 @@ public class AuthorizationTokenFilter extends OncePerRequestFilter {
                 accessToken
         ));
         if (authorizationUserDTO == null) {
+            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                    new AuthorizationUserDTO(),
+                    null,
+                    new ArrayList<>()
+            );
+            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             filterChain.doFilter(request, response);
             return;
         }
