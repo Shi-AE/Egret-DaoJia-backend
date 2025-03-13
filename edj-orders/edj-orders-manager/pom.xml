@@ -95,6 +95,11 @@
             <groupId>com.edj</groupId>
             <artifactId>edj-rabbitmq</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>com.edj</groupId>
+            <artifactId>edj-seata</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

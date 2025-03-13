@@ -31,6 +31,7 @@
         <module>edj-sentinel</module>
         <module>../edj-trade</module>
         <module>../edj-market</module>
+        <module>edj-seata</module>
     </modules>
 
     <properties>
@@ -69,6 +70,7 @@
         <zxing.version>3.5.3</zxing.version>
         <wechatpay.version>0.5.0</wechatpay.version>
         <alipay.version>2.2.3</alipay.version>
+        <seata.version>2.2.0</seata.version>
     </properties>
 
     <parent>
@@ -207,6 +209,12 @@
                 <groupId>org.redisson</groupId>
                 <artifactId>redisson</artifactId>
                 <version>${redisson.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.seata</groupId>
+                <artifactId>seata-spring-boot-starter</artifactId>
+                <version>${seata.version}</version>
             </dependency>
 
             <!--xxl-job定时任务-->
@@ -348,6 +356,11 @@
             <dependency>
                 <groupId>com.edj</groupId>
                 <artifactId>edj-sentinel</artifactId>
+                <version>${edj.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.edj</groupId>
+                <artifactId>edj-seata</artifactId>
                 <version>${edj.version}</version>
             </dependency>
         </dependencies>

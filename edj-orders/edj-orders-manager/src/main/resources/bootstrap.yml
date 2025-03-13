@@ -29,6 +29,8 @@ spring:
             refresh: false
           - data-id: shared-rabbitmq.yaml
             refresh: false
+          - data-id: shared-spring-seata.yaml
+            refresh: false
 
 #################     项目独有配置     #################
 
