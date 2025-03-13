@@ -72,8 +72,6 @@ public class SecurityConfiguration {
                         .requestMatchers("/open/**").permitAll()
                         // 验证码
                         .requestMatchers(HttpMethod.POST, "/sms/code/send").permitAll()
-                        // 内部请求
-                        .requestMatchers("/inner/**").permitAll()
                         // 拦截
                         .anyRequest().authenticated()
                 )

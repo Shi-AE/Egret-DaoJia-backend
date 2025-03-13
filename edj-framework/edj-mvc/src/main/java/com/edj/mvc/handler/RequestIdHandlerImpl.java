@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import static com.edj.common.constants.AuthorizationConstants.HeaderKey.AUTHORIZATION_ACCESS_TOKEN;
+import static org.springframework.http.HttpHeaders.USER_AGENT;
 
 /**
  * @author A.E.
@@ -34,5 +35,10 @@ public class RequestIdHandlerImpl implements RequestIdHandler {
     @Override
     public String getAccessToken() {
         return RequestUtils.getValueFromHeader(AUTHORIZATION_ACCESS_TOKEN);
+    }
+
+    @Override
+    public String getUserAgent() {
+        return RequestUtils.getValueFromHeader(USER_AGENT);
     }
 }

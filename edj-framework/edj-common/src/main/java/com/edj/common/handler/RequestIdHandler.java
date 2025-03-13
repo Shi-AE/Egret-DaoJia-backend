@@ -11,4 +11,6 @@ public interface RequestIdHandler {
     String getRequestId();
 
     String getAccessToken();
+
+    String getUserAgent();
 }

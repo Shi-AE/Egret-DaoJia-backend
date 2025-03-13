@@ -63,6 +63,9 @@ public class JWTUtils extends JWTUtil {
         return claims;
     }
 
+    /**
+     * 根据原 token 数据生成新 token
+     */
     public static String refreshCreateToken(String refreshToken) {
         // 解析出负载加入新token
         JWT jwt = parseToken(refreshToken);
