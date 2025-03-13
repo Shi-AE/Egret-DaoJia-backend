@@ -384,9 +384,11 @@ public class EdjCouponServiceImpl extends MPJBaseServiceImpl<EdjCouponMapper, Ed
         }
 
         // 更新优惠券状态
+        Long id = coupon.getId();
         LocalDateTime validityTime = coupon.getValidityTime();
         LocalDateTime now = LocalDateTime.now();
         LambdaUpdateWrapper<EdjCoupon> couponLambdaUpdateWrapper = new LambdaUpdateWrapper<EdjCoupon>()
+                .eq(EdjCoupon::getId, id)
                 .set(EdjCoupon::getEdjOrdersId, null)
                 .set(EdjCoupon::getUseTime, null)
                 .set(EdjCoupon::getStatus, validityTime.isBefore(now) ? EdjCouponStatus.CANCELLED : EdjCouponStatus.UNUSED);
@@ -396,7 +398,6 @@ public class EdjCouponServiceImpl extends MPJBaseServiceImpl<EdjCouponMapper, Ed
         }
 
         // 删除核销记录
-        Long id = coupon.getId();
         LambdaQueryWrapper<EdjCouponWriteOff> couponWriteOffLambdaQueryWrapper = new LambdaQueryWrapper<EdjCouponWriteOff>()
                 .eq(EdjCouponWriteOff::getEdjCouponId, id);
         int delete = couponWriteOffMapper.delete(couponWriteOffLambdaQueryWrapper);
