@@ -55,7 +55,7 @@ public class InnerCouponController implements CouponApi {
      * 退回优惠券
      */
     @DeleteMapping("back")
-    public void back(@RequestParam @NotNull @Positive Long orderId) {
-        couponService.back(orderId);
+    public void backIfExist(@RequestParam @NotNull @Positive Long orderId) {
+        couponService.backIfExist(orderId);
     }
 }

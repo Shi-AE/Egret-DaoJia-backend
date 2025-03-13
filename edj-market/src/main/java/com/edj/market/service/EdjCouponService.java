@@ -54,5 +54,5 @@ public interface EdjCouponService extends MPJBaseService<EdjCoupon> {
     /**
      * 退回优惠券
      */
-    void back(Long orderId);
+    void backIfExist(Long orderId);
 }

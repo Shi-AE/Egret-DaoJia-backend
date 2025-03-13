@@ -365,7 +365,7 @@ public class EdjCouponServiceImpl extends MPJBaseServiceImpl<EdjCouponMapper, Ed
     }
 
     @Override
-    public void back(Long orderId) {
+    public void backIfExist(Long orderId) {
         // 查询优惠券信息
         LambdaQueryWrapper<EdjCoupon> wrapper = new LambdaQueryWrapper<EdjCoupon>()
                 .select(EdjCoupon::getId, EdjCoupon::getEdjUserId, EdjCoupon::getStatus, EdjCoupon::getValidityTime)
@@ -373,7 +373,8 @@ public class EdjCouponServiceImpl extends MPJBaseServiceImpl<EdjCouponMapper, Ed
         EdjCoupon coupon = baseMapper.selectOne(wrapper);
         // 校验
         if (coupon == null) {
-            throw new BadRequestException("优惠券不存在");
+            // 优惠券不存在直接返回
+            return;
         }
         // 校验用户
         Long userId = coupon.getEdjUserId();

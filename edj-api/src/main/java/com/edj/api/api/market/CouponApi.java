@@ -36,8 +36,8 @@ public interface CouponApi {
     CouponUseVO use(@RequestBody CouponUseDTO couponUseDTO);
 
     /**
-     * 退回优惠券
+     * 如果优惠券存在退回优惠券
      */
     @DeleteMapping("back")
-    void back(@RequestParam @NotNull @Positive Long orderId);
+    void backIfExist(@RequestParam @NotNull @Positive Long orderId);
 }
