@@ -18,12 +18,14 @@ import com.edj.market.domain.dto.CouponPageDTO;
 import com.edj.market.domain.dto.GrabCouponDTO;
 import com.edj.market.domain.entity.EdjActivity;
 import com.edj.market.domain.entity.EdjCoupon;
+import com.edj.market.domain.entity.EdjCouponUseBack;
 import com.edj.market.domain.entity.EdjCouponWriteOff;
 import com.edj.market.domain.vo.ActivityInfoVO;
 import com.edj.market.domain.vo.CouponPageVO;
 import com.edj.market.enums.EdjCouponStatus;
 import com.edj.market.mapper.EdjActivityMapper;
 import com.edj.market.mapper.EdjCouponMapper;
+import com.edj.market.mapper.EdjCouponUseBackMapper;
 import com.edj.market.mapper.EdjCouponWriteOffMapper;
 import com.edj.market.service.EdjCouponService;
 import com.edj.market.utils.CouponUtils;
@@ -74,6 +76,8 @@ public class EdjCouponServiceImpl extends MPJBaseServiceImpl<EdjCouponMapper, Ed
     private final LockHelper lockHelper;
 
     private final EdjCouponWriteOffMapper couponWriteOffMapper;
+
+    private final EdjCouponUseBackMapper couponUseBackMapper;
 
     @Resource(name = "grabCouponScript")
     private DefaultRedisScript<Long> grabCouponScript;
@@ -358,5 +362,62 @@ public class EdjCouponServiceImpl extends MPJBaseServiceImpl<EdjCouponMapper, Ed
                 .builder()
                 .discountAmount(CouponUtils.calDiscountAmount(coupon, totalAmount))
                 .build();
+    }
+
+    @Override
+    public void back(Long orderId) {
+        // 查询优惠券信息
+        LambdaQueryWrapper<EdjCoupon> wrapper = new LambdaQueryWrapper<EdjCoupon>()
+                .select(EdjCoupon::getId, EdjCoupon::getEdjUserId, EdjCoupon::getStatus, EdjCoupon::getValidityTime)
+                .eq(EdjCoupon::getEdjOrdersId, orderId);
+        EdjCoupon coupon = baseMapper.selectOne(wrapper);
+        // 校验
+        if (coupon == null) {
+            throw new BadRequestException("优惠券不存在");
+        }
+        // 校验用户
+        Long userId = coupon.getEdjUserId();
+        if (ObjectUtils.notEqual(SecurityUtils.getUserId(), userId)) {
+            throw new BadRequestException("用户不符合");
+        }
+        // 校验优惠券状态
+        Integer status = coupon.getStatus();
+        if (EnumUtils.ne(EdjCouponStatus.USED, status)) {
+            throw new BadRequestException("优惠券未使用");
+        }
+
+        // 更新优惠券状态
+        LocalDateTime validityTime = coupon.getValidityTime();
+        LocalDateTime now = LocalDateTime.now();
+        LambdaUpdateWrapper<EdjCoupon> couponLambdaUpdateWrapper = new LambdaUpdateWrapper<EdjCoupon>()
+                .set(EdjCoupon::getEdjOrdersId, null)
+                .set(EdjCoupon::getUseTime, null)
+                .set(EdjCoupon::getStatus, validityTime.isBefore(now) ? EdjCouponStatus.CANCELLED : EdjCouponStatus.UNUSED);
+        int update = baseMapper.update(new EdjCoupon(), couponLambdaUpdateWrapper);
+        if (update != 1) {
+            throw new DBException();
+        }
+
+        // 删除核销记录
+        Long id = coupon.getId();
+        LambdaQueryWrapper<EdjCouponWriteOff> couponWriteOffLambdaQueryWrapper = new LambdaQueryWrapper<EdjCouponWriteOff>()
+                .eq(EdjCouponWriteOff::getEdjCouponId, id);
+        int delete = couponWriteOffMapper.delete(couponWriteOffLambdaQueryWrapper);
+        if (delete != 1) {
+            throw new DBException();
+        }
+
+        // 添加优惠券退回记录
+        int insert = couponUseBackMapper.insert(EdjCouponUseBack
+                .builder()
+                .edjCouponId(id)
+                .edjUserId(userId)
+                .useBackTime(now)
+                .writeOffTime(validityTime)
+                .build()
+        );
+        if (insert != 1) {
+            throw new DBException();
+        }
     }
 }

@@ -4,11 +4,9 @@ import com.edj.api.api.market.dto.CouponUseDTO;
 import com.edj.api.api.market.vo.AvailableCouponVO;
 import com.edj.api.api.market.vo.CouponUseVO;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -36,4 +34,10 @@ public interface CouponApi {
      */
     @PostMapping("use")
     CouponUseVO use(@RequestBody CouponUseDTO couponUseDTO);
+
+    /**
+     * 退回优惠券
+     */
+    @DeleteMapping("back")
+    void back(@RequestParam @NotNull @Positive Long orderId);
 }

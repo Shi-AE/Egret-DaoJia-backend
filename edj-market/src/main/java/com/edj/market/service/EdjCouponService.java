@@ -50,4 +50,9 @@ public interface EdjCouponService extends MPJBaseService<EdjCoupon> {
      * 使用优惠券，返回优惠金额
      */
     CouponUseVO use(CouponUseDTO couponUseDTO);
+
+    /**
+     * 退回优惠券
+     */
+    void back(Long orderId);
 }

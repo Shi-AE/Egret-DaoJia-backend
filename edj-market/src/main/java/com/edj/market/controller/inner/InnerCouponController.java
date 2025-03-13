@@ -7,6 +7,7 @@ import com.edj.api.api.market.vo.CouponUseVO;
 import com.edj.market.service.EdjCouponService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -48,5 +49,13 @@ public class InnerCouponController implements CouponApi {
     @PostMapping("use")
     public CouponUseVO use(@Validated @RequestBody CouponUseDTO couponUseDTO) {
         return couponService.use(couponUseDTO);
+    }
+
+    /**
+     * 退回优惠券
+     */
+    @DeleteMapping("back")
+    public void back(@RequestParam @NotNull @Positive Long orderId) {
+        couponService.back(orderId);
     }
 }
