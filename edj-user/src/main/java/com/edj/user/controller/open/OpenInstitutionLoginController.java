@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -41,7 +40,6 @@ public class OpenInstitutionLoginController {
      */
     @PostMapping("login")
     @Operation(summary = "登录")
-    @PreAuthorize("isAnonymous()")
     public UserTokenVO consumerLogin(@Validated @RequestBody PhoneLoginDTO phoneLoginDTO, HttpServletRequest request) {
         return loginService.loginForPhone(phoneLoginDTO, request);
     }
@@ -51,7 +49,6 @@ public class OpenInstitutionLoginController {
      */
     @PostMapping("register")
     @Operation(summary = "机构端用户注册")
-    @PreAuthorize("isAnonymous()")
     public void register(@Validated @RequestBody InstitutionRegisterDTO institutionRegisterDTO) {
         registerService.institutionRegister(institutionRegisterDTO);
     }

@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -43,7 +42,6 @@ public class OpenLoginController {
      */
     @PostMapping("login")
     @Operation(summary = "登录")
-    @PreAuthorize("isAnonymous()")
     public UserTokenVO login(@Validated @RequestBody UserLoginDTO userLoginDTO, HttpServletRequest request) {
         return loginService.loginForUsername(userLoginDTO, request);
     }
@@ -53,7 +51,6 @@ public class OpenLoginController {
      */
     @PostMapping("register")
     @Operation(summary = "注册")
-    @PreAuthorize("isAnonymous()")
     public Result<Void> register() {
         userMapper.insert(EdjUser
                 .builder()
