@@ -93,7 +93,7 @@ public class OrdersDiversionServiceImpl implements OrdersDiversionService {
 
         // 计算抽成
         // 没有平台抽成？圣人平台写死抽取 1%
-        BigDecimal ordersAmount = realPayAmount.multiply(new BigDecimal("0.99"), new MathContext(2, RoundingMode.UNNECESSARY));
+        BigDecimal ordersAmount = realPayAmount.multiply(new BigDecimal("0.99"), new MathContext(2, RoundingMode.FLOOR));
 
         EdjOrdersGrab ordersGrab = EdjOrdersGrab
                 .builder()

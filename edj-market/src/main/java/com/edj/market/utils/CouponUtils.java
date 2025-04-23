@@ -40,7 +40,7 @@ public class CouponUtils {
                     // 计算优惠率
                     .divide(new BigDecimal(100), new MathContext(2, RoundingMode.UNNECESSARY))
                     // 计算优惠金额
-                    .multiply(totalAmount, new MathContext(2, RoundingMode.UNNECESSARY));
+                    .multiply(totalAmount, new MathContext(2, RoundingMode.FLOOR));
         } else {
             throw new ServerErrorException();
         }
