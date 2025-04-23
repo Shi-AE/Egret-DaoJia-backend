@@ -6,6 +6,7 @@ import com.edj.market.domain.entity.EdjCoupon;
 import com.edj.market.enums.EdjCouponType;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.math.RoundingMode;
 
 /**
@@ -37,9 +38,9 @@ public class CouponUtils {
             Integer discountRate = coupon.getDiscountRate();
             return new BigDecimal(100 - discountRate)
                     // 计算优惠率
-                    .divide(new BigDecimal(100), 2, RoundingMode.UNNECESSARY)
+                    .divide(new BigDecimal(100), new MathContext(2, RoundingMode.UNNECESSARY))
                     // 计算优惠金额
-                    .multiply(totalAmount);
+                    .multiply(totalAmount, new MathContext(2, RoundingMode.UNNECESSARY));
         } else {
             throw new ServerErrorException();
         }

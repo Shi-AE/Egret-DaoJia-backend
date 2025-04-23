@@ -1,4 +1,4 @@
-package com.edj.market.controller.config;
+package com.edj.market.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
