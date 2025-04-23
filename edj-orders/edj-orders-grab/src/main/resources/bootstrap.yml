@@ -1,0 +1,44 @@
+#################     服务器配置     #################
+
+server:
+  port: 33580 #端口
+
+#################     spring公共配置     #################
+
+spring:
+  profiles:
+    active: dev
+  application:
+    name: edj-orders-grab
+  cloud:
+    nacos:
+      config:
+        file-extension: yaml
+        shared-configs:
+          - data-id: shared-redis.yaml
+            refresh: false
+          - data-id: shared-mysql.yaml
+            refresh: false
+          - data-id: shared-swagger.yaml
+            refresh: false
+
+#################     项目独有配置     #################
+
+mysql:
+  db-name: edj-orders
+mybatis-plus:
+  mapper-locations: mapper/orders/*.xml
+  type-aliases-package: com.edj.orders.base.mapper
+swagger:
+  title: 白鹭到家-抢单服务接口文档
+  description: 用于向机构或服务端抢单，抢单列表检索
+
+snowflake:
+  workerId: 8
+  datacenterId: 8
+
+xxl-job:
+  port: 33581
+
+feign:
+  enable: true

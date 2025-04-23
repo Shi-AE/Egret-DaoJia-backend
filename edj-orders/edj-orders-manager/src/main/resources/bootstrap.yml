@@ -40,7 +40,7 @@ mybatis-plus:
   mapper-locations: mapper/orders/*.xml
   type-aliases-package: com.edj.orders.base.mapper
 swagger:
-  title: 白鹭到家-订单管理服务
+  title: 白鹭到家-订单管理服务接口文档
   description: 管理订单的生命周期、订单状态、订单信息
 
 snowflake:

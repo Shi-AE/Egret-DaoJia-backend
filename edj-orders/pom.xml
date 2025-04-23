@@ -15,6 +15,7 @@
     <modules>
         <module>edj-orders-base</module>
         <module>edj-orders-manager</module>
+        <module>edj-orders-grab</module>
     </modules>
 
     <properties>
