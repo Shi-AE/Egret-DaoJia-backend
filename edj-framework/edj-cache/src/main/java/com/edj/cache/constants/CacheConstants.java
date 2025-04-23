@@ -78,6 +78,16 @@ public class CacheConstants {
          * 抢券同步队列key
          */
         public static final String SUCCESS_SYNC_CACHE = GRAB_COUPON + ":SUCCESS_SYNC:{%s}";
+
+        /**
+         * 抢单缓存前缀
+         */
+        public static final String GRAB_ORDERS = EDJ_CACHE + ":GRAB_ORDERS";
+
+        /**
+         * 抢单库存缓存
+         */
+        public static final String ORDERS_STOCK_CACHE = GRAB_ORDERS + ":ORDERS:STOCK:{%s}";
     }
 
     public static final class CacheManager {

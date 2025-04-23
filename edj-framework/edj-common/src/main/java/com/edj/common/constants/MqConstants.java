@@ -74,6 +74,11 @@ public class MqConstants {
         public static final String FOUNDATION_SYNC_TO_ES = "edj.queue.foundation.serve.sync.to.es";
 
         /**
+         * 订单服务：canal 同步 edj_orders_grab 表数据至 es
+         */
+        public static final String ORDERS_GRAB_TO_ES = "edj.queue.orders.grab.to.es";
+
+        /**
          * 订单微服务：更新支付状态
          */
         public static final String ORDERS_TRADE_UPDATE_STATUS = "edj.queue.orders.trade.update.status";
@@ -93,6 +98,11 @@ public class MqConstants {
          * canal 同步edj_serve_sync表数据至 es
          */
         public static final String SERVE_SYNC_TO_ES = "edj-key-serve-sync-to-es";
+
+        /**
+         * canal 同步edj_serve_sync表数据至 es
+         */
+        public static final String ORDERS_GRAB_TO_ES = "edj-key-orders-grab-to-es";
 
         /**
          * 更新支付状态

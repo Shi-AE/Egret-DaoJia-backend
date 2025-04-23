@@ -21,6 +21,10 @@ spring:
             refresh: false
           - data-id: shared-swagger.yaml
             refresh: false
+          - data-id: shared-es.yaml
+            refresh: false
+          - data-id: shared-rabbitmq.yaml
+            refresh: false
 
 #################     项目独有配置     #################
 

@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 /**
  * 经纬度
  *
@@ -19,11 +21,11 @@ public class Location {
     /**
      * 经度
      */
-    private Double lon;
+    private BigDecimal lon;
 
     /**
      * 纬度
      */
-    private Double lat;
+    private BigDecimal lat;
 
 }
