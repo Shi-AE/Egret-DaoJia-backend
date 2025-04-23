@@ -1,9 +1,11 @@
 package com.edj.foundations.service.impl;
 
+import com.edj.foundations.domain.entity.EdjCity;
 import com.edj.foundations.domain.entity.EdjConfigRegion;
 import com.edj.foundations.mapper.EdjConfigRegionMapper;
 import com.edj.foundations.service.EdjConfigRegionService;
 import com.github.yulichang.base.MPJBaseServiceImpl;
+import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,5 +49,15 @@ public class EdjConfigRegionServiceImpl extends MPJBaseServiceImpl<EdjConfigRegi
     @Transactional
     public void delete(Long id) {
         baseMapper.deleteById(id);
+    }
+
+    @Override
+    public EdjConfigRegion findByCityCode(String cityCode) {
+        MPJLambdaWrapper<EdjConfigRegion> wrapper = new MPJLambdaWrapper<EdjConfigRegion>()
+                .selectAll(EdjConfigRegion.class)
+                .innerJoin(EdjCity.class, EdjCity::getId, EdjConfigRegion::getEdjCityId)
+                .eq(EdjCity::getCityCode, cityCode);
+
+        return baseMapper.selectJoinOne(EdjConfigRegion.class, wrapper);
     }
 }

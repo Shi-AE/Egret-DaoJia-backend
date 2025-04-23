@@ -20,4 +20,9 @@ public interface EdjConfigRegionService extends MPJBaseService<EdjConfigRegion> 
      * 删除区域配置
      */
     void delete(Long id);
+
+    /**
+     * 根据城市编码获取区域配置
+     */
+    EdjConfigRegion findByCityCode(String cityCode);
 }

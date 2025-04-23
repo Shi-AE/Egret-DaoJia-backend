@@ -28,6 +28,11 @@
             <groupId>com.edj</groupId>
             <artifactId>edj-mysql</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>com.edj</groupId>
+            <artifactId>edj-api</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

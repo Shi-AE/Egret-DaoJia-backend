@@ -28,6 +28,7 @@ import com.edj.orders.base.domain.entity.EdjOrders;
 import com.edj.orders.base.enums.EdjOrderPayStatus;
 import com.edj.orders.base.enums.EdjOrderStatus;
 import com.edj.orders.base.mapper.EdjOrdersMapper;
+import com.edj.orders.base.service.OrdersDiversionService;
 import com.edj.orders.manager.domain.dto.OrdersPayDTO;
 import com.edj.orders.manager.domain.dto.PlaceOrderDTO;
 import com.edj.orders.manager.domain.vo.OrdersPayVO;
@@ -80,6 +81,8 @@ public class EdjOrdersCreateServiceImpl extends MPJBaseServiceImpl<EdjOrdersMapp
     private final CouponApi couponApi;
 
     private final RedisTemplate<String, Object> redisTemplate;
+
+    private final OrdersDiversionService ordersDiversionService;
 
     /**
      * 生成订单id 格式：{yyMMdd}{13位id}
@@ -286,6 +289,9 @@ public class EdjOrdersCreateServiceImpl extends MPJBaseServiceImpl<EdjOrdersMapp
                     .set(EdjOrders::getPayStatus, EdjOrderPayStatus.SUCCESS)
                     .set(EdjOrders::getPayTime, LocalDateTime.now());
             baseMapper.update(new EdjOrders(), updateWrapper);
+
+            // 订单分流
+            ordersDiversionService.diversion(id);
         }
 
         return tradingVO.getTradingState();

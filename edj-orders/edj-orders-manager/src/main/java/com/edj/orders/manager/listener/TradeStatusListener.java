@@ -12,6 +12,7 @@ import com.edj.orders.base.domain.entity.EdjOrders;
 import com.edj.orders.base.enums.EdjOrderPayStatus;
 import com.edj.orders.base.enums.EdjOrderStatus;
 import com.edj.orders.base.mapper.EdjOrdersMapper;
+import com.edj.orders.base.service.OrdersDiversionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.ExchangeTypes;
@@ -36,6 +37,8 @@ public class TradeStatusListener {
 
     private final EdjOrdersMapper ordersMapper;
 
+    private final OrdersDiversionService ordersDiversionService;
+
     /**
      * 监听并更新支付结果
      */
@@ -56,14 +59,19 @@ public class TradeStatusListener {
         tradeStatusMsgList.stream()
                 .filter(m -> EnumUtils.eq(EdjTradingState.SETTLED, m.getStatusCode()) &&
                         StringUtils.equals(PRODUCT_APP_ID, m.getProductAppId()))
-                .map(m -> new LambdaUpdateWrapper<EdjOrders>()
-                        .eq(EdjOrders::getId, m.getProductOrderNo())
-                        .eq(EdjOrders::getOrdersStatus, EdjOrderStatus.PENDING_PAYMENT)
-                        .set(EdjOrders::getTransactionId, m.getTransactionId())
-                        .set(EdjOrders::getOrdersStatus, EdjOrderStatus.DISPATCHING)
-                        .set(EdjOrders::getPayStatus, EdjOrderPayStatus.SUCCESS)
-                        .set(EdjOrders::getPayTime, LocalDateTime.now())
-                )
-                .forEach(wrapper -> ordersMapper.update(new EdjOrders(), wrapper));
+                .forEach(m -> {
+                    // 修改订单状态
+                    LambdaUpdateWrapper<EdjOrders> wrapper = new LambdaUpdateWrapper<EdjOrders>()
+                            .eq(EdjOrders::getId, m.getProductOrderNo())
+                            .eq(EdjOrders::getOrdersStatus, EdjOrderStatus.PENDING_PAYMENT)
+                            .set(EdjOrders::getTransactionId, m.getTransactionId())
+                            .set(EdjOrders::getOrdersStatus, EdjOrderStatus.DISPATCHING)
+                            .set(EdjOrders::getPayStatus, EdjOrderPayStatus.SUCCESS)
+                            .set(EdjOrders::getPayTime, LocalDateTime.now());
+                    ordersMapper.update(new EdjOrders(), wrapper);
+
+                    // 订单分流
+                    ordersDiversionService.diversion(m.getProductOrderNo());
+                });
     }
 }
