@@ -156,7 +156,7 @@ public class EdjServeServiceImpl extends MPJBaseServiceImpl<EdjServeMapper, EdjS
                     return serve;
                 })
                 .toList();
-        SqlUtils.actionBatch(serveList, list -> list.forEach(serve -> baseMapper.insert(serve)), true);
+        SqlUtils.actionBatch(serveList, list -> list.forEach(serve -> baseMapper.insert(serve)), true, true);
     }
 
     @Override

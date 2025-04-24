@@ -4,7 +4,10 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.edj.api.api.foundations.ServeItemApi;
 import com.edj.api.api.foundations.dto.ServeTypeCategoryDTO;
 import com.edj.common.expcetions.BadRequestException;
-import com.edj.common.utils.*;
+import com.edj.common.utils.AsyncUtils;
+import com.edj.common.utils.BeanUtils;
+import com.edj.common.utils.CollUtils;
+import com.edj.common.utils.EnumUtils;
 import com.edj.customer.domain.dto.ServeSkillUpsertDTO;
 import com.edj.customer.domain.entity.EdjServeProviderSettings;
 import com.edj.customer.domain.entity.EdjServeProviderSync;
@@ -105,7 +108,8 @@ public class EdjServeSkillServiceImpl extends MPJBaseServiceImpl<EdjServeSkillMa
         SqlUtils.actionBatch(
                 serveSkillList,
                 list -> baseMapper.insert(list),
-                true
+                false,
+                false
         );
 
         // 设置技能状态

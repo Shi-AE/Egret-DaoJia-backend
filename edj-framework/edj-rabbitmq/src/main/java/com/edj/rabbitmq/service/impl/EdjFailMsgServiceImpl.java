@@ -72,7 +72,7 @@ public class EdjFailMsgServiceImpl extends MPJBaseServiceImpl<EdjFailMsgMapper, 
                     .setIncrBy(EdjFailMsg::getNextFetchTime, 10)
                     .in(EdjFailMsg::getId, list);
             failMsgMapper.update(new EdjFailMsg(), updateWrapper);
-        }, false);
+        }, false, false);
 
         return failMsgList;
     }

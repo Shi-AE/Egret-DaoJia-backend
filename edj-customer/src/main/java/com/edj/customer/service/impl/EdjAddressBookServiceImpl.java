@@ -174,6 +174,7 @@ public class EdjAddressBookServiceImpl extends MPJBaseServiceImpl<EdjAddressBook
                         throw new BadRequestException("地址簿不存在");
                     }
                 },
+                true,
                 true
         );
     }

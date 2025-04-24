@@ -32,26 +32,33 @@ public class SqlUtils extends SqlUtil {
     /**
      * 仅执行批处理
      */
-    public static <T> void actionBatch(List<T> list, Consumer<List<T>> action, boolean transaction) {
-        actionBatch(list, action, transaction, BATCH_SIZE);
+    public static <T> void actionBatch(List<T> list, Consumer<List<T>> action, boolean transaction, boolean multi) {
+        actionBatch(list, action, transaction, multi, BATCH_SIZE);
     }
 
     /**
      * 仅执行批处理，自定义大小批处理
      * 默认加入当前事务
+     * 同表更新等情况可能出现无法开启多线程
      */
-    public static <T> void actionBatch(List<T> list, Consumer<List<T>> action, boolean transaction, int batchSize) {
+    public static <T> void actionBatch(List<T> list, Consumer<List<T>> action, boolean transaction, boolean multi, int batchSize) {
         List<List<T>> split = ListUtil.split(list, batchSize);
         log.debug("actionBatch 拆分批处理 split = {}", split);
-        // 是否开启事务
-        if (transaction) {
+        // 开启事务并且多线程
+        if (transaction && multi) {
             AsyncUtils.runAsyncTransaction(split
                     .stream()
                     .map(item -> (Runnable) () -> action.accept(item))
                     .toList()
             );
-        } else {
+        }
+        // 仅多线程
+        else if (multi) {
             split.parallelStream().forEach(action);
+        }
+        // 仅开启事务（需要依赖主线程事务） || 都不开启
+        else {
+            split.forEach(action);
         }
     }
 
