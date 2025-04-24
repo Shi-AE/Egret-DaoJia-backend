@@ -170,9 +170,6 @@ public class AsyncUtils {
         // 任务数
         final int taskCount = runnableList.size();
 
-        // 请求数据库连接许可
-        ConnectSemaphore.acquire(taskCount);
-
         // 创建等量闭锁
         final CountDownLatch countDownLatch = new CountDownLatch(taskCount);
         // 任务失败标志
@@ -194,8 +191,11 @@ public class AsyncUtils {
                     TransactionStatus status = TRANSACTION_MANAGER.getTransaction(new DefaultTransactionDefinition());
 
                     // 执行任务
+                    // 获取数据库连接许可
+                    ConnectSemaphore.acquire();
                     try {
                         if (!wrong.get()) {
+                            // 执行 数据库\非数据库 任务
                             runnable.run();
                         }
                     } catch (Exception e) {
@@ -203,6 +203,8 @@ public class AsyncUtils {
                         exceptionList.add(e);
                     } finally {
                         countDownLatch.countDown();
+                        // 释放数据库许可
+                        ConnectSemaphore.release();
                     }
 
                     // 等待任务全部结束
@@ -231,9 +233,6 @@ public class AsyncUtils {
                 .toList();
         // 聚合等待任务
         CompletableFuture.allOf(futureList.toArray(new CompletableFuture[0])).join();
-
-        // 释放连接信号量
-        ConnectSemaphore.release(taskCount);
 
         // 抛出异常
         if (CollUtils.isNotEmpty(exceptionList)) {
