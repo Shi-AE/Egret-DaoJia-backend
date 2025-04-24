@@ -2,6 +2,7 @@ package com.edj.customer.controller.inner;
 
 import cn.hutool.core.lang.Snowflake;
 import com.edj.api.api.customer.ProviderApi;
+import com.edj.api.api.customer.dto.ProviderSettingsDetailDTO;
 import com.edj.common.utils.AsyncUtils;
 import com.edj.common.utils.IdUtils;
 import com.edj.customer.domain.entity.EdjServeProvider;
@@ -10,6 +11,7 @@ import com.edj.customer.domain.entity.EdjServeProviderSync;
 import com.edj.customer.mapper.EdjServeProviderMapper;
 import com.edj.customer.mapper.EdjServeProviderSettingsMapper;
 import com.edj.customer.mapper.EdjServeProviderSyncMapper;
+import com.edj.customer.service.EdjServeProviderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -33,7 +35,7 @@ import java.util.List;
  */
 @Validated
 @RestController
-@RequestMapping("inner/worker")
+@RequestMapping("inner/provider")
 @RequiredArgsConstructor
 @Tag(name = "内部接口 - 服务人员/机构相关接口")
 public class InnerProviderController implements ProviderApi {
@@ -43,6 +45,8 @@ public class InnerProviderController implements ProviderApi {
     private final EdjServeProviderSettingsMapper serveProviderSettingsMapper;
 
     private final EdjServeProviderSyncMapper serveProviderSyncMapper;
+
+    private final EdjServeProviderService serveProviderService;
 
     private final Snowflake snowflake;
 
@@ -75,5 +79,15 @@ public class InnerProviderController implements ProviderApi {
         );
 
         AsyncUtils.runAsyncTransaction(List.of(task1, task2, task3));
+    }
+
+    /**
+     * 查询用户设置详细信息
+     */
+    @Override
+    @Operation(summary = "查询用户设置详细信息")
+    @GetMapping("detail")
+    public ProviderSettingsDetailDTO detail() {
+        return serveProviderService.detail();
     }
 }

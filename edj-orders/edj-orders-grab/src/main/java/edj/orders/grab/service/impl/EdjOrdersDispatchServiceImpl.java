@@ -1,9 +1,9 @@
-package com.edj.orders.manager.service.impl;
+package edj.orders.grab.service.impl;
 
 import com.edj.orders.base.domain.entity.EdjOrdersDispatch;
 import com.edj.orders.base.mapper.EdjOrdersDispatchMapper;
-import com.edj.orders.manager.service.EdjOrdersDispatchService;
 import com.github.yulichang.base.MPJBaseServiceImpl;
+import edj.orders.grab.service.EdjOrdersDispatchService;
 import org.springframework.stereotype.Service;
 
 /**

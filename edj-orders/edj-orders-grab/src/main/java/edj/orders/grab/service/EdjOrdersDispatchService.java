@@ -1,4 +1,4 @@
-package com.edj.orders.manager.service;
+package edj.orders.grab.service;
 
 import com.edj.orders.base.domain.entity.EdjOrdersDispatch;
 import com.github.yulichang.base.MPJBaseService;

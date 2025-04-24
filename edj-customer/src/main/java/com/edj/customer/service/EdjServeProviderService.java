@@ -1,5 +1,6 @@
 package com.edj.customer.service;
 
+import com.edj.api.api.customer.dto.ProviderSettingsDetailDTO;
 import com.edj.customer.domain.entity.EdjServeProvider;
 import com.github.yulichang.base.MPJBaseService;
 
@@ -10,4 +11,9 @@ import com.github.yulichang.base.MPJBaseService;
  * @date 2024/11/12
  */
 public interface EdjServeProviderService extends MPJBaseService<EdjServeProvider> {
+
+    /**
+     * 查询用户设置详细信息
+     */
+    ProviderSettingsDetailDTO detail();
 }

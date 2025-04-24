@@ -16,4 +16,8 @@ public class LambdaUtils extends LambdaUtil {
         String fieldName = getFieldName(func);
         return StringUtils.isEmpty(fieldName) ? null : StringUtils.toUnderlineCase(fieldName);
     }
+
+    public static <T> String UFN(Func1<T, ?> func) throws IllegalArgumentException {
+        return getUnderLineFieldName(func);
+    }
 }

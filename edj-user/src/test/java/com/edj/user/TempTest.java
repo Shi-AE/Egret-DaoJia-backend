@@ -25,7 +25,7 @@ public class TempTest {
     void addAuthority() {
         // 设置权限条目
         List.of(
-                        Pair.of("获取可用优惠券", "consumer:orders:availableCoupon")
+                        Pair.of("查询服务端抢单列表", "provider:ordersGarb:list")
                 )
                 .parallelStream()
                 .unordered()
@@ -34,7 +34,7 @@ public class TempTest {
                     EdjAuthority edjAuthority = EdjAuthority
                             .builder()
                             // 设置父id
-                            .parentId(26292939730984960L)
+                            .parentId(70231767117996032L)
                             .name(authority.getKey())
                             .permission(authority.getValue())
                             .build();
@@ -43,7 +43,8 @@ public class TempTest {
                     // 设置对应角色
                     List.of(
                                     EdjSysRole.ADMIN.getValue(),
-                                    EdjSysRole.CONSUMER.getValue()
+                                    EdjSysRole.WORKER.getValue(),
+                                    EdjSysRole.INSTITUTION.getValue()
                             )
                             .parallelStream()
                             .unordered()
