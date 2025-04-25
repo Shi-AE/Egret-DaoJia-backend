@@ -25,10 +25,12 @@ import edj.orders.grab.service.EdjOrdersGrabService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
 import static com.edj.common.constants.IndexConstants.ORDERS_GRAB;
+import static com.edj.common.utils.DateUtils.DEFAULT_DATE_TIME_FORMAT;
 
 /**
  * 针对表【edj_orders_grab(抢单池)】的数据库操作Service实现
@@ -115,6 +117,15 @@ public class EdjOrdersGrabServiceImpl extends MPJBaseServiceImpl<EdjOrdersGrabMa
                     if (StringUtils.isNotBlank(keyWord)) {
                         bool.must(must -> must.match(match -> match.field(LambdaUtils.UFN(OrdersGrabInfo::getKeyWords)).query(keyWord)));
                     }
+
+                    // 时间范围
+                    LocalDateTime minServeStartTime = ordersGrabListDTO.getMinServeStartTime();
+                    LocalDateTime maxServeStartTime = ordersGrabListDTO.getMaxServeStartTime();
+                    bool.must(mast -> mast.range(range -> range
+                            .field(LambdaUtils.UFN(OrdersGrabInfo::getServeStartTime))
+                            .from(DateUtils.format(minServeStartTime, DEFAULT_DATE_TIME_FORMAT))
+                            .to(DateUtils.format(maxServeStartTime, DEFAULT_DATE_TIME_FORMAT))
+                    ));
 
                     return bool;
                 }))

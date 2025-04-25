@@ -294,6 +294,7 @@ public class DefaultDocumentOperations implements DocumentOperations {
     @Override
     public <T> SearchResponse<T> search(SearchRequest searchRequest, Class<T> clazz) {
         try {
+            log.debug("ES Search: {}", searchRequest.toString());
             return elasticsearchClient.search(searchRequest, clazz);
         } catch (IOException e) {
             log.error(e.getMessage(), e);

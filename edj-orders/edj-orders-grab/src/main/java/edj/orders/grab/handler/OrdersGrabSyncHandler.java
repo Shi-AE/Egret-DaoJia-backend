@@ -63,8 +63,8 @@ public class OrdersGrabSyncHandler extends AbstractCanalRabbitMqMsgListener<EdjO
                     // 设置服务开始时间(yyMMddHH)
                     ordersGrabInfo.setServeTime(Integer.parseInt(LocalDateTimeUtil.format(ordersGrab.getServeStartTime(), "yyMMddHH")));
                     ordersGrabInfo.setLocation(new Location(ordersGrab.getLon(), ordersGrab.getLat()));
-                    ordersGrabInfo.setKeyWords(ordersGrab.getServeTypeName() +
-                            ordersGrab.getServeItemName() +
+                    ordersGrabInfo.setKeyWords(ordersGrab.getServeTypeName() + " " +
+                            ordersGrab.getServeItemName() + " " +
                             ordersGrab.getServeAddress()
                     );
                     return ordersGrabInfo;

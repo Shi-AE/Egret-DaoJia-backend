@@ -1,6 +1,7 @@
 package edj.orders.grab.domain.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -31,18 +32,21 @@ public class OrdersGrabListDTO {
      * 服务类型id
      */
     @Schema(description = "服务类型id")
+    @Positive
     private Long serveTypeId;
 
     /**
      * 服务距离
      */
     @Schema(description = "服务距离")
+    @Positive
     private Double serveDistance;
 
     /**
      * 上一页最后一条数据的距离，用于滚动分页
      */
     @Schema(description = "上一页最后一条数据的距离，用于滚动分页")
+    @Positive
     private Double lastRealDistance;
 
     /**
