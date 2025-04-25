@@ -18,8 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.math.MathContext;
-import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
@@ -91,10 +89,6 @@ public class OrdersDiversionServiceImpl implements OrdersDiversionService {
         Integer purNum = orders.getPurNum();
         long minutes = between.toMinutes();
 
-        // 计算抽成
-        // 没有平台抽成？圣人平台写死抽取 1%
-        BigDecimal ordersAmount = realPayAmount.multiply(new BigDecimal("0.99"), new MathContext(2, RoundingMode.FLOOR));
-
         EdjOrdersGrab ordersGrab = EdjOrdersGrab
                 .builder()
                 .id(ordersId)
@@ -105,7 +99,7 @@ public class OrdersDiversionServiceImpl implements OrdersDiversionService {
                 .cityCode(cityCode)
                 .serveAddress(serveAddress)
                 .serveItemImg(serveItemImg)
-                .ordersAmount(ordersAmount)
+                .ordersAmount(realPayAmount)
                 .serveStartTime(serveStartTime)
                 .paySuccessTime(payTime)
                 .lon(lon)
@@ -128,7 +122,7 @@ public class OrdersDiversionServiceImpl implements OrdersDiversionService {
                     .cityCode(cityCode)
                     .serveAddress(serveAddress)
                     .serveItemImg(serveItemImg)
-                    .ordersAmount(ordersAmount)
+                    .ordersAmount(realPayAmount)
                     .serveStartTime(serveStartTime)
                     .paySuccessTime(payTime)
                     .lon(lon)
