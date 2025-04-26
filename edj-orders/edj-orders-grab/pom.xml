@@ -95,6 +95,11 @@
             <groupId>com.edj</groupId>
             <artifactId>edj-api</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>com.edj</groupId>
+            <artifactId>edj-xxl-job</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

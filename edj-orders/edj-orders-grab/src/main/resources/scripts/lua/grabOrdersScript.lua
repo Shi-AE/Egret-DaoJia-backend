@@ -1,6 +1,6 @@
 -- 抢单lua实现
 -- key: 库存(KEYS[1]), 抢券同步队列(KEYS[2])
--- argv: 订单id(ARGV[1]), 用户id(ARGV[2]), 是否机器抢单（1：机器抢单，0：人工抢单）(ARGV[3])
+-- argv: 订单id(ARGV[1]), 用户id(ARGV[2]), 用户角色(ARGV[3]), 是否机器抢单（1：机器抢单，0：人工抢单）(ARGV[4])
 
 -- 校验库存是否充足
 local stockNum = redis.call("HGET", KEYS[1], ARGV[1])
@@ -15,7 +15,7 @@ if not subStockNum or tonumber(subStockNum) < 0 then
 end
 
 -- 写入结果同步队列
-local result = redis.call("HSETNX", KEYS[2], ARGV[1], "[" .. ARGV[2] .. "," .. ARGV[3] .. "]")
+local result = redis.call("HSETNX", KEYS[2], ARGV[1], "[" .. ARGV[2] .. "," .. ARGV[3] .. "," .. ARGV[4] .. "]")
 if not result or tonumber(result) <= 0 then
     return "-3"
 end

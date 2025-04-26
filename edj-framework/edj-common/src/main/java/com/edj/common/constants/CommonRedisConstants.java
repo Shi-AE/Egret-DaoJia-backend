@@ -43,6 +43,11 @@ public class CommonRedisConstants {
         /**
          * 同步抢券结果锁
          */
-        public static final String GRAB_COUPON_LOCK = "EDJ_LOCK:%s";
+        public static final String GRAB_COUPON_LOCK = "EDJ_LOCK:GRAB:COUPON:%s";
+
+        /**
+         * 同步抢单结果锁
+         */
+        public static final String GRAB_ORDERS_LOCK = "EDJ_LOCK:GRAB:ORDERS:%s";
     }
 }

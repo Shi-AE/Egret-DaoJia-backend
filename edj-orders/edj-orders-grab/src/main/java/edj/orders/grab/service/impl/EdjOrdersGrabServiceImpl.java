@@ -1,5 +1,7 @@
 package edj.orders.grab.service.impl;
 
+import cn.hutool.extra.spring.SpringUtil;
+import cn.hutool.json.JSONArray;
 import co.elastic.clients.elasticsearch._types.DistanceUnit;
 import co.elastic.clients.elasticsearch._types.FieldValue;
 import co.elastic.clients.elasticsearch._types.GeoDistanceType;
@@ -7,38 +9,58 @@ import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.edj.api.api.customer.ProviderApi;
 import com.edj.api.api.customer.dto.ProviderSettingsDetailDTO;
 import com.edj.api.api.foundations.ConfigRegionApi;
 import com.edj.api.api.foundations.dto.ConfigRegionInnerDTO;
+import com.edj.cache.helper.LockHelper;
 import com.edj.common.constants.ErrorInfo;
 import com.edj.common.expcetions.BadRequestException;
 import com.edj.common.expcetions.CommonException;
+import com.edj.common.expcetions.ServerErrorException;
 import com.edj.common.utils.*;
 import com.edj.es.core.ElasticSearchTemplate;
 import com.edj.es.utils.SearchResponseUtils;
+import com.edj.orders.base.domain.entity.EdjOrders;
 import com.edj.orders.base.domain.entity.EdjOrdersGrab;
+import com.edj.orders.base.domain.entity.EdjOrdersServe;
+import com.edj.orders.base.enums.EdjOrderStatus;
+import com.edj.orders.base.mapper.EdjOrdersDispatchMapper;
 import com.edj.orders.base.mapper.EdjOrdersGrabMapper;
+import com.edj.orders.base.mapper.EdjOrdersMapper;
+import com.edj.orders.base.mapper.EdjOrdersServeMapper;
 import com.edj.security.enums.EdjSysRole;
 import com.edj.security.utils.SecurityUtils;
 import com.github.yulichang.base.MPJBaseServiceImpl;
 import edj.orders.grab.domain.dto.OrdersGrabInfo;
 import edj.orders.grab.domain.dto.OrdersGrabListDTO;
 import edj.orders.grab.domain.vo.OrdersGrabVO;
+import edj.orders.grab.enums.EdjOrderOriginType;
+import edj.orders.grab.enums.EdjServeStatus;
 import edj.orders.grab.service.EdjOrdersGrabService;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.IntStream;
 
 import static com.edj.cache.constants.CacheConstants.CacheName.ORDERS_STOCK_CACHE;
 import static com.edj.cache.constants.CacheConstants.CacheName.ORDERS_SUCCESS_SYNC_CACHE;
+import static com.edj.cache.helper.LockHelper.COMPLEX_OPERATION_WAIT_TIME;
+import static com.edj.common.constants.CommonRedisConstants.Lock.GRAB_ORDERS_LOCK;
 import static com.edj.common.constants.IndexConstants.ORDERS_GRAB;
+import static com.edj.common.constants.RedisConstants.LIMIT;
 import static com.edj.common.constants.RedisConstants.QUEUE_NUM;
 import static com.edj.common.utils.DateUtils.DEFAULT_DATE_TIME_FORMAT;
 import static edj.orders.grab.constants.ErrorInfo.Msg.SEIZE_ORDERS_FAILED;
@@ -51,6 +73,7 @@ import static edj.orders.grab.constants.ErrorInfo.Msg.SEIZE_ORDERS_RECEIVE_CLOSE
  * @date 2025/04/23
  */
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class EdjOrdersGrabServiceImpl extends MPJBaseServiceImpl<EdjOrdersGrabMapper, EdjOrdersGrab> implements EdjOrdersGrabService {
 
@@ -64,6 +87,14 @@ public class EdjOrdersGrabServiceImpl extends MPJBaseServiceImpl<EdjOrdersGrabMa
 
     @Resource(name = "grabOrdersScript")
     private DefaultRedisScript<Long> grabOrdersScript;
+
+    private final LockHelper lockHelper;
+
+    private final EdjOrdersServeMapper ordersServeMapper;
+
+    private final EdjOrdersMapper ordersMapper;
+
+    private final EdjOrdersDispatchMapper ordersDispatchMapper;
 
     @Override
     public List<OrdersGrabVO> searchList(OrdersGrabListDTO ordersGrabListDTO) {
@@ -105,6 +136,7 @@ public class EdjOrdersGrabServiceImpl extends MPJBaseServiceImpl<EdjOrdersGrabMa
         double lon = detail.getLon().doubleValue();
         double lat = detail.getLat().doubleValue();
         Double lastRealDistance = ordersGrabListDTO.getLastRealDistance();
+        Long lastId = ordersGrabListDTO.getLastId();
         SearchRequest searchRequest = new SearchRequest.Builder()
                 .query(query -> query.bool(bool -> {
                     // 所在城市
@@ -153,10 +185,15 @@ public class EdjOrdersGrabServiceImpl extends MPJBaseServiceImpl<EdjOrdersGrabMa
                         .unit(DistanceUnit.Kilometers)
                         .location(location -> location.latlon(ll -> ll.lon(lon).lat(lat)))
                 ))
+                .sort(sort -> sort.field(f -> f
+                        .field(LambdaUtils.UFN(OrdersGrabInfo::getId))
+                        .order(SortOrder.Desc)
+                ))
                 // 索引
                 .index(ORDERS_GRAB)
                 // 分页
                 .searchAfter(NumberUtils.null2Default(lastRealDistance, 0))
+                .searchAfter(NumberUtils.null2Default(lastId, Long.MAX_VALUE))
                 .build();
 
         // 检索数据
@@ -220,13 +257,13 @@ public class EdjOrdersGrabServiceImpl extends MPJBaseServiceImpl<EdjOrdersGrabMa
         Long userId = SecurityUtils.getUserId();
 
         // -- key: 库存(KEYS[1]), 抢券同步队列(KEYS[2])
-        // -- argv: 订单id(ARGV[1]), 用户id(ARGV[2]), 是否机器抢单（1：机器抢单，0：人工抢单）(ARGV[3])
+        // -- argv: 订单id(ARGV[1]), 用户id(ARGV[2]), 用户角色(ARGV[3]), 是否机器抢单（1：机器抢单，0：人工抢单）(ARGV[4])
 
         // 执行脚本
         Long result = redisTemplate.execute(
                 grabOrdersScript,
                 List.of(stockKey, syncKey),
-                id, userId, 0
+                id, userId, EnumUtils.value(sysRole), 0
         );
 
         if (ObjectUtils.isNull(result)) {
@@ -240,5 +277,139 @@ public class EdjOrdersGrabServiceImpl extends MPJBaseServiceImpl<EdjOrdersGrabMa
         if (result == -3) {
             throw new BadRequestException("抢券失败");
         }
+    }
+
+    @Override
+    public void GrabOrdersSync() {
+        // 开启多线程处理
+        List<CompletableFuture<Void>> futureList = IntStream.range(0, QUEUE_NUM)
+                .mapToObj(i -> AsyncUtils.runAsync(() -> completableFutureHandel(i)))
+                .toList();
+        CompletableFuture.allOf(futureList.toArray(new CompletableFuture[0])).join();
+    }
+
+    private void completableFutureHandel(int i) {
+        // 获取key
+        String key = String.format(ORDERS_SUCCESS_SYNC_CACHE, i);
+        log.info("线程: {} -> 获取key | key: {}", i, key);
+
+        // 加锁执行
+        lockHelper.syncLock(
+                String.format(GRAB_ORDERS_LOCK, key),
+                COMPLEX_OPERATION_WAIT_TIME,
+                () -> lockHandel(i, key)
+        );
+    }
+
+    private void lockHandel(int i, String key) {
+        // 获取抢单成功数据表
+        redisTemplate.opsForHash()
+                .scan(key, ScanOptions.scanOptions().count(LIMIT).build())
+                // 遍历查询结果
+                .forEachRemaining(entry -> {
+                    // 保证独立流程正常执行捕获保留异常
+                    try {
+                        // 执行数据库处理
+                        SpringUtil.getBean(this.getClass()).handle(entry);
+                        // 删除 redis 库存数据
+                        redisTemplate.opsForHash().delete(String.format(ORDERS_STOCK_CACHE, i), Long.valueOf((String) entry.getKey()));
+                        // 删除 redis 同步队列数据
+                        redisTemplate.opsForHash().delete(key, Long.valueOf((String) entry.getKey()));
+                    } catch (Exception e) {
+                        log.error("线程: {} -> 获取key | key: {} | 订单: {}", i, key, entry, e);
+                    }
+                });
+    }
+
+    @Transactional
+    public void handle(Map.Entry<Object, Object> entry) {
+        // 解析数据
+        JSONArray result = JsonUtils.parseArray(entry.getValue());
+        // 服务者id
+        Long serveProviderId = result.getLong(0);
+        // 用户角色
+        EdjSysRole sysRole = EnumUtils.getEnum(result.getLong(1), EdjSysRole.class);
+        // 是否为机器抢单
+        Boolean isMachine = result.getBool(2);
+
+        // 订单id
+        Long orderId = NumberUtils.parseLong(entry.getKey().toString());
+
+        // 获取抢单信息
+        EdjOrdersGrab ordersGrab = baseMapper.selectById(orderId);
+        // 校验抢单池是否存在此订单
+        if (ObjectUtils.isNull(ordersGrab)) {
+            // 删除
+            return;
+        }
+
+        // 校验服务单是否已经生成
+        LambdaQueryWrapper<EdjOrdersServe> ordersServeQueryWrapper = new LambdaQueryWrapper<EdjOrdersServe>()
+                .select(EdjOrdersServe::getId)
+                .eq(EdjOrdersServe::getId, orderId);
+        boolean exists = ordersServeMapper.exists(ordersServeQueryWrapper);
+        if (exists) {
+            // 删除
+            return;
+        }
+
+        // 查询订单所属人id
+        LambdaQueryWrapper<EdjOrders> ordersQueryWrapper = new LambdaQueryWrapper<EdjOrders>()
+                .select(EdjOrders::getEdjUserId)
+                .eq(EdjOrders::getId, orderId);
+        EdjOrders orders = ordersMapper.selectOne(ordersQueryWrapper);
+        if (ObjectUtils.isNull(orders)) {
+            // 删除
+            return;
+        }
+
+        // 生成服务单
+        EdjOrdersServe ordersServe = EdjOrdersServe
+                .builder()
+                .edjServeProvidersId(serveProviderId)
+                .edjUserId(orders.getEdjUserId())
+                .edjOrdersId(orderId)
+                .ordersOriginType(EnumUtils.value(
+                        isMachine ? EdjOrderOriginType.ASSIGN : EdjOrderOriginType.GRAB,
+                        Integer.class
+                ))
+                .cityCode(ordersGrab.getCityCode())
+                .edjServeTypeId(ordersGrab.getEdjServeTypeId())
+                .serveStartTime(ordersGrab.getServeStartTime())
+                .edjServeItemId(ordersGrab.getEdjServeItemId())
+                .serveStatus(EnumUtils.value(
+                        sysRole.equals(EdjSysRole.WORKER) ? EdjServeStatus.TO_SERVE : EdjServeStatus.TO_ASSIGN,
+                        Integer.class
+                ))
+                .serveItemImg(ordersGrab.getServeItemImg())
+                .ordersAmount(ordersGrab.getOrdersAmount())
+                .purNum(ordersGrab.getPurNum())
+                .sortBy(ordersGrab.getSortBy().longValue())
+                .build();
+        int insert = ordersServeMapper.insert(ordersServe);
+        if (insert != 1) {
+            // 不删除，中断执行，回滚
+            throw new ServerErrorException();
+        }
+
+        // 修改订单状态
+        LambdaUpdateWrapper<EdjOrders> ordersUpdateWrapper = new LambdaUpdateWrapper<EdjOrders>()
+                .eq(EdjOrders::getId, orderId)
+                .eq(EdjOrders::getOrdersStatus, EdjOrderStatus.DISPATCHING)
+                .set(EdjOrders::getOrdersStatus, EdjOrderStatus.PENDING_SERVE);
+        int update = ordersMapper.update(new EdjOrders(), ordersUpdateWrapper);
+        if (update != 1) {
+            // 不删除，中断执行，回滚
+            throw new ServerErrorException();
+        }
+
+        // 删除抢单池数据
+        int d1 = baseMapper.deleteById(orderId);
+        if (d1 != 1) {
+            // 不删除，中断执行，回滚
+            throw new ServerErrorException();
+        }
+        // 删除派单池数据
+        ordersDispatchMapper.deleteById(orderId);
     }
 }

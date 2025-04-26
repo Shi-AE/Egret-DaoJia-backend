@@ -24,4 +24,9 @@ public interface EdjOrdersGrabService extends MPJBaseService<EdjOrdersGrab> {
      * 抢单
      */
     void grab(Long id);
+
+    /**
+     * 同步抢单结果
+     */
+    void GrabOrdersSync();
 }

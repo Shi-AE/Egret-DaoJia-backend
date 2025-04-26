@@ -50,6 +50,13 @@ public class OrdersGrabListDTO {
     private Double lastRealDistance;
 
     /**
+     * 上一页最后一条数据的id，用于滚动分页
+     */
+    @Schema(description = "上一页最后一条数据的id，用于滚动分页")
+    @Positive
+    private Long lastId;
+
+    /**
      * 预约时间查询下限
      */
     @Schema(description = "预约时间查询下限")
