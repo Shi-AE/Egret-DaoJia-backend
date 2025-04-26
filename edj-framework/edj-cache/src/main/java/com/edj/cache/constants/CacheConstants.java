@@ -88,6 +88,11 @@ public class CacheConstants {
          * 抢单库存缓存
          */
         public static final String ORDERS_STOCK_CACHE = GRAB_ORDERS + ":ORDERS:STOCK:{%s}";
+
+        /**
+         * 抢券同步队列key
+         */
+        public static final String ORDERS_SUCCESS_SYNC_CACHE = GRAB_ORDERS + ":SUCCESS_SYNC:{%s}";
     }
 
     public static final class CacheManager {

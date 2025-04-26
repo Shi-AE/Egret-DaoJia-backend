@@ -1,6 +1,8 @@
 package com.edj.customer.service.impl;
 
 import com.edj.api.api.customer.dto.ProviderSettingsDetailDTO;
+import com.edj.common.expcetions.ServerErrorException;
+import com.edj.common.utils.ObjectUtils;
 import com.edj.customer.domain.entity.EdjServeProvider;
 import com.edj.customer.domain.entity.EdjServeProviderSettings;
 import com.edj.customer.domain.entity.EdjServeSkill;
@@ -22,6 +24,9 @@ public class EdjServeProviderServiceImpl extends MPJBaseServiceImpl<EdjServeProv
     @Override
     public ProviderSettingsDetailDTO detail() {
         Long userId = SecurityUtils.getUserId();
+        if (ObjectUtils.isNull(userId)) {
+            throw new ServerErrorException("非用户查询");
+        }
         MPJLambdaWrapper<EdjServeProvider> wrapper = new MPJLambdaWrapper<EdjServeProvider>()
                 .select(EdjServeProvider::getId, EdjServeProvider::getCode, EdjServeProvider::getSettingsStatus,
                         EdjServeProvider::getScore, EdjServeProvider::getGoodLevelRate)

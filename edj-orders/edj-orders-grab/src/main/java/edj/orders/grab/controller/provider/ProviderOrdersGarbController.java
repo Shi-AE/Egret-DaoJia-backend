@@ -8,10 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -38,5 +35,15 @@ public class ProviderOrdersGarbController {
     @PreAuthorize("hasAuthority('provider:ordersGarb:list')")
     public List<OrdersGrabVO> searchList(@RequestBody @Validated OrdersGrabListDTO ordersGrabListDTO) {
         return ordersGrabService.searchList(ordersGrabListDTO);
+    }
+
+    /**
+     * 抢单
+     */
+    @PostMapping("{id}")
+    @Operation(summary = "抢单")
+    @PreAuthorize("hasAuthority('provider:ordersGarb:grab')")
+    public void grab(@PathVariable Long id) {
+        ordersGrabService.grab(id);
     }
 }

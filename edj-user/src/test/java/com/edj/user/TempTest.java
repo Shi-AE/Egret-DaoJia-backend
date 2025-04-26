@@ -25,7 +25,7 @@ public class TempTest {
     void addAuthority() {
         // 设置权限条目
         List.of(
-                        Pair.of("查询服务端抢单列表", "provider:ordersGarb:list")
+                        Pair.of("抢单", "provider:ordersGarb:grab")
                 )
                 .parallelStream()
                 .unordered()

@@ -19,4 +19,9 @@ public interface EdjOrdersGrabService extends MPJBaseService<EdjOrdersGrab> {
      * 查询服务端抢单列表
      */
     List<OrdersGrabVO> searchList(OrdersGrabListDTO ordersGrabListDTO);
+
+    /**
+     * 抢单
+     */
+    void grab(Long id);
 }
