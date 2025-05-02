@@ -196,7 +196,7 @@ public class EdjActivityServiceImpl extends MPJBaseServiceImpl<EdjActivityMapper
                     // 从redis获取库存
                     Long activityId = activity.getId();
                     String stockKey = String.format(ACTIVITY_STOCK_CACHE, activityId % QUEUE_NUM);
-                    Long stock = (Long) longRedisTemplate.opsForHash().get(stockKey, activityId);
+                    Integer stock = (Integer) longRedisTemplate.opsForHash().get(stockKey, activityId);
                     activityInfoVO.setRemainNum(NumberUtils.null2Default(stock, 0));
 
                     return activityInfoVO;
@@ -278,12 +278,12 @@ public class EdjActivityServiceImpl extends MPJBaseServiceImpl<EdjActivityMapper
             if (EnumUtils.eq(EdjActivityStatus.PENDING, status)) {
                 // 无限制
                 if (totalNum == 0) {
-                    longRedisTemplate.opsForHash().put(key, id, Long.MAX_VALUE);
+                    longRedisTemplate.opsForHash().put(key, id, Integer.MAX_VALUE);
                     continue;
                 }
 
                 // 有限制
-                longRedisTemplate.opsForHash().put(key, id, (long) totalNum);
+                longRedisTemplate.opsForHash().put(key, id, totalNum);
                 continue;
             }
 
@@ -291,7 +291,7 @@ public class EdjActivityServiceImpl extends MPJBaseServiceImpl<EdjActivityMapper
             if (EnumUtils.eq(EdjActivityStatus.ONGOING, status)) {
                 // 无限制
                 if (totalNum == 0) {
-                    longRedisTemplate.opsForHash().put(key, id, Long.MAX_VALUE);
+                    longRedisTemplate.opsForHash().put(key, id, Integer.MAX_VALUE);
                     continue;
                 }
 
@@ -310,7 +310,7 @@ public class EdjActivityServiceImpl extends MPJBaseServiceImpl<EdjActivityMapper
                     long stock = NumberUtils.max(totalNum - couponCount, 0);
 
                     // 同步库存
-                    longRedisTemplate.opsForHash().put(key, id, stock);
+                    longRedisTemplate.opsForHash().put(key, id, Math.toIntExact(stock));
                 }
             }
         }

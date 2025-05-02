@@ -85,5 +85,5 @@ public class ActivityInfoVO {
      * 优惠券剩余数量
      */
     @Schema(description = "优惠券剩余数量")
-    private Long remainNum;
+    private Integer remainNum;
 }

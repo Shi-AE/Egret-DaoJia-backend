@@ -1,16 +1,21 @@
 package com.edj.user;
 
 import cn.hutool.core.lang.Pair;
+import com.edj.common.utils.JsonUtils;
 import com.edj.security.enums.EdjSysRole;
 import com.edj.user.domain.entity.EdjAuthority;
 import com.edj.user.domain.entity.EdjRoleAuthority;
 import com.edj.user.mapper.EdjAuthorityMapper;
 import com.edj.user.mapper.EdjRoleAuthorityMapper;
+import com.edj.user.service.EdjAuthorityService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @SpringBootTest
 public class TempTest {
@@ -20,6 +25,9 @@ public class TempTest {
 
     @Autowired
     private EdjRoleAuthorityMapper roleAuthorityMapper;
+
+    @Autowired
+    private EdjAuthorityService authorityService;
 
     @Test
     void addAuthority() {
@@ -65,5 +73,21 @@ public class TempTest {
                 .edjRoleId(EdjSysRole.INSTITUTION.getValue())
                 .build()
         );
+    }
+
+    @Test
+    @Transactional
+    void select() {
+        Map<String, Map<String, List<String>>> r1 = new HashMap<>();
+        authorityService.lambdaQuery().eq(EdjAuthority::getParentId, 0).list().forEach(o1 -> {
+            Map<String, List<String>> r2 = new HashMap<>();
+            r1.put(o1.getName(), r2);
+            authorityService.lambdaQuery().eq(EdjAuthority::getParentId, o1.getId()).list().forEach(o2 -> {
+                r2.put(o2.getName(), authorityService.lambdaQuery().eq(EdjAuthority::getParentId, o2.getId()).list().stream().map(EdjAuthority::getName).toList());
+            });
+        });
+
+
+        System.out.println(JsonUtils.parse(r1));
     }
 }

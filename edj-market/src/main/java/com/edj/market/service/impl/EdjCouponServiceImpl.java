@@ -88,7 +88,11 @@ public class EdjCouponServiceImpl extends MPJBaseServiceImpl<EdjCouponMapper, Ed
         LambdaQueryWrapper<EdjCoupon> wrapper = new LambdaQueryWrapper<EdjCoupon>()
                 .eq(EdjCoupon::getEdjActivityId, couponPageDTO.getActivityId());
         Page<EdjCoupon> couponPage = baseMapper.selectPage(page, wrapper);
-        return PageUtils.toPage(couponPage, CouponPageVO.class);
+        return PageUtils.toPage(couponPage, CouponPageVO.class, (o, t) -> {
+            BeanUtils.copyProperties(o, t);
+            t.setActivityId(o.getEdjActivityId());
+            t.setOrdersId(o.getEdjOrdersId());
+        });
     }
 
     @Override
