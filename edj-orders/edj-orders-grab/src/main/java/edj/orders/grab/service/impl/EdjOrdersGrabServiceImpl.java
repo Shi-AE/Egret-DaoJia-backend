@@ -102,6 +102,9 @@ public class EdjOrdersGrabServiceImpl extends MPJBaseServiceImpl<EdjOrdersGrabMa
         ProviderSettingsDetailDTO detail = providerApi.detail();
 
         // 校验用户是否可以查询
+        if (ObjectUtils.isNull(detail)) {
+            return List.of();
+        }
         Integer canPickUp = detail.getCanPickUp();
         Integer settingsStatus = detail.getSettingsStatus();
         if (canPickUp != 1 || settingsStatus != 1) {
